@@ -186,6 +186,8 @@ export interface Database {
           arm_circumference: number | null
           blood_pressure: string | null
           notes: string | null
+          complaints: string | null
+          recommendations: string | null
           created_by: string | null
           created_at: string
           updated_at: string
@@ -200,6 +202,8 @@ export interface Database {
           arm_circumference?: number | null
           blood_pressure?: string | null
           notes?: string | null
+          complaints?: string | null
+          recommendations?: string | null
           created_by?: string | null
           created_at?: string
           updated_at?: string
@@ -214,6 +218,8 @@ export interface Database {
           arm_circumference?: number | null
           blood_pressure?: string | null
           notes?: string | null
+          complaints?: string | null
+          recommendations?: string | null
           created_by?: string | null
           created_at?: string
           updated_at?: string

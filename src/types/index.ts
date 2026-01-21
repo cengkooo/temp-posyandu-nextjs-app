@@ -49,6 +49,11 @@ export type VisitWithPatient = Visit & {
   patient: Patient
 }
 
+export type VisitWithPatientAndProfile = Visit & {
+  patient: Patient
+  profile?: Profile
+}
+
 export type ImmunizationWithPatient = Immunization & {
   patient: Patient
 }

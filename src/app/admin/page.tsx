@@ -27,8 +27,8 @@ export default function AdminDashboard() {
       {
         label: 'Kunjungan',
         data: [200, 290, 200, 300, 280, 290],
-        borderColor: '#14b8a6',
-        backgroundColor: 'rgba(20, 184, 166, 0.1)',
+        borderColor: '#10b981',
+        backgroundColor: 'rgba(16, 185, 129, 0.1)',
         tension: 0.4,
         fill: true,
       },
@@ -41,7 +41,7 @@ export default function AdminDashboard() {
     datasets: [
       {
         data: [850, 250, 100, 47],
-        backgroundColor: ['#14b8a6', '#fbbf24', '#ef4444', '#f97316'],
+        backgroundColor: ['#10b981', '#fbbf24', '#f97316', '#ef4444'],
         borderWidth: 0,
       },
     ],

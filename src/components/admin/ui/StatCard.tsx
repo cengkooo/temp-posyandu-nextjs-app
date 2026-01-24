@@ -1,5 +1,5 @@
 import React from 'react';
-import { LucideIcon, TrendingUp } from 'lucide-react';
+import { LucideIcon, TrendingUp, TrendingDown } from 'lucide-react';
 
 interface StatCardProps {
   icon: LucideIcon;
@@ -23,38 +23,49 @@ export default function StatCard({
   label,
 }: StatCardProps) {
   return (
-    <div className="bg-white rounded-xl p-6 border border-gray-200 hover:shadow-lg transition-shadow">
-      <div className="flex items-start justify-between mb-4">
-        <div className={`p-3 ${bgColor} rounded-lg`}>
-          <Icon className={`w-6 h-6 ${iconColor}`} />
+    <div className="bg-white rounded-2xl p-6 border border-gray-100 hover:shadow-md transition-all duration-300">
+      <div className="flex items-center justify-between">
+        {/* Icon on Left */}
+        <div className={`p-4 ${bgColor} rounded-xl`}>
+          <Icon className={`w-7 h-7 ${iconColor}`} strokeWidth={2.5} />
         </div>
+
+        {/* Trend or Label on Right */}
         {trendValue && (
           <div
-            className={`flex items-center gap-1 text-sm font-medium ${
-              trend === 'up' ? 'text-teal-600' : 'text-red-600'
+            className={`flex items-center gap-1.5 text-sm font-semibold px-3 py-1.5 rounded-lg ${
+              trend === 'up' 
+                ? 'text-emerald-600 bg-emerald-50' 
+                : 'text-red-600 bg-red-50'
             }`}
           >
-            <TrendingUp className="w-4 h-4" />
+            {trend === 'up' ? (
+              <TrendingUp className="w-4 h-4" />
+            ) : (
+              <TrendingDown className="w-4 h-4" />
+            )}
             <span>{trendValue}</span>
           </div>
         )}
-        {label && (
+        {label && !trendValue && (
           <span
-            className={`text-xs px-2 py-1 rounded-full ${
+            className={`text-xs px-3 py-1.5 rounded-lg font-medium ${
               label.includes('follow up')
-                ? 'bg-orange-100 text-orange-700'
-                : 'bg-red-100 text-red-700'
+                ? 'bg-amber-50 text-amber-700'
+                : 'bg-red-50 text-red-700'
             }`}
           >
             {label}
           </span>
         )}
       </div>
-      <div>
-        <div className="text-3xl font-bold text-gray-900 mb-1" suppressHydrationWarning>
+
+      {/* Value and Title */}
+      <div className="mt-5">
+        <div className="text-4xl font-bold text-gray-900 mb-1.5" suppressHydrationWarning>
           {value.toLocaleString('id-ID')}
         </div>
-        <div className="text-sm text-gray-600">{title}</div>
+        <div className="text-sm font-medium text-gray-500">{title}</div>
       </div>
     </div>
   );

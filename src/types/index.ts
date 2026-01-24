@@ -71,3 +71,46 @@ export type VisitStats = {
   thisMonth: number
   thisWeek: number
 }
+
+// Reporting types
+export type ReportType = 'kunjungan' | 'imunisasi' | 'lengkap'
+
+export type Statistics = {
+  totalVisits: number
+  totalVisitsTrend: number
+  newPatients: number
+  newPatientsTrend: number
+  immunizationCoverage: number
+  immunizationCoverageTrend: number
+  totalBalita: number
+  totalBalitaTrend: number
+}
+
+export type VisitTrend = {
+  month: string
+  balita: number
+  ibu_hamil: number
+  lansia: number
+}
+
+export type NutritionalStatus = {
+  status: 'Gizi Baik' | 'Gizi Kurang' | 'Gizi Buruk' | 'Stunting'
+  count: number
+  percentage: number
+  color: string
+}
+
+export type ImmunizationCoverage = {
+  vaccine: string
+  actual: number
+  target: number
+  percentage: number
+}
+
+export type BreakdownRow = {
+  category: string
+  patientCount: number
+  visitCount: number
+  averagePerMonth: number
+  trend: number
+}

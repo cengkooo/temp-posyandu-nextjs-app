@@ -15,8 +15,8 @@ export const patientFormSchema = z.object({
   date_of_birth: z.string()
     .min(1, 'Tanggal lahir wajib diisi'),
   
-  gender: z.enum(['L', 'P'], {
-    required_error: 'Jenis kelamin wajib dipilih',
+  gender: z.enum(['L', 'P'], { 
+    message: 'Jenis kelamin wajib dipilih' 
   }),
   
   address: z.string()
@@ -29,8 +29,8 @@ export const patientFormSchema = z.object({
     .optional()
     .or(z.literal('')),
   
-  patient_type: z.enum(['balita', 'ibu_hamil', 'lansia'], {
-    required_error: 'Tipe pasien wajib dipilih',
+  patient_type: z.enum(['bayi', 'balita', 'ibu_hamil', 'remaja_dewasa', 'lansia'], { 
+    message: 'Tipe pasien wajib dipilih' 
   }),
   
   parent_name: z.string()

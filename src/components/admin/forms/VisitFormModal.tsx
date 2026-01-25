@@ -1,38 +1,69 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { X, Save, Printer, Plus, Search } from 'lucide-react';
 import { getPatients, createVisit, updateVisit } from '@/lib/api';
 import type { Patient, Visit } from '@/types';
 import Button from './Button';
+import Card from '../ui/Card';
+import BayiBalitaVisitForm, {
+  BayiBalitaVisitData,
+  createInitialBayiBalitaVisitData,
+} from './visit-forms/BayiBalitaVisitForm';
+import IbuHamilVisitForm, {
+  IbuHamilVisitData,
+  createInitialIbuHamilVisitData,
+} from './visit-forms/IbuHamilVisitForm';
+import RemajaDewasaVisitForm, {
+  RemajaDewasaVisitData,
+  createInitialRemajaDewasaVisitData,
+} from './visit-forms/RemajaDewasaVisitForm';
+import LansiaVisitForm, {
+  LansiaVisitData,
+  createInitialLansiaVisitData,
+} from './visit-forms/LansiaVisitForm';
+import { calculateAgeInMonths, formatAge } from '@/lib/nutritionCalculator';
 
 interface VisitFormModalProps {
-  visit?: Visit & { patient: Patient } | null;
+  visit?: (Visit & { patient: Patient }) | null;
+  preselectedPatient?: Patient | null;
   onClose: () => void;
   onSuccess: () => void;
 }
 
-export default function VisitFormModal({ visit, onClose, onSuccess }: VisitFormModalProps) {
+type SaveAction = 'save_close' | 'save_print' | 'save_add';
+
+export default function VisitFormModal({
+  visit,
+  preselectedPatient,
+  onClose,
+  onSuccess,
+}: VisitFormModalProps) {
   const [patients, setPatients] = useState<Patient[]>([]);
   const [loading, setLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showPatientDropdown, setShowPatientDropdown] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  
-  const [formData, setFormData] = useState({
-    patient_id: visit?.patient_id || '',
-    visit_date: visit?.visit_date || new Date().toISOString().split('T')[0],
-    weight: visit?.weight?.toString() || '',
-    height: visit?.height?.toString() || '',
-    head_circumference: visit?.head_circumference?.toString() || '',
-    arm_circumference: visit?.arm_circumference?.toString() || '',
-    blood_pressure: visit?.blood_pressure || '',
-    notes: visit?.notes || '',
-    complaints: (visit as any)?.complaints || '',
-    recommendations: (visit as any)?.recommendations || '',
-  });
 
+  // Form state
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(
-    visit?.patient || null
+    preselectedPatient || visit?.patient || null
   );
+  const [visitDate, setVisitDate] = useState(
+    visit?.visit_date || new Date().toISOString().split('T')[0]
+  );
+
+  // Form data per patient type
+  const [bayiBalitaData, setBayiBalitaData] = useState<BayiBalitaVisitData>(
+    createInitialBayiBalitaVisitData()
+  );
+  const [ibuHamilData, setIbuHamilData] = useState<IbuHamilVisitData>(
+    createInitialIbuHamilVisitData()
+  );
+  const [remajaDewasaData, setRemajaDewasaData] = useState<RemajaDewasaVisitData>(
+    createInitialRemajaDewasaVisitData()
+  );
+  const [lansiaData, setLansiaData] = useState<LansiaVisitData>(createInitialLansiaVisitData());
 
   useEffect(() => {
     loadPatients();
@@ -45,334 +76,442 @@ export default function VisitFormModal({ visit, onClose, onSuccess }: VisitFormM
     }
   };
 
-  const handlePatientChange = (patientId: string) => {
-    const patient = patients.find((p) => p.id === patientId);
-    setSelectedPatient(patient || null);
-    setFormData({ ...formData, patient_id: patientId });
+  // Filter patients based on search query
+  const filteredPatients = useMemo(() => {
+    if (!searchQuery.trim()) return patients;
+    const query = searchQuery.toLowerCase();
+    return patients.filter(
+      (p) =>
+        p.full_name.toLowerCase().includes(query) ||
+        p.patient_type.toLowerCase().includes(query)
+    );
+  }, [patients, searchQuery]);
+
+  const handlePatientSelect = (patient: Patient) => {
+    setSelectedPatient(patient);
+    setSearchQuery(patient.full_name);
+    setShowPatientDropdown(false);
   };
 
-  const validateForm = () => {
+  // Determine patient type for form rendering
+  const patientType = selectedPatient?.patient_type;
+  const isBayi = useMemo(() => {
+    if (!selectedPatient?.date_of_birth) return false;
+    const months = calculateAgeInMonths(selectedPatient.date_of_birth);
+    return months < 12;
+  }, [selectedPatient?.date_of_birth]);
+
+  const getPatientTypeColor = (type: string) => {
+    switch (type) {
+      case 'bayi':
+        return 'bg-blue-100 text-blue-700';
+      case 'balita':
+        return 'bg-cyan-100 text-cyan-700';
+      case 'ibu_hamil':
+        return 'bg-pink-100 text-pink-700';
+      case 'remaja_dewasa':
+        return 'bg-purple-100 text-purple-700';
+      case 'lansia':
+        return 'bg-orange-100 text-orange-700';
+      default:
+        return 'bg-gray-100 text-gray-700';
+    }
+  };
+
+  const getPatientTypeLabel = (type: string) => {
+    switch (type) {
+      case 'bayi':
+        return 'Bayi';
+      case 'balita':
+        return 'Balita';
+      case 'ibu_hamil':
+        return 'Ibu Hamil';
+      case 'remaja_dewasa':
+        return 'Remaja/Dewasa';
+      case 'lansia':
+        return 'Lansia';
+      default:
+        return type;
+    }
+  };
+
+  const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
 
-    if (!formData.patient_id) {
-      newErrors.patient_id = 'Pilih pasien terlebih dahulu';
+    if (!selectedPatient) {
+      newErrors.patient = 'Pilih pasien terlebih dahulu';
     }
 
-    if (!formData.visit_date) {
+    if (!visitDate) {
       newErrors.visit_date = 'Tanggal kunjungan wajib diisi';
-    } else {
-      const visitDate = new Date(formData.visit_date);
-      const today = new Date();
-      today.setHours(23, 59, 59, 999);
-      if (visitDate > today) {
-        newErrors.visit_date = 'Tanggal kunjungan tidak boleh di masa depan';
-      }
     }
 
-    if (formData.weight && (parseFloat(formData.weight) <= 0 || parseFloat(formData.weight) > 500)) {
-      newErrors.weight = 'Berat badan harus antara 0-500 kg';
-    }
-
-    if (formData.height && (parseFloat(formData.height) <= 0 || parseFloat(formData.height) > 300)) {
-      newErrors.height = 'Tinggi badan harus antara 0-300 cm';
-    }
-
-    if (formData.head_circumference && (parseFloat(formData.head_circumference) <= 0 || parseFloat(formData.head_circumference) > 100)) {
-      newErrors.head_circumference = 'Lingkar kepala harus antara 0-100 cm';
-    }
-
-    if (formData.arm_circumference && (parseFloat(formData.arm_circumference) <= 0 || parseFloat(formData.arm_circumference) > 100)) {
-      newErrors.arm_circumference = 'Lingkar lengan harus antara 0-100 cm';
-    }
-
-    if (formData.blood_pressure && !/^\d{2,3}\/\d{2,3}$/.test(formData.blood_pressure)) {
-      newErrors.blood_pressure = 'Format tekanan darah harus xxx/xx (contoh: 120/80)';
-    }
-
-    if (formData.notes && formData.notes.length < 10) {
-      newErrors.notes = 'Catatan pemeriksaan minimal 10 karakter';
-    }
+    // Add type-specific validations here if needed
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const prepareVisitData = () => {
+    const baseData = {
+      patient_id: selectedPatient!.id,
+      visit_date: visitDate,
+    };
 
-    if (!validateForm()) {
-      return;
+    // Merge form data based on patient type
+    let typeSpecificData = {};
+
+    if (patientType === 'bayi' || patientType === 'balita') {
+      typeSpecificData = {
+        weight: bayiBalitaData.weight || null,
+        height: bayiBalitaData.height || null,
+        head_circumference: bayiBalitaData.head_circumference || null,
+        arm_circumference: bayiBalitaData.arm_circumference || null,
+        notes: bayiBalitaData.notes || null,
+        metadata: {
+          complaints: bayiBalitaData.complaints,
+          physical_exam: bayiBalitaData.physical_exam,
+          actions: bayiBalitaData.actions,
+        },
+      };
+    } else if (patientType === 'ibu_hamil') {
+      typeSpecificData = {
+        weight: ibuHamilData.weight || null,
+        height: ibuHamilData.height || null,
+        arm_circumference: ibuHamilData.lila || null,
+        blood_pressure: ibuHamilData.systolic && ibuHamilData.diastolic
+          ? `${ibuHamilData.systolic}/${ibuHamilData.diastolic}`
+          : null,
+        notes: ibuHamilData.notes || null,
+        metadata: {
+          pregnancy_weeks: ibuHamilData.pregnancy_weeks,
+          fundal_height: ibuHamilData.fundal_height,
+          fetal_heart_rate: ibuHamilData.fetal_heart_rate,
+          fetal_presentation: ibuHamilData.fetal_presentation,
+          edema: ibuHamilData.edema,
+          protein_urine: ibuHamilData.protein_urine,
+          ttd_given: ibuHamilData.ttd_given,
+          immunization_tt: ibuHamilData.immunization_tt,
+          counseling: ibuHamilData.counseling,
+          complaints: ibuHamilData.complaints,
+        },
+      };
+    } else if (patientType === 'remaja_dewasa') {
+      typeSpecificData = {
+        weight: remajaDewasaData.weight || null,
+        height: remajaDewasaData.height || null,
+        blood_pressure: remajaDewasaData.systolic && remajaDewasaData.diastolic
+          ? `${remajaDewasaData.systolic}/${remajaDewasaData.diastolic}`
+          : null,
+        notes: remajaDewasaData.notes || null,
+        metadata: {
+          waist_circumference: remajaDewasaData.waist_circumference,
+          blood_sugar: remajaDewasaData.blood_sugar,
+          cholesterol: remajaDewasaData.cholesterol,
+          uric_acid: remajaDewasaData.uric_acid,
+          physical_activity: remajaDewasaData.physical_activity,
+          vegetable_fruit_portions: remajaDewasaData.vegetable_fruit_portions,
+          smoking_status: remajaDewasaData.smoking_status,
+          cigarettes_per_day: remajaDewasaData.cigarettes_per_day,
+          complaints: remajaDewasaData.complaints,
+          examination: remajaDewasaData.examination,
+          counseling: remajaDewasaData.counseling,
+          referral_needed: remajaDewasaData.referral_needed,
+          referral_to: remajaDewasaData.referral_to,
+        },
+      };
+    } else if (patientType === 'lansia') {
+      typeSpecificData = {
+        weight: lansiaData.weight || null,
+        height: lansiaData.height || null,
+        blood_pressure: lansiaData.systolic && lansiaData.diastolic
+          ? `${lansiaData.systolic}/${lansiaData.diastolic}`
+          : null,
+        notes: lansiaData.notes || null,
+        metadata: {
+          knee_height: lansiaData.knee_height,
+          pulse_rate: lansiaData.pulse_rate,
+          blood_sugar: lansiaData.blood_sugar,
+          temperature: lansiaData.temperature,
+          eating_independence: lansiaData.eating_independence,
+          dressing_independence: lansiaData.dressing_independence,
+          bathing_independence: lansiaData.bathing_independence,
+          toileting_independence: lansiaData.toileting_independence,
+          mobility_independence: lansiaData.mobility_independence,
+          mobility_type: lansiaData.mobility_type,
+          mental_status: lansiaData.mental_status,
+          fall_risk_items: lansiaData.fall_risk_items,
+          pain_scale: lansiaData.pain_scale,
+          main_complaint: lansiaData.main_complaint,
+          examination: lansiaData.examination,
+          medication_given: lansiaData.medication_given,
+          counseling: lansiaData.counseling,
+          referral_needed: lansiaData.referral_needed,
+          referral_to: lansiaData.referral_to,
+          next_visit_date: lansiaData.next_visit_date,
+        },
+      };
     }
+
+    return { ...baseData, ...typeSpecificData };
+  };
+
+  const handleSubmit = async (action: SaveAction) => {
+    if (!validateForm()) return;
 
     setLoading(true);
 
-    const visitData = {
-      patient_id: formData.patient_id,
-      visit_date: formData.visit_date,
-      weight: formData.weight ? parseFloat(formData.weight) : null,
-      height: formData.height ? parseFloat(formData.height) : null,
-      head_circumference: formData.head_circumference ? parseFloat(formData.head_circumference) : null,
-      arm_circumference: formData.arm_circumference ? parseFloat(formData.arm_circumference) : null,
-      blood_pressure: formData.blood_pressure || null,
-      notes: formData.notes || null,
-      complaints: formData.complaints || null,
-      recommendations: formData.recommendations || null,
-    };
+    try {
+      const visitData = prepareVisitData();
 
-    let result;
-    if (visit) {
-      result = await updateVisit(visit.id, visitData);
-    } else {
-      result = await createVisit(visitData as any);
-    }
+      let result;
+      if (visit) {
+        result = await updateVisit(visit.id, visitData);
+      } else {
+        result = await createVisit(visitData as any);
+      }
 
-    setLoading(false);
+      if (result.error) {
+        alert('Gagal menyimpan data kunjungan: ' + result.error.message);
+        setLoading(false);
+        return;
+      }
 
-    if (result.error) {
-      alert('Gagal menyimpan data kunjungan: ' + result.error.message);
-    } else {
-      alert(visit ? 'Data kunjungan berhasil diperbarui' : 'Data kunjungan berhasil disimpan');
+      if (action === 'save_print') {
+        // TODO: Implement KMS print
+        alert('Data tersimpan. Fitur cetak KMS dalam pengembangan.');
+      } else if (action === 'save_add') {
+        // Reset form for new entry
+        setSelectedPatient(null);
+        setSearchQuery('');
+        setVisitDate(new Date().toISOString().split('T')[0]);
+        setBayiBalitaData(createInitialBayiBalitaVisitData());
+        setIbuHamilData(createInitialIbuHamilVisitData());
+        setRemajaDewasaData(createInitialRemajaDewasaVisitData());
+        setLansiaData(createInitialLansiaVisitData());
+        alert('Data kunjungan berhasil disimpan! Silakan tambah kunjungan baru.');
+        setLoading(false);
+        return;
+      }
+
       onSuccess();
+    } catch (err) {
+      alert('Terjadi kesalahan: ' + (err as Error).message);
+      setLoading(false);
     }
   };
 
-  const isBalita = selectedPatient?.patient_type === 'balita';
+  const renderFormByPatientType = () => {
+    if (!selectedPatient) {
+      return (
+        <div className="text-center py-12 text-gray-500">
+          <Search className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+          <p className="text-lg font-medium">Pilih Pasien</p>
+          <p className="text-sm">Cari dan pilih pasien untuk mencatat kunjungan</p>
+        </div>
+      );
+    }
+
+    switch (patientType) {
+      case 'bayi':
+      case 'balita':
+        return (
+          <BayiBalitaVisitForm
+            data={bayiBalitaData}
+            onChange={setBayiBalitaData}
+            patientDateOfBirth={selectedPatient.date_of_birth}
+            patientGender={selectedPatient.gender as 'L' | 'P'}
+            isBayi={isBayi}
+            disabled={loading}
+            errors={errors}
+          />
+        );
+      case 'ibu_hamil':
+        return (
+          <IbuHamilVisitForm
+            data={ibuHamilData}
+            onChange={setIbuHamilData}
+            disabled={loading}
+            errors={errors}
+          />
+        );
+      case 'remaja_dewasa':
+        return (
+          <RemajaDewasaVisitForm
+            data={remajaDewasaData}
+            onChange={setRemajaDewasaData}
+            patientGender={selectedPatient.gender as 'L' | 'P'}
+            disabled={loading}
+            errors={errors}
+          />
+        );
+      case 'lansia':
+        return (
+          <LansiaVisitForm
+            data={lansiaData}
+            onChange={setLansiaData}
+            disabled={loading}
+            errors={errors}
+          />
+        );
+      default:
+        return (
+          <div className="text-center py-12 text-gray-500">
+            <p className="text-lg font-medium">Tipe pasien tidak dikenali</p>
+            <p className="text-sm">Silakan pilih pasien dengan tipe yang valid</p>
+          </div>
+        );
+    }
+  };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-gray-900/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-xl shadow-xl max-w-4xl w-full max-h-[95vh] overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200 sticky top-0 bg-white">
-          <h2 className="text-xl font-semibold text-gray-900">
-            {visit ? 'Edit Kunjungan' : 'Catat Kunjungan'}
-          </h2>
+        <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-teal-600 to-emerald-600">
+          <div>
+            <h2 className="text-xl font-semibold text-white">
+              {visit ? 'Edit Kunjungan' : 'Catat Kunjungan'}
+            </h2>
+            <p className="text-sm text-teal-100">
+              {selectedPatient
+                ? `${selectedPatient.full_name} - ${getPatientTypeLabel(patientType || '')}`
+                : 'Pilih pasien untuk memulai'}
+            </p>
+          </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 hover:bg-white/20 rounded-lg transition-colors"
           >
-            <X className="w-5 h-5 text-gray-500" />
+            <X className="w-5 h-5 text-white" />
           </button>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          {/* Pilih Pasien */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Cari dan pilih pasien... <span className="text-red-500">*</span>
-            </label>
-            <select
-              value={formData.patient_id}
-              onChange={(e) => handlePatientChange(e.target.value)}
-              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 ${
-                errors.patient_id ? 'border-red-500' : 'border-gray-200'
-              }`}
-              disabled={!!visit}
-            >
-              <option value="">Cari dan pilih pasien...</option>
-              {patients.map((patient) => (
-                <option key={patient.id} value={patient.id}>
-                  {patient.full_name} - {patient.patient_type === 'balita' ? 'Balita' : patient.patient_type === 'ibu_hamil' ? 'Ibu Hamil' : 'Lansia'}
-                </option>
-              ))}
-            </select>
-            {errors.patient_id && (
-              <p className="text-red-500 text-sm mt-1">{errors.patient_id}</p>
-            )}
-          </div>
-
-          {/* Tanggal Kunjungan */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Tanggal Kunjungan <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="date"
-              value={formData.visit_date}
-              onChange={(e) => setFormData({ ...formData, visit_date: e.target.value })}
-              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 ${
-                errors.visit_date ? 'border-red-500' : 'border-gray-200'
-              }`}
-            />
-            {errors.visit_date && (
-              <p className="text-red-500 text-sm mt-1">{errors.visit_date}</p>
-            )}
-          </div>
-
-          {/* Pengukuran */}
-          <div className="border-t border-gray-200 pt-4">
-            <h3 className="text-sm font-semibold text-gray-900 mb-3">Pengukuran</h3>
-            
-            <div className="grid grid-cols-2 gap-4">
-              {/* Berat Badan */}
-              <div>
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+          {/* Patient Selection */}
+          <Card padding="sm">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Patient Search */}
+              <div className="relative">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Berat Badan (kg)
+                  Pilih Pasien <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="number"
-                  step="0.01"
-                  placeholder="0.0"
-                  value={formData.weight}
-                  onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
-                  className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 ${
-                    errors.weight ? 'border-red-500' : 'border-gray-200'
-                  }`}
-                />
-                {errors.weight && (
-                  <p className="text-red-500 text-sm mt-1">{errors.weight}</p>
-                )}
-              </div>
-
-              {/* Tinggi Badan */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Tinggi Badan (cm)
-                </label>
-                <input
-                  type="number"
-                  step="0.01"
-                  placeholder="0.0"
-                  value={formData.height}
-                  onChange={(e) => setFormData({ ...formData, height: e.target.value })}
-                  className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 ${
-                    errors.height ? 'border-red-500' : 'border-gray-200'
-                  }`}
-                />
-                {errors.height && (
-                  <p className="text-red-500 text-sm mt-1">{errors.height}</p>
-                )}
-              </div>
-
-              {/* Lingkar Kepala - Only for Balita */}
-              {isBalita && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Lingkar Kepala (cm)
-                  </label>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <input
-                    type="number"
-                    step="0.01"
-                    placeholder="0.0"
-                    value={formData.head_circumference}
-                    onChange={(e) => setFormData({ ...formData, head_circumference: e.target.value })}
-                    className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 ${
-                      errors.head_circumference ? 'border-red-500' : 'border-gray-200'
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      setShowPatientDropdown(true);
+                    }}
+                    onFocus={() => setShowPatientDropdown(true)}
+                    placeholder="Cari nama pasien..."
+                    disabled={!!visit}
+                    className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 ${
+                      errors.patient ? 'border-red-500' : 'border-gray-200'
                     }`}
                   />
-                  {errors.head_circumference && (
-                    <p className="text-red-500 text-sm mt-1">{errors.head_circumference}</p>
-                  )}
                 </div>
-              )}
+                {errors.patient && (
+                  <p className="text-red-500 text-sm mt-1">{errors.patient}</p>
+                )}
 
-              {/* Lingkar Lengan */}
+                {/* Dropdown */}
+                {showPatientDropdown && !visit && filteredPatients.length > 0 && (
+                  <div className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                    {filteredPatients.slice(0, 10).map((patient) => (
+                      <button
+                        key={patient.id}
+                        type="button"
+                        onClick={() => handlePatientSelect(patient)}
+                        className="w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center justify-between border-b border-gray-100 last:border-0"
+                      >
+                        <div>
+                          <p className="font-medium text-gray-900">{patient.full_name}</p>
+                          <p className="text-xs text-gray-500">
+                            {patient.date_of_birth && formatAge(patient.date_of_birth)}
+                          </p>
+                        </div>
+                        <span
+                          className={`text-xs px-2 py-1 rounded-full ${getPatientTypeColor(
+                            patient.patient_type
+                          )}`}
+                        >
+                          {getPatientTypeLabel(patient.patient_type)}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Visit Date */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Lingkar Lengan (cm)
+                  Tanggal Kunjungan <span className="text-red-500">*</span>
                 </label>
                 <input
-                  type="number"
-                  step="0.01"
-                  placeholder="0.0"
-                  value={formData.arm_circumference}
-                  onChange={(e) => setFormData({ ...formData, arm_circumference: e.target.value })}
+                  type="date"
+                  value={visitDate}
+                  onChange={(e) => setVisitDate(e.target.value)}
                   className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 ${
-                    errors.arm_circumference ? 'border-red-500' : 'border-gray-200'
+                    errors.visit_date ? 'border-red-500' : 'border-gray-200'
                   }`}
                 />
-                {errors.arm_circumference && (
-                  <p className="text-red-500 text-sm mt-1">{errors.arm_circumference}</p>
+                {errors.visit_date && (
+                  <p className="text-red-500 text-sm mt-1">{errors.visit_date}</p>
                 )}
               </div>
             </div>
-          </div>
+          </Card>
 
-          {/* Tekanan Darah */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Tekanan Darah
-            </label>
-            <input
-              type="text"
-              placeholder="120/80"
-              value={formData.blood_pressure}
-              onChange={(e) => setFormData({ ...formData, blood_pressure: e.target.value })}
-              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 ${
-                errors.blood_pressure ? 'border-red-500' : 'border-gray-200'
-              }`}
-            />
-            {errors.blood_pressure && (
-              <p className="text-red-500 text-sm mt-1">{errors.blood_pressure}</p>
-            )}
-          </div>
+          {/* Dynamic Form */}
+          {renderFormByPatientType()}
+        </div>
 
-          {/* Catatan Pemeriksaan */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Catatan Pemeriksaan
-            </label>
-            <textarea
-              rows={3}
-              placeholder="Catatan hasil pemeriksaan..."
-              value={formData.notes}
-              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none ${
-                errors.notes ? 'border-red-500' : 'border-gray-200'
-              }`}
-            />
-            {errors.notes && (
-              <p className="text-red-500 text-sm mt-1">{errors.notes}</p>
-            )}
-          </div>
-
-          {/* Keluhan (Optional) */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Keluhan (Opsional)
-            </label>
-            <textarea
-              rows={3}
-              placeholder="Keluhan pasien..."
-              value={formData.complaints}
-              onChange={(e) => setFormData({ ...formData, complaints: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none"
-            />
-          </div>
-
-          {/* Tindakan/Rekomendasi (Optional) */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Tindakan/Rekomendasi (Opsional)
-            </label>
-            <textarea
-              rows={3}
-              placeholder="Tindakan yang diberikan atau rekomendasi..."
-              value={formData.recommendations}
-              onChange={(e) => setFormData({ ...formData, recommendations: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none"
-            />
-          </div>
-
-          {/* Actions */}
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-200">
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={onClose}
-              disabled={loading}
-            >
+        {/* Footer Actions */}
+        <div className="p-4 border-t border-gray-200 bg-gray-50">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <Button variant="outline" onClick={onClose} disabled={loading}>
               Batal
             </Button>
-            <Button
-              type="submit"
-              variant="primary"
-              disabled={loading}
-            >
-              {loading ? 'Menyimpan...' : 'Simpan'}
-            </Button>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                variant="secondary"
+                onClick={() => handleSubmit('save_print')}
+                disabled={loading || !selectedPatient}
+                className="flex items-center gap-2"
+              >
+                <Printer className="w-4 h-4" />
+                Simpan & Cetak KMS
+              </Button>
+
+              <Button
+                variant="secondary"
+                onClick={() => handleSubmit('save_add')}
+                disabled={loading || !selectedPatient}
+                className="flex items-center gap-2"
+              >
+                <Plus className="w-4 h-4" />
+                Simpan & Tambah Lagi
+              </Button>
+
+              <Button
+                variant="primary"
+                onClick={() => handleSubmit('save_close')}
+                disabled={loading || !selectedPatient}
+                isLoading={loading}
+                className="flex items-center gap-2"
+              >
+                <Save className="w-4 h-4" />
+                Simpan & Tutup
+              </Button>
+            </div>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );

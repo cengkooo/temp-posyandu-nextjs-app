@@ -2,28 +2,75 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { ArrowLeft } from 'lucide-react';
-import { patientFormSchema, type PatientFormData } from '@/lib/validations';
-import { createPatient } from '@/lib/api';
+import { ArrowLeft, ArrowRight, Save } from 'lucide-react';
 import Card from '@/components/admin/ui/Card';
 import Button from '@/components/admin/forms/Button';
+import PatientTypeSelector, { PatientTypeValue } from '@/components/admin/forms/PatientTypeSelector';
+import BayiForm, { BayiFormData, createInitialBayiFormData } from '@/components/admin/forms/patient-forms/BayiForm';
+import BalitaForm, { BalitaFormData, createInitialBalitaFormData } from '@/components/admin/forms/patient-forms/BalitaForm';
+import IbuHamilForm from '@/components/admin/forms/patient-forms/IbuHamilForm';
+import LansiaForm from '@/components/admin/forms/patient-forms/LansiaForm';
+import RemajaDewasaForm from '@/components/admin/forms/patient-forms/RemajaDewasaForm';
+import { createPatient } from '@/lib/api';
+
+type Step = 'select_type' | 'fill_form';
 
 export default function TambahPasienPage() {
   const router = useRouter();
+  const [step, setStep] = useState<Step>('select_type');
+  const [patientType, setPatientType] = useState<PatientTypeValue | null>(null);
   const [loading, setLoading] = useState(false);
   const [consentChecked, setConsentChecked] = useState(false);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<PatientFormData>({
-    resolver: zodResolver(patientFormSchema),
-  });
+  // Form data states for each patient type
+  const [bayiData, setBayiData] = useState<BayiFormData>(createInitialBayiFormData());
+  const [balitaData, setBalitaData] = useState<BalitaFormData>(createInitialBalitaFormData());
 
-  const onSubmit = async (data: PatientFormData) => {
+  // Form errors
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const handleSelectType = (type: PatientTypeValue) => {
+    setPatientType(type);
+  };
+
+  const handleContinueToForm = () => {
+    if (patientType) {
+      setStep('fill_form');
+    }
+  };
+
+  const handleBackToTypeSelection = () => {
+    setStep('select_type');
+  };
+
+  const validateForm = (): boolean => {
+    const newErrors: Record<string, string> = {};
+
+    if (patientType === 'bayi') {
+      if (!bayiData.full_name.trim()) {
+        newErrors.full_name = 'Nama lengkap wajib diisi';
+      }
+      if (!bayiData.date_of_birth) {
+        newErrors.date_of_birth = 'Tanggal lahir wajib diisi';
+      }
+      if (!bayiData.gender) {
+        newErrors.gender = 'Jenis kelamin wajib dipilih';
+      }
+      if (!bayiData.parent_name.trim()) {
+        newErrors.parent_name = 'Nama orang tua wajib diisi';
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async () => {
+    if (!validateForm()) {
+      alert('Mohon lengkapi data yang wajib diisi');
+      return;
+    }
+
     if (!consentChecked) {
       alert('Anda harus menyetujui kebijakan privasi terlebih dahulu');
       return;
@@ -31,28 +78,130 @@ export default function TambahPasienPage() {
 
     setLoading(true);
 
-    // Prepare data for submission
-    const patientData = {
-      full_name: data.full_name,
-      nik: data.nik || null,
-      date_of_birth: data.date_of_birth,
-      gender: data.gender,
-      address: data.address || null,
-      phone: data.phone || null,
-      patient_type: data.patient_type,
-      parent_name: data.parent_name || null,
-    };
+    try {
+      // Prepare data based on patient type
+      let patientData: Record<string, unknown> = {};
 
-    const { data: result, error } = await createPatient(patientData);
+      if (patientType === 'bayi') {
+        patientData = {
+          full_name: bayiData.full_name,
+          nik: bayiData.nik || null,
+          date_of_birth: bayiData.date_of_birth,
+          gender: bayiData.gender,
+          address: bayiData.address || null,
+          phone: bayiData.phone || null,
+          patient_type: 'bayi',
+          parent_name: bayiData.parent_name || null,
+          // Extended data stored in metadata
+          metadata: {
+            weight: bayiData.weight,
+            height: bayiData.height,
+            head_circumference: bayiData.head_circumference,
+            measurement_date: bayiData.measurement_date,
+            asi_exclusive: bayiData.asi_exclusive,
+            asi_duration_months: bayiData.asi_duration_months,
+            mpasi_started: bayiData.mpasi_started,
+            mpasi_age_months: bayiData.mpasi_age_months,
+            mpasi_types: bayiData.mpasi_types,
+            immunizations: bayiData.immunizations,
+            vitamin_a_given: bayiData.vitamin_a_given,
+            vitamin_a_date: bayiData.vitamin_a_date,
+            ispa_history: bayiData.ispa_history,
+            ispa_last_date: bayiData.ispa_last_date,
+            diare_history: bayiData.diare_history,
+            diare_last_date: bayiData.diare_last_date,
+            other_illness: bayiData.other_illness,
+            special_notes: bayiData.special_notes,
+          },
+        };
+      } else if (patientType === 'balita') {
+        // TODO: Implement balita form data mapping
+        patientData = {
+          full_name: 'TODO',
+          date_of_birth: new Date().toISOString().split('T')[0],
+          gender: 'L',
+          patient_type: 'balita',
+        };
+      } else {
+        // Map to legacy patient types for now
+        const legacyType = patientType === 'ibu_hamil' ? 'ibu_hamil' : 
+                          patientType === 'lansia' ? 'lansia' : 'balita';
+        patientData = {
+          full_name: 'TODO',
+          date_of_birth: new Date().toISOString().split('T')[0],
+          gender: 'L',
+          patient_type: legacyType,
+        };
+      }
 
-    if (error) {
-      alert('Gagal menambahkan pasien: ' + error.message);
+      const { data: result, error } = await createPatient(patientData);
+
+      if (error) {
+        alert('Gagal menambahkan pasien: ' + error.message);
+        setLoading(false);
+        return;
+      }
+
+      alert('Pasien berhasil ditambahkan!');
+      router.push('/admin/pasien');
+    } catch (err) {
+      alert('Terjadi kesalahan: ' + (err as Error).message);
       setLoading(false);
-      return;
     }
+  };
 
-    alert('Pasien berhasil ditambahkan!');
-    router.push('/admin/pasien');
+  const getPatientTypeLabel = (type: PatientTypeValue | null): string => {
+    const labels: Record<PatientTypeValue, string> = {
+      bayi: 'Bayi (0-11 bulan)',
+      balita: 'Balita (1-5 tahun)',
+      ibu_hamil: 'Ibu Hamil',
+      remaja_dewasa: 'Remaja & Dewasa (15-45 tahun)',
+      lansia: 'Lansia (≥60 tahun)',
+    };
+    return type ? labels[type] : '';
+  };
+
+  const renderForm = () => {
+    switch (patientType) {
+      case 'bayi':
+        return (
+          <BayiForm
+            data={bayiData}
+            onChange={setBayiData}
+            errors={errors}
+            disabled={loading}
+          />
+        );
+      case 'balita':
+        return (
+          <BalitaForm
+            data={balitaData}
+            onChange={setBalitaData}
+            errors={errors}
+            disabled={loading}
+          />
+        );
+      case 'ibu_hamil':
+        return (
+          <IbuHamilForm
+            onSubmit={(data) => console.log('Ibu Hamil data:', data)}
+          />
+        );
+      case 'remaja_dewasa':
+        return (
+          <RemajaDewasaForm
+            onSubmit={(data) => console.log('Remaja/Dewasa data:', data)}
+          />
+        );
+      case 'lansia':
+        return (
+          <LansiaForm
+            onSubmit={(data) => console.log('Lansia data:', data)}
+          />
+        );
+      default:
+        return null;
+    }
   };
 
   return (
@@ -60,229 +209,132 @@ export default function TambahPasienPage() {
       {/* Header */}
       <div className="flex items-center gap-4">
         <button
-          onClick={() => router.back()}
+          onClick={() => (step === 'fill_form' ? handleBackToTypeSelection() : router.back())}
           className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Tambah Pasien Baru</h1>
-          <p className="text-sm text-gray-500">Lengkapi data untuk mendaftarkan pasien baru</p>
+          <p className="text-sm text-gray-500">
+            {step === 'select_type'
+              ? 'Pilih tipe pasien untuk melanjutkan'
+              : `Mengisi data ${getPatientTypeLabel(patientType)}`}
+          </p>
         </div>
       </div>
 
-      {/* Form */}
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <Card>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Left Column - Data Pribadi */}
-            <div className="space-y-6">
-              <h2 className="text-lg font-bold text-gray-900">Data Pribadi</h2>
+      {/* Progress indicator */}
+      <div className="flex items-center gap-2">
+        <div
+          className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium ${
+            step === 'select_type'
+              ? 'bg-teal-100 text-teal-700'
+              : 'bg-gray-100 text-gray-500'
+          }`}
+        >
+          <span className="w-5 h-5 flex items-center justify-center bg-teal-600 text-white text-xs rounded-full">
+            1
+          </span>
+          Pilih Tipe
+        </div>
+        <div className="w-8 h-0.5 bg-gray-200" />
+        <div
+          className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium ${
+            step === 'fill_form'
+              ? 'bg-teal-100 text-teal-700'
+              : 'bg-gray-100 text-gray-500'
+          }`}
+        >
+          <span
+            className={`w-5 h-5 flex items-center justify-center text-xs rounded-full ${
+              step === 'fill_form' ? 'bg-teal-600 text-white' : 'bg-gray-300 text-gray-600'
+            }`}
+          >
+            2
+          </span>
+          Isi Data
+        </div>
+      </div>
 
-              {/* Nama Lengkap */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Nama Lengkap <span className="text-red-500">*</span>
-                </label>
+      {/* Content */}
+      <Card>
+        {step === 'select_type' ? (
+          <div className="space-y-6">
+            <PatientTypeSelector
+              value={patientType}
+              onChange={handleSelectType}
+            />
+
+            {/* Continue button */}
+            <div className="flex justify-end pt-4 border-t border-gray-200">
+              <Button
+                variant="primary"
+                onClick={handleContinueToForm}
+                disabled={!patientType}
+                className="flex items-center gap-2"
+              >
+                Lanjutkan
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {/* Form content */}
+            {renderForm()}
+
+            {/* Privacy Consent */}
+            <div className="pt-6 border-t border-gray-200">
+              <label className="flex items-start gap-3 cursor-pointer">
                 <input
-                  type="text"
-                  {...register('full_name')}
-                  placeholder="Masukkan nama lengkap"
-                  className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 ${
-                    errors.full_name ? 'border-red-500' : 'border-gray-200'
-                  }`}
+                  type="checkbox"
+                  checked={consentChecked}
+                  onChange={(e) => setConsentChecked(e.target.checked)}
+                  className="mt-1 w-4 h-4 text-teal-500 focus:ring-teal-500 rounded"
                 />
-                {errors.full_name && (
-                  <p className="mt-1 text-sm text-red-500">{errors.full_name.message}</p>
-                )}
-              </div>
+                <span className="text-sm text-gray-700">
+                  Saya menyetujui data pasien ini disimpan dan diproses sesuai kebijakan privasi
+                  Posyandu
+                </span>
+              </label>
+            </div>
 
-              {/* Tanggal Lahir */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Tanggal Lahir <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="date"
-                  {...register('date_of_birth')}
-                  className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 ${
-                    errors.date_of_birth ? 'border-red-500' : 'border-gray-200'
-                  }`}
-                />
-                {errors.date_of_birth && (
-                  <p className="mt-1 text-sm text-red-500">{errors.date_of_birth.message}</p>
-                )}
-              </div>
+            {/* Action Buttons */}
+            <div className="flex items-center justify-between pt-4">
+              <Button
+                variant="outline"
+                onClick={handleBackToTypeSelection}
+                disabled={loading}
+                className="flex items-center gap-2"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Kembali
+              </Button>
 
-              {/* Tipe Pasien */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Tipe Pasien <span className="text-red-500">*</span>
-                </label>
-                <select
-                  {...register('patient_type')}
-                  className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 ${
-                    errors.patient_type ? 'border-red-500' : 'border-gray-200'
-                  }`}
+              <div className="flex items-center gap-3">
+                <Button
+                  variant="outline"
+                  onClick={() => router.back()}
+                  disabled={loading}
                 >
-                  <option value="">Pilih tipe pasien</option>
-                  <option value="balita">Balita</option>
-                  <option value="ibu_hamil">Ibu Hamil</option>
-                  <option value="lansia">Lansia</option>
-                </select>
-                {errors.patient_type && (
-                  <p className="mt-1 text-sm text-red-500">{errors.patient_type.message}</p>
-                )}
-              </div>
-
-              {/* Alamat Lengkap */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Alamat Lengkap
-                </label>
-                <textarea
-                  {...register('address')}
-                  placeholder="Masukkan alamat lengkap"
-                  rows={4}
-                  className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 ${
-                    errors.address ? 'border-red-500' : 'border-gray-200'
-                  }`}
-                />
-                {errors.address && (
-                  <p className="mt-1 text-sm text-red-500">{errors.address.message}</p>
-                )}
-              </div>
-            </div>
-
-            {/* Right Column - Data Kesehatan */}
-            <div className="space-y-6">
-              <h2 className="text-lg font-bold text-gray-900">Data Kesehatan</h2>
-
-              {/* NIK */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  NIK (Opsional)
-                </label>
-                <input
-                  type="text"
-                  {...register('nik')}
-                  placeholder="16 digit NIK"
-                  maxLength={16}
-                  className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 ${
-                    errors.nik ? 'border-red-500' : 'border-gray-200'
-                  }`}
-                />
-                <p className="mt-1 text-xs text-gray-500">
-                  Data NIK akan dienkripsi untuk keamanan
-                </p>
-                {errors.nik && (
-                  <p className="mt-1 text-sm text-red-500">{errors.nik.message}</p>
-                )}
-              </div>
-
-              {/* Jenis Kelamin */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Jenis Kelamin <span className="text-red-500">*</span>
-                </label>
-                <div className="flex gap-4">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      {...register('gender')}
-                      value="L"
-                      className="w-4 h-4 text-teal-500 focus:ring-teal-500"
-                    />
-                    <span className="text-sm text-gray-700">Laki-laki</span>
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      {...register('gender')}
-                      value="P"
-                      className="w-4 h-4 text-teal-500 focus:ring-teal-500"
-                    />
-                    <span className="text-sm text-gray-700">Perempuan</span>
-                  </label>
-                </div>
-                {errors.gender && (
-                  <p className="mt-1 text-sm text-red-500">{errors.gender.message}</p>
-                )}
-              </div>
-
-              {/* Nomor Telepon */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Nomor Telepon
-                </label>
-                <input
-                  type="tel"
-                  {...register('phone')}
-                  placeholder="08xxxxxxxxxx"
-                  className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 ${
-                    errors.phone ? 'border-red-500' : 'border-gray-200'
-                  }`}
-                />
-                {errors.phone && (
-                  <p className="mt-1 text-sm text-red-500">{errors.phone.message}</p>
-                )}
-              </div>
-
-              {/* Nama Orang Tua / Wali */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Nama Orang Tua / Wali
-                </label>
-                <input
-                  type="text"
-                  {...register('parent_name')}
-                  placeholder="Masukkan nama orang tua/wali"
-                  className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 ${
-                    errors.parent_name ? 'border-red-500' : 'border-gray-200'
-                  }`}
-                />
-                {errors.parent_name && (
-                  <p className="mt-1 text-sm text-red-500">{errors.parent_name.message}</p>
-                )}
+                  Batal
+                </Button>
+                <Button
+                  variant="primary"
+                  onClick={handleSubmit}
+                  disabled={loading || !consentChecked}
+                  isLoading={loading}
+                  className="flex items-center gap-2"
+                >
+                  <Save className="w-4 h-4" />
+                  Simpan
+                </Button>
               </div>
             </div>
           </div>
-
-          {/* Privacy Consent */}
-          <div className="mt-6 pt-6 border-t border-gray-200">
-            <label className="flex items-start gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={consentChecked}
-                onChange={(e) => setConsentChecked(e.target.checked)}
-                className="mt-1 w-4 h-4 text-teal-500 focus:ring-teal-500 rounded"
-              />
-              <span className="text-sm text-gray-700">
-                Saya menyetujui data pasien ini disimpan dan diproses sesuai kebijakan privasi Posyandu
-              </span>
-            </label>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex items-center justify-end gap-3 mt-6">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => router.back()}
-              disabled={loading}
-            >
-              Batal
-            </Button>
-            <Button
-              type="submit"
-              variant="primary"
-              disabled={loading || !consentChecked}
-            >
-              {loading ? 'Menyimpan...' : 'Simpan'}
-            </Button>
-          </div>
-        </Card>
-      </form>
+        )}
+      </Card>
     </div>
   );
 }

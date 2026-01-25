@@ -1,443 +1,5 @@
-UI/UX Design Brief - Posyandu Web Application
-Project Overview
-Web application untuk Posyandu (Pos Pelayanan Terpadu) dengan dua bagian utama: Landing Page public untuk informasi umum dan Dashboard Admin untuk manajemen data kesehatan.
-Target Users
-
-Public Users: Masyarakat umum yang mencari informasi tentang posyandu, jadwal, dan layanan
-Admin: Pengelola posyandu dengan akses penuh ke semua fitur
-Kader: Petugas kesehatan dengan akses terbatas untuk input data
-
-Design Requirements
-Brand & Visual Identity
-
-Tone: Professional, trustworthy, warm, approachable
-Color Palette Suggestions:
-
-Primary: Hijau/biru (kesehatan, kepercayaan)
-Secondary: Orange/kuning (kehangatan, semangat)
-Neutral: Abu-abu untuk teks, putih untuk background
-
-
-Typography: Clean, readable (Sans-serif untuk modern look)
-Imagery: Foto-foto kegiatan posyandu, ibu dan anak, aktivitas kesehatan
-
-
-PART 1: PUBLIC LANDING PAGE
-1.1 Hero Section
-Purpose: First impression, explain what this posyandu is
-Content Elements:
-
-Large hero image/background (foto kegiatan posyandu yang welcoming)
-Headline: Nama Posyandu + Tagline singkat
-Sub-headline: Lokasi dan deskripsi singkat layanan
-CTA Buttons:
-
-"Lihat Jadwal Kegiatan"
-"Hubungi Kami"
-
-
-Quick stats (optional): Jumlah pasien terlayani, tahun berdiri, dll
-
-Design Notes:
-
-Full-width section
-Overlay gradient untuk readability text di atas image
-Responsive: Stack vertically di mobile
-
-1.2 Tentang Posyandu Section
-Purpose: Memberikan informasi profil posyandu
-Content Elements:
-
-Visi & Misi (bisa dalam cards atau kolom)
-Lokasi & Kontak
-
-Alamat lengkap
-Nomor telepon
-Email
-Embed Google Maps (optional)
-
-
-Jadwal Operasional
-
-Hari dan jam buka
-Presentasi dalam table atau list yang clean
-
-
-
-Design Notes:
-
-Two-column layout (desktop), stacked di mobile
-Icons untuk setiap info point
-Map embed dengan border radius dan shadow
-
-1.3 Layanan Kami Section
-Purpose: Showcase semua layanan yang ditawarkan
-Content Elements:
-Cards untuk setiap layanan:
-
-Imunisasi Balita
-
-Icon: Syringe/vaccine
-Deskripsi singkat
-
-
-Penimbangan & Pengukuran Balita
-
-Icon: Weight scale/height chart
-Deskripsi singkat
-
-
-Pemeriksaan Ibu Hamil
-
-Icon: Pregnant woman
-Deskripsi singkat
-
-
-Keluarga Berencana (KB)
-
-Icon: Family planning
-Deskripsi singkat
-
-
-Pemeriksaan Lansia
-
-Icon: Elderly care
-Deskripsi singkat
-
-
-Konseling Gizi
-
-Icon: Nutrition/food
-Deskripsi singkat
-
-
-
-Design Notes:
-
-Grid layout: 3 columns (desktop), 2 columns (tablet), 1 column (mobile)
-Card dengan icon di atas, judul, dan deskripsi
-Hover effect: Lift/shadow atau color change
-Consistent spacing
-
-1.4 Jadwal & Pengumuman Section
-Purpose: Inform users tentang kegiatan mendatang dan info penting
-Content Elements:
-
-Tab Navigation atau Split Section:
-
-Tab 1: Jadwal Kegiatan Mendatang
-Tab 2: Pengumuman Terbaru
-
-
-
-Jadwal Kegiatan:
-
-List/Cards dengan:
-
-Tanggal & waktu (prominent)
-Judul kegiatan
-Lokasi
-Icon kalender
-
-
-Sort by: Nearest date first
-"Lihat Semua Jadwal" button jika ada banyak
-
-Pengumuman:
-
-Cards dengan:
-
-Badge/tag untuk tipe (Info, Jadwal, Event)
-Judul pengumuman
-Excerpt/preview konten
-Tanggal publish
-"Baca Selengkapnya" link
-
-
-Max 3-5 pengumuman terbaru
-"Lihat Semua Pengumuman" button
-
-Design Notes:
-
-Timeline style atau card grid
-Color-coded badges untuk announcement types
-Clear date formatting (e.g., "17 Jan 2026")
-
-1.5 Tim Kader Section
-Purpose: Showcase tim kader dan tenaga kesehatan
-Content Elements:
-
-Grid of cards, setiap card berisi:
-
-Foto profile (jika ada, atau avatar placeholder)
-Nama lengkap
-Posisi/Role (Kader, Bidan, dll)
-Kontak (optional)
-
-
-
-Design Notes:
-
-Circle atau rounded square untuk foto
-3-4 columns (desktop), 2 (tablet), 1 (mobile)
-Subtle shadow on cards
-Consistent image sizes
-
-1.6 Galeri Kegiatan Section
-Purpose: Visual showcase aktivitas posyandu
-Content Elements:
-
-Photo grid/masonry layout
-Setiap foto dengan:
-
-Caption/title (on hover atau below)
-Tanggal foto (optional)
-
-
-Lightbox/modal untuk view full image
-"Lihat Galeri Lengkap" button
-
-Design Notes:
-
-Masonry atau uniform grid
-Lazy loading untuk performance
-Hover overlay dengan title
-Modal dengan prev/next navigation
-Responsive: 3-4 cols (desktop), 2 (tablet), 1-2 (mobile)
-
-1.7 Footer
-Purpose: Navigation dan informasi kontak
-Content Elements:
-
-Column 1: Logo + tagline singkat
-Column 2: Quick Links
-
-Tentang Kami
-Layanan
-Jadwal
-Galeri
-Kontak
-
-
-Column 3: Kontak Info
-
-Alamat
-Telepon
-Email
-Jam operasional
-
-
-Column 4: Social Media (jika ada)
-
-Facebook, Instagram, WhatsApp icons
-
-
-
-Bottom Bar:
-
-Copyright notice
-"Login Admin" link (subtle, di pojok)
-
-Design Notes:
-
-Dark background (contrast dengan main content)
-Light text
-4 columns (desktop), stacked (mobile)
-Icons untuk kontak info
-
-1.8 Navigation Bar
-Purpose: Easy navigation throughout landing page
-Content Elements:
-
-Logo posyandu (kiri)
-Menu items (center atau kanan):
-
-Beranda
-Tentang
-Layanan
-Jadwal
-Galeri
-Kontak
-
-
-"Login" button (outlined, di kanan)
-
-Design Notes:
-
-Sticky/fixed on scroll
-Transparent dengan blur effect atau solid background
-Hamburger menu di mobile
-Active state untuk current section
-Smooth scroll to sections
-
-
-PART 2: ADMIN DASHBOARD
-2.1 Login Page
-Purpose: Authentication untuk admin/kader
-Content Elements:
-
-Logo posyandu (center top)
-Judul: "Login Admin"
-Form fields:
-
-Email input
-Password input (dengan show/hide toggle)
-"Ingat Saya" checkbox (optional)
-"Lupa Password?" link
-
-
-"Masuk" button (primary, full width)
-Error messages area
-"Kembali ke Beranda" link (subtle, di bawah)
-
-Design Notes:
-
-Center aligned card/box
-Clean, minimal design
-Soft shadow pada card
-Background: Subtle pattern atau gradient
-Responsive: Full width card di mobile
-Form validation states (error, success)
-
-2.2 Dashboard Layout Structure
-Purpose: Consistent layout untuk semua admin pages
-Components:
-Sidebar (Left):
-
-Logo + Nama Posyandu (top)
-User info card:
-
-Avatar
-Nama user
-Role badge (Admin/Kader)
-
-
-Navigation menu dengan icons:
-
-Dashboard (Home icon)
-Data Pasien (Users icon)
-Kunjungan (Calendar icon)
-Imunisasi (Shield/syringe icon)
-Laporan & Statistik (Chart icon)
-Konten Website (Edit icon)
-
-Sub: Pengumuman
-Sub: Jadwal
-Sub: Galeri
-
-
-Pengaturan (Settings icon)
-Keluar (Logout icon)
-
-
-Collapse/expand button (mobile)
-
-Top Bar:
-
-Page title (kiri)
-Breadcrumb (optional)
-Search bar (center, untuk search global)
-Notifications icon dengan badge
-User profile dropdown (kanan):
-
-Lihat Profile
-Pengaturan
-Logout
-
-
-
-Main Content Area:
-
-Padding yang cukup
-Background: Light gray atau white
-Cards/sections dengan shadow
-
-Design Notes:
-
-Sidebar: 250-280px width (desktop), collapsible
-Top bar: 60-70px height, sticky
-Sidebar overlay di mobile dengan backdrop
-Active menu item highlighted
-Icons consistency (gunakan lucide-react)
-
-2.3 Dashboard Home/Overview
-Purpose: Quick overview dan stats penting
-Content Elements:
-Stats Cards Row (Top):
-4 cards dengan icons:
-
-Total Pasien Aktif
-
-Large number
-Icon: Users
-Trend indicator (↑ 5% dari bulan lalu)
-
-
-Kunjungan Bulan Ini
-
-Large number
-Icon: Calendar
-Comparison dengan bulan lalu
-
-
-Imunisasi Pending
-
-Large number dengan warning jika > 0
-Icon: Alert/syringe
-List yang perlu follow-up
-
-
-Balita Gizi Buruk/Stunting
-
-Large number dengan warning color
-Icon: Alert triangle
-Perlu perhatian khusus
-
-
-
-Charts Section:
-
-Grafik Kunjungan (Line/bar chart):
-
-X-axis: Bulan (6-12 bulan terakhir)
-Y-axis: Jumlah kunjungan
-Filter: Semua/Balita/Ibu Hamil/Lansia
-
-
-Status Gizi Balita (Pie/donut chart):
-
-Segments: Gizi Baik, Gizi Kurang, Gizi Buruk, Stunting
-Color coded
-Percentages
-
-
-
-Recent Activities:
-
-Table atau list dengan:
-
-Kunjungan terbaru (5-10 terakhir)
-Columns: Nama Pasien, Tipe, Tanggal, Petugas
-"Lihat Semua" link
-
-
-
-Quick Actions:
-Floating action buttons atau card dengan:
-
-Tambah Pasien Baru
-Catat Kunjungan
-Input Imunisasi
-
-Design Notes:
-
-Stats cards: 4 columns (desktop), 2 (tablet), 1 (mobile)
-Color coded: Green (good), Yellow (warning), Red (danger)
-Charts responsive
-Use recharts library
-
-2.4 Data Pasien Page
-Purpose: Manage semua data pasien
+PART 2: ADMIN DASHBOARD (UPDATED)
+2.4 Data Pasien Page (REVISED)
 Content Elements:
 Top Action Bar:
 
@@ -445,684 +7,1043 @@ Top Action Bar:
 Search bar (kiri)
 Filter dropdowns:
 
-Tipe Pasien (Semua/Balita/Ibu Hamil/Lansia)
+Tipe Pasien: Semua / Bayi (0-11 bulan) / Balita (1-5 tahun) / Ibu Hamil / Remaja & Dewasa (15-45 tahun) / Lansia (≥60 tahun)
 Status (Aktif/Tidak Aktif)
 Sort by (Nama, Tanggal Daftar, Umur)
 
 
 
 Data Table:
-Columns:
+Columns (adjusted based on patient type):
 
 Nama Lengkap
 NIK (partial/masked: ***1234)
 Tanggal Lahir / Umur
-Jenis Kelamin (L/P dengan icon atau badge)
-Tipe Pasien (Badge dengan color)
-Nama Orang Tua (untuk balita)
+Jenis Kelamin (L/P dengan badge)
+Tipe Pasien (Badge dengan color-coding):
+
+Bayi (0-11 bulan) - Blue
+Balita (1-5 tahun) - Cyan
+Ibu Hamil - Pink
+Remaja/Dewasa (15-45) - Purple
+Lansia (≥60) - Orange
+
+
+Status Gizi/Kesehatan (icon indicator: ✓ Baik, ⚠ Perhatian, ✗ Buruk)
+Nama Orang Tua (untuk bayi/balita)
 Telepon
 Aksi (View/Edit/Delete icons)
 
-Pagination:
 
-Rows per page selector (10, 25, 50, 100)
-Page numbers
-Previous/Next buttons
-Total count
+2.5 Form Tambah/Edit Pasien (REVISED)
+Dynamic Form Based on Patient Type
+Step 1: Pilih Tipe Pasien (jika tambah baru)
 
-Design Notes:
+Radio cards dengan icons:
 
-Striped rows atau hover highlight
-Responsive: Horizontal scroll di mobile atau card view
-Action buttons: Icon buttons dengan tooltip
-Color-coded badges untuk tipe pasien
-Delete dengan confirmation modal
+👶 Bayi (0-11 bulan)
+🧒 Balita (1-5 tahun)
+🤰 Ibu Hamil
+👨 Remaja & Dewasa (15-45 tahun)
+👴 Lansia (≥60 tahun)
 
-2.5 Form Tambah/Edit Pasien
-Purpose: Input data pasien baru atau edit existing
-Content Elements:
-Form Sections (menggunakan tabs atau accordion):
-Tab 1: Data Pribadi
+
+
+Step 2: Form Sections (tabs atau accordion, conditional based on type)
+Universal Fields (Semua Tipe):
 
 Nama Lengkap (required)
-NIK (optional, dengan note tentang privacy)
+NIK (optional, encrypted)
 Tanggal Lahir (date picker, required)
-Jenis Kelamin (radio buttons: L/P, required)
+Jenis Kelamin (radio: L/P, required)
 Alamat Lengkap (textarea)
 Nomor Telepon
-Tipe Pasien (select: Balita/Ibu Hamil/Lansia, required)
-Nama Orang Tua/Wali (conditional: jika balita)
+Nama Orang Tua/Wali (conditional: jika Bayi/Balita)
 
-Tab 2: Data Kesehatan (optional, bisa diisi nanti):
 
-Golongan Darah
-Alergi (textarea)
-Riwayat Penyakit (textarea)
-Kondisi Khusus
+A. FORM KHUSUS BAYI (0-11 bulan)
+Tab 1: Data Bayi
 
-Consent Checkbox (bottom):
+Semua universal fields
+Umur (auto-calculate dari tanggal lahir, display: X bulan)
 
-"Saya menyetujui data pasien ini disimpan dan diproses sesuai kebijakan privasi"
+Tab 2: Pengukuran Antropometri (dapat diisi saat kunjungan atau langsung)
 
-Action Buttons (bottom right):
+Berat Badan (kg) - number input
+Panjang Badan (cm) - number input
+Lingkar Kepala (cm) - number input
+Tanggal Pengukuran (auto: today)
 
-"Batal" (secondary)
-"Simpan" (primary)
+Tab 3: Riwayat ASI & MP-ASI
 
-Design Notes:
+ASI Eksklusif:
 
-Two column layout untuk form (desktop)
-Stacked di mobile
-Clear field labels
-Placeholder text untuk guidance
-Inline validation
-Required field indicators (*)
-Success/error toast notifications
-Loading state pada submit button
+Radio: Ya / Tidak / Sedang Berlangsung
+Durasi ASI eksklusif (bulan)
 
-2.6 Detail Pasien Page
-Purpose: View comprehensive patient data dan history
-Content Elements:
-Header Section:
+
+Pemberian MP-ASI:
+
+Sudah Dimulai: Ya/Tidak
+Usia mulai MP-ASI (bulan)
+Jenis MP-ASI (textarea)
+
+
+
+Tab 4: Imunisasi & Vitamin
+
+Status Imunisasi (checklist):
+
+HB0, BCG, Polio 1-4, DPT-HB-Hib 1-3, IPV, Campak/MR
+Setiap item: Checkbox + Tanggal
+
+
+Vitamin A:
+
+Sudah diberikan: Ya/Tidak
+Tanggal pemberian terakhir
+
+
+
+Tab 5: Riwayat Kesehatan
+
+Riwayat Sakit:
+
+ISPA: Ya/Tidak + Tanggal terakhir
+Diare: Ya/Tidak + Tanggal terakhir
+Penyakit lain (textarea)
+
+
+Catatan Khusus (textarea)
+
+Auto-Calculated Display (read-only, update saat save):
+
+BB/U (Berat Badan menurut Umur) - indicator: Normal/Kurang/Buruk
+PB/U (Panjang Badan menurut Umur) - indicator
+BB/PB (Berat Badan menurut Panjang Badan) - indicator
+Status Gizi Final (badge): Gizi Baik / Kurang / Buruk / Stunting / Wasting
+
+
+B. FORM KHUSUS BALITA (1-5 tahun)
+Similar to Bayi, dengan adjustment:
+
+Panjang Badan → Tinggi Badan
+Parameter: TB/U (Tinggi Badan menurut Umur)
+IMT/U (Indeks Massa Tubuh menurut Umur)
+Tambahan: Perkembangan motorik (opsional)
+
+
+C. FORM KHUSUS IBU HAMIL
+Tab 1: Data Ibu
+
+Semua universal fields
+Umur Ibu (auto-calculate)
+
+Tab 2: Data Kehamilan
+
+Gravida (G) - number input (kehamilan ke-berapa)
+Para (P) - number input (melahirkan berapa kali)
+Abortus (A) - number input (keguguran berapa kali)
+Usia Kehamilan:
+
+Input: Minggu (number)
+Auto-calculate: Trimester (1/2/3)
+
+
+HPHT (Hari Pertama Haid Terakhir) - date picker
+Taksiran Persalinan (HPL) - auto-calculate atau manual input
+
+Tab 3: Antropometri & Gizi
+
+Berat Badan Awal (sebelum hamil) - kg
+Berat Badan Saat Ini - kg
+Kenaikan BB - auto-calculate, dengan indicator (Normal/Kurang/Berlebih)
+Tinggi Badan - cm
+Lingkar Lengan Atas (LILA) - cm
+
+Auto-indicator: ✓ Normal (≥23.5 cm) / ⚠ Risiko KEK (<23.5 cm)
+
+
+
+Tab 4: Kesehatan Ibu
+
+Tekanan Darah - format: 120/80
+
+Auto-indicator: Normal / Prehipertensi / Hipertensi
+
+
+Hemoglobin (Hb) - g/dL (optional)
+
+Auto-indicator: Normal / Anemia Ringan / Sedang / Berat
+
+
+Status Risiko KEK:
+
+Auto dari LILA atau manual select: Tidak Berisiko / Berisiko
+
+
+Keluhan Kehamilan (textarea):
+
+Mual/muntah, pusing, dll
+
+
+
+Tab 5: Layanan ANC
+
+Kunjungan ANC (checklist dengan tanggal):
+
+K1 (Trimester 1)
+K2, K3 (Trimester 2)
+K4, K5, K6 (Trimester 3)
+
+
+Tablet Tambah Darah (TTD):
+
+Sudah diberikan: Ya/Tidak
+Jumlah yang diterima (tablet)
+Kepatuhan minum: Rutin / Kadang / Tidak
+
+
+Imunisasi TT:
+
+TT1, TT2, TT3, TT4, TT5
+Setiap item: Checkbox + Tanggal
+
+
+
+Tab 6: Edukasi & Rencana
+
+Edukasi yang diberikan (checklist):
+
+Gizi ibu hamil
+Persiapan persalinan
+ASI eksklusif
+Perawatan bayi
+Tanda bahaya kehamilan
+
+
+Rencana Persalinan:
+
+Tempat: Rumah/Puskesmas/RS
+Penolong: Bidan/Dokter
+
+
+Catatan Khusus (textarea)
+
+
+D. FORM KHUSUS REMAJA & DEWASA (15-45 tahun)
+Tab 1: Data Pribadi
+
+Semua universal fields
+Pekerjaan (optional)
+Status Pernikahan (optional)
+
+Tab 2: Antropometri
+
+Berat Badan (kg)
+Tinggi Badan (cm)
+IMT - auto-calculate dengan indicator:
+
+Underweight (<18.5)
+Normal (18.5-24.9)
+Overweight (25-29.9)
+Obesitas (≥30)
+
+
+Lingkar Perut (cm)
+
+Auto-indicator risiko metabolik:
+
+Pria: Normal (<90 cm) / Berisiko (≥90 cm)
+Wanita: Normal (<80 cm) / Berisiko (≥80 cm)
+
+
+
+
+
+Tab 3: Faktor Risiko PTM (Penyakit Tidak Menular)
+
+Tekanan Darah - format: 120/80
+
+Auto-indicator: Normal / Prehipertensi / Hipertensi Stage 1/2
+
+
+Riwayat Merokok:
+
+Radio: Tidak Pernah / Pernah (sudah berhenti) / Aktif
+Jika aktif: Batang per hari (number)
+
+
+Aktivitas Fisik:
+
+Radio: Kurang Aktif / Cukup Aktif / Sangat Aktif
+Durasi per minggu (menit)
+
+
+Pola Makan:
+
+Konsumsi Sayur per hari: Porsi (number)
+Konsumsi Buah per hari: Porsi (number)
+Auto-indicator: Cukup (≥5 porsi) / Kurang
+
+
+
+Tab 4: Pemeriksaan Lab (Optional)
+
+Gula Darah Sewaktu (mg/dL)
+
+Auto-indicator: Normal / Prediabetes / Diabetes
+
+
+Gula Darah Puasa (mg/dL) - optional
+Kolesterol Total (mg/dL)
+
+Auto-indicator: Normal / Borderline / Tinggi
+
+
+Asam Urat (mg/dL) - optional
+
+Tab 5: Riwayat Penyakit
+
+Penyakit Tidak Menular (checklist):
+
+Diabetes Melitus
+Hipertensi
+Jantung
+Stroke
+Kanker
+Lainnya (textarea)
+
+
+Riwayat Penyakit Keluarga (textarea)
+Obat yang Dikonsumsi Rutin (textarea)
+
+Tab 6: Konseling & Tindak Lanjut
+
+Konseling yang diberikan (checklist):
+
+Diet sehat
+Aktivitas fisik
+Stop merokok
+Manajemen stress
+
+
+Rujukan:
+
+Perlu Rujuk: Ya/Tidak
+Rujuk ke: Puskesmas/RS
+Alasan rujukan (textarea)
+
+
+
+
+E. FORM KHUSUS LANSIA (≥60 tahun)
+Tab 1: Data Lansia
+
+Semua universal fields
+Nama Keluarga/Pendamping (yang bisa dihubungi)
+Telepon Keluarga
+
+Tab 2: Antropometri
+
+Berat Badan (kg)
+Tinggi Badan (cm)
+
+Atau: Tinggi Lutut (cm) - jika tidak bisa berdiri
+Auto-convert ke estimasi TB
+
+
+IMT - auto-calculate dengan kategori khusus lansia
+Lingkar Perut (cm)
+
+Tab 3: Pemeriksaan Vital
+
+Tekanan Darah - format: 120/80
+Denyut Nadi (kali/menit)
+
+Auto-indicator: Bradikardia / Normal / Takikardia
+
+
+Gula Darah (mg/dL) - optional
+Suhu Tubuh (°C) - optional
+
+Tab 4: Status Fungsional
+
+Kemandirian (ADL - Activities of Daily Living):
+Radio cards untuk setiap aktivitas:
+
+Makan: Mandiri / Bantuan / Tergantung
+Berpakaian: Mandiri / Bantuan / Tergantung
+Mandi: Mandiri / Bantuan / Tergantung
+Toileting: Mandiri / Bantuan / Tergantung
+Mobilitas: Mandiri / Bantuan / Tergantung
+Auto-score: Mandiri / Sebagian Mandiri / Tergantung Total
+
+
+Risiko Jatuh:
+Checklist screening:
+
+Riwayat jatuh dalam 1 tahun terakhir
+Gangguan keseimbangan
+Menggunakan alat bantu jalan
+Pusing saat berdiri
+Auto-indicator: Risiko Rendah / Sedang / Tinggi
+
+
+Status Mental/Emosional (sederhana):
+
+Mood: Baik / Cemas / Depresi
+Orientasi: Baik / Gangguan Ringan / Gangguan Berat
+Memori: Baik / Gangguan Ringan / Gangguan Berat
+
+
+
+Tab 5: Keluhan & Penyakit
+
+Keluhan Utama (textarea)
+Penyakit Kronis (checklist):
+
+Hipertensi
+Diabetes
+Jantung
+Stroke
+Asam urat
+Osteoporosis
+Demensia
+Lainnya (textarea)
+
+
+Obat Rutin (textarea)
+
+Nama obat & dosis
+
+
+
+Tab 6: Layanan & Konseling
+
+Konseling yang Diberikan (checklist):
+
+Gizi seimbang lansia
+Aktivitas fisik lansia (senam, jalan santai)
+Pencegahan jatuh
+Manajemen penyakit kronis
+Kesehatan mental
+
+
+Aktivitas Fisik yang Disarankan (textarea)
+Rujukan:
+
+Perlu Rujuk: Ya/Tidak
+Rujuk ke: Puskesmas/RS
+Alasan rujukan (textarea)
+
+
+Jadwal Kontrol Berikutnya (date picker)
+
+
+2.6 Detail Pasien Page (UPDATED)
+Header Section (sama untuk semua):
 
 Nama pasien (large)
-Patient info cards in row:
+Patient info cards dengan content conditional based on type
 
-Umur & Tanggal Lahir
-NIK (masked)
-Tipe Pasien (badge)
-Nomor Telepon
+Conditional Tabs Based on Patient Type:
+BAYI (0-11 bulan):
 
+Riwayat Pertumbuhan
 
-Action buttons:
-
-Edit Data
-Cetak Riwayat
-Hapus Pasien (admin only, dengan confirm)
+Table dengan: Tanggal, Umur (bulan), BB, PB, LK, Status Gizi
 
 
+Grafik Pertumbuhan
 
-Tabs Navigation:
+3 charts: BB/U, PB/U, LK/U
+Overlay WHO growth curves
+
+
+Imunisasi
+
+Timeline checklist dengan status
+
+
+ASI & MP-ASI
+
+History pemberian
+
+
+Riwayat Sakit
+
+Log ISPA, diare, dll
+
+
+
+IBU HAMIL:
+
+Data Kehamilan
+
+Summary GPA, usia kehamilan, HPL
+
+
+Riwayat ANC
+
+Timeline kunjungan K1-K6
+Grafik kenaikan BB
+
+
+Hasil Pemeriksaan
+
+Table: Tanggal, BB, TD, LILA, Keluhan, Petugas
+
+
+Imunisasi TT
+
+Checklist dengan tanggal
+
+
+Edukasi & Konseling
+
+Log edukasi yang sudah diberikan
+
+
+
+REMAJA & DEWASA (15-45):
 
 Riwayat Kunjungan
-Imunisasi
-Grafik Pertumbuhan (untuk balita)
-Data Kehamilan (untuk ibu hamil)
 
-Tab 1: Riwayat Kunjungan:
-
-Timeline atau table dengan:
-
-Tanggal kunjungan
-Berat badan
-Tinggi badan
-Lingkar kepala (balita)
-Lingkar lengan
-Tekanan darah
-Catatan pemeriksaan
-Petugas yang input
+Table pemeriksaan rutin
 
 
-"Tambah Kunjungan Baru" button (floating atau top)
-Filter by date range
+Trend Antropometri
 
-Tab 2: Imunisasi:
-
-Timeline/checklist imunisasi:
-
-Nama vaksin
-Tanggal diberikan
-Jadwal berikutnya
-Status (Selesai/Pending dengan icon)
-Catatan
+Line chart: BB, IMT, Lingkar Perut over time
 
 
-"Tambah Imunisasi" button
-Color coded: Green (completed), Yellow (upcoming), Red (overdue)
+Faktor Risiko PTM
 
-Tab 3: Grafik Pertumbuhan (Balita):
-
-Line charts:
-
-Berat Badan vs Umur (dengan WHO growth chart reference)
-Tinggi Badan vs Umur
-Lingkar Kepala vs Umur
+Visualization: Traffic light indicator untuk setiap faktor
+Trend TD, Gula Darah, Kolesterol
 
 
-Legend: Patient data line, WHO standard (percentiles)
-Date range filter
-Export chart button
+Hasil Lab
 
-Tab 4: Data Kehamilan (Ibu Hamil):
+Table hasil lab dengan tanggal
 
-Kehamilan ke- berapa
-Usia kehamilan (minggu)
-Taksiran persalinan (HPL)
-Status kehamilan
-Riwayat pemeriksaan kehamilan (table)
 
-Design Notes:
+Konseling
 
-Card-based layout
-Charts dengan hover tooltips
-Responsive tables
-Print-friendly views
-Empty states ketika belum ada data
-Loading skeletons
+Log konseling & tindak lanjut
 
-2.7 Form Catat Kunjungan
-Purpose: Quick input untuk kunjungan/pemeriksaan
-Content Elements:
 
-Pilih Pasien (searchable dropdown/autocomplete)
+
+LANSIA (≥60):
+
+Riwayat Pemeriksaan
+
+Table comprehensive dengan semua parameter
+
+
+Trend Kesehatan
+
+Charts: TD, Gula Darah, BB over time
+
+
+Status Fungsional
+
+Timeline ADL scores
+Risiko jatuh tracking
+
+
+Penyakit & Obat
+
+List penyakit kronis
+Daftar obat rutin
+
+
+Rujukan & Follow-up
+
+History rujukan
+Jadwal kontrol berikutnya
+
+
+
+
+2.7 Form Catat Kunjungan (UPDATED)
+Dynamic form based on selected patient type:
+Common Fields:
+
+Pilih Pasien (searchable dropdown - shows: Nama, Tipe, Umur)
 Tanggal Kunjungan (date picker, default: today)
-Pengukuran section:
+Petugas yang Memeriksa (auto-fill: current user)
 
-Berat Badan (kg) - number input dengan increment/decrement
-Tinggi Badan (cm)
-Lingkar Kepala (cm) - conditional untuk balita
-Lingkar Lengan (cm)
-Tekanan Darah (format: 120/80)
+Conditional Measurement Sections:
+For BAYI/BALITA:
+[Anthropometry Card]
+├─ Berat Badan (kg) ━━ increment/decrement buttons
+├─ Panjang/Tinggi Badan (cm)
+├─ Lingkar Kepala (cm) - jika bayi
+└─ Lingkar Lengan Atas (cm)
 
+[Auto-calculated Indicators - Real-time]
+├─ BB/U: [●●●○○] Normal
+├─ TB/U: [●●○○○] Pendek (Stunting Risk)
+└─ BB/TB: [●●●●○] Gizi Baik
 
-Catatan Pemeriksaan (textarea)
-Keluhan (textarea, optional)
-Tindakan/Rekomendasi (textarea, optional)
+[Additional]
+├─ Keluhan (textarea)
+├─ Pemeriksaan Fisik (textarea)
+└─ Tindakan/Vitamin (checkboxes)
+For IBU HAMIL:
+[Vital Signs Card]
+├─ Berat Badan (kg)
+├─ Tinggi Badan (cm) - read-only jika sudah ada
+├─ LILA (cm)
+├─ Tekanan Darah (120/80)
+└─ Usia Kehamilan (auto-calculate or manual)
 
-Auto-calculated Indicators:
+[Auto-calculated]
+├─ Kenaikan BB: +X kg [indicator: Normal/Kurang/Berlebih]
+└─ Status LILA: [✓ Normal / ⚠ Risiko KEK]
 
-Status Gizi (berdasarkan BB/TB)
-BMI (jika applicable)
-Alert jika ada anomali
+[Pregnancy Specific]
+├─ Tinggi Fundus Uteri (cm)
+├─ Denyut Jantung Janin (kali/menit)
+├─ Presentasi/Letak Janin
+├─ Keluhan (textarea)
+├─ Edema: Ya/Tidak
+└─ Protein Urine: Negatif/Positif
 
-Action Buttons:
+[Services Provided]
+├─ Tablet Tambah Darah (jumlah yang diberikan)
+├─ Imunisasi TT (jika applicable)
+└─ Konseling (checkboxes)
+For REMAJA/DEWASA:
+[Measurements]
+├─ Berat Badan (kg)
+├─ Tinggi Badan (cm)
+├─ Lingkar Perut (cm)
+└─ Tekanan Darah (120/80)
+
+[Auto-calculated]
+├─ IMT: 23.5 [●●●○○] Normal
+└─ Risiko Metabolik: [✓ Rendah / ⚠ Tinggi]
+
+[Optional Lab Results]
+├─ Gula Darah (mg/dL)
+├─ Kolesterol (mg/dL)
+└─ Asam Urat (mg/dL)
+
+[Lifestyle Assessment]
+├─ Aktivitas Fisik: [Radio buttons]
+├─ Konsumsi Sayur/Buah: [Porsi/hari]
+└─ Status Merokok: [Radio buttons]
+
+[Notes]
+├─ Keluhan (textarea)
+├─ Pemeriksaan (textarea)
+└─ Konseling yang Diberikan (checkboxes)
+For LANSIA:
+[Vital Signs]
+├─ Berat Badan (kg)
+├─ Tinggi Badan (cm) atau Tinggi Lutut
+├─ Tekanan Darah (120/80)
+├─ Denyut Nadi (x/menit)
+└─ Gula Darah (mg/dL) - optional
+
+[Functional Assessment - Quick Check]
+├─ Kemandirian: [5 Radio buttons: Mandiri/Bantuan/Tergantung]
+├─ Mobilitas: [Normal / Alat Bantu / Kursi Roda]
+└─ Status Mental: [Baik / Gangguan Ringan / Gangguan Berat]
+
+[Screening]
+├─ Risiko Jatuh: [Checklist] → Auto-score
+└─ Nyeri: [Skala 0-10]
+
+[Keluhan & Tindakan]
+├─ Keluhan Utama (textarea)
+├─ Pemeriksaan (textarea)
+├─ Obat yang Diberikan (textarea)
+└─ Konseling (checkboxes)
+
+[Follow-up]
+├─ Perlu Rujukan: Ya/Tidak
+├─ Jadwal Kontrol: [Date picker]
+Bottom Action Buttons (All Types):
 
 "Batal"
+"Simpan & Cetak KMS/Kartu"
 "Simpan & Tutup"
 "Simpan & Tambah Lagi"
 
+
+2.8 Laporan & Statistik Page (UPDATED)
+New Report Types:
+Filter Section:
+
+Periode (date range)
+Tipe Laporan (dropdown dengan lebih banyak opsi):
+Laporan Bayi & Balita:
+
+Distribusi Status Gizi
+Cakupan Imunisasi
+Prevalensi Stunting
+ASI Eksklusif
+
+Laporan Ibu Hamil:
+
+Cakupan ANC (K1, K4, K6)
+Distribusi Risiko KEK
+Cakupan Imunisasi TT
+Cakupan Tablet Tambah Darah
+
+Laporan Remaja & Dewasa:
+
+Distribusi IMT
+Prevalensi Faktor Risiko PTM
+Deteksi Dini Hipertensi & Diabetes
+
+Laporan Lansia:
+
+Distribusi Status Fungsional
+Prevalensi Penyakit Kronis
+Risiko Jatuh
+
+Laporan Umum:
+
+Laporan Bulanan Posyandu
+Rekap Kunjungan per Tipe Pasien
+
+
+
+Dynamic Charts Based on Selected Report:
+Laporan Bayi/Balita - Status Gizi:
+[Donut Chart] Status Gizi Balita
+├─ Gizi Baik: 75% (hijau)
+├─ Gizi Kurang: 15% (kuning)
+├─ Gizi Buruk: 5% (merah)
+└─ Stunting: 5% (orange)
+
+[Bar Chart] Trend 6 Bulan Terakhir
+└─ Stacked bar: Baik/Kurang/Buruk/Stunting per bulan
+
+[Table] Detail per Balita dengan Status Gizi Buruk/Stunting
+└─ Action: Export list untuk follow-up
+Laporan Ibu Hamil - Cakupan ANC:
+[Progress Bar Indicators]
+├─ K1: 95% (target: 100%)
+├─ K4: 85% (target: 95%)
+└─ K6: 70% (target: 90%)
+
+[Pie Chart] Distribusi Risiko KEK
+├─ Normal: 80%
+└─ Risiko KEK: 20%
+
+[Line Chart] Trend Cakupan per Bulan
+Laporan PTM (Remaja/Dewasa):
+[Multi-bar Chart] Prevalensi Faktor Risiko
+├─ Hipertensi: X%
+├─ Obesitas: X%
+├─ Merokok: X%
+├─ Kurang Aktif: X%
+└─ Kurang Sayur/Buah: X%
+
+[Scatter Plot] IMT vs Lingkar Perut
+└─ Color-coded by risk level
+
+[Table] High-Risk Individuals → Perlu follow-up
+Laporan Lansia:
+[Stacked Bar] Status Kemandirian
+├─ Mandiri: 60%
+├─ Sebagian Mandiri: 30%
+└─ Tergantung: 10%
+
+[Horizontal Bar] Penyakit Kronis Terbanyak
+├─ Hipertensi: 45%
+├─ Diabetes: 30%
+├─ Jantung: 15%
+└─ Lainnya: 10%
+
+[Risk Matrix] Risiko Jatuh
+└─ Heatmap: Risiko Rendah/Sedang/Tinggi
+Export Options:
+
+PDF (Professional report dengan cover, charts, tables)
+Excel (Raw data dengan multiple sheets per kategori)
+CSV (For further analysis)
+Print (Print-optimized layout)
+
+
+NEW SECTION: 2.11 KMS Digital (Kartu Menuju Sehat)
+Purpose: Digital version dari KMS kertas untuk tracking pertumbuhan
+Page Design:
+For Bayi/Balita:
+[Header Card]
+├─ Foto Anak (optional)
+├─ Nama: [Auto-fill]
+├─ NIK: [Masked]
+├─ Tanggal Lahir: [Auto]
+├─ Jenis Kelamin: [Badge]
+└─ Nama Orang Tua: [Auto]
+
+[WHO Growth Charts - Tabs]
+Tab 1: Berat Badan / Umur
+├─ Interactive line chart
+├─ WHO percentile curves (3rd, 15th, 50th, 85th, 97th)
+├─ Child's actual data points (colored by status)
+└─ Zoom & pan controls
+
+Tab 2: Tinggi Badan / Umur
+└─ Similar layout
+
+Tab 3: Berat Badan / Tinggi Badan
+└─ Similar layout
+
+Tab 4: Lingkar Kepala / Umur (Bayi only)
+└─ Similar layout
+
+[Imunisasi Timeline]
+├─ Visual timeline dengan checkmarks
+├─ Color-coded: Completed (green) / Due (yellow) / Overdue (red)
+└─ Click to see details
+
+[Vitamin & Supplements]
+├─ Vitamin A pemberian
+└─ Suplemen lain
+
+[Development Milestones] (Optional)
+├─ Motorik
+├─ Bahasa
+└─ Sosial-Emosional
+
+[Action Buttons]
+├─ Cetak KMS (PDF)
+├─ Export Data (Excel)
+└─ Bagikan ke Orang Tua (Generate shareable link - view only)
 Design Notes:
 
-Modal atau dedicated page
-Smart defaults
-Quick number input controls
-Validation untuk ranges yang masuk akal
-Warning indicators untuk abnormal values
-Auto-save draft (optional)
-
-2.8 Laporan & Statistik Page
-Purpose: Generate reports dan lihat analytics
-Content Elements:
-Filter Section (Top):
-
-Periode (date range picker)
-Tipe Laporan (dropdown):
-
-Laporan Kunjungan
-Laporan Imunisasi
-Status Gizi Balita
-Laporan Ibu Hamil
-Laporan Lansia
-
-
-Export Format:
-
-PDF
-Excel
-Print
-
-
-"Generate Laporan" button
-
-Dashboard Stats:
-
-Summary cards based on selected period:
-
-Total Kunjungan
-Total Pasien Baru
-Cakupan Imunisasi (%)
-Status Gizi Distribution
-
-
-
-Charts:
-
-Trend Kunjungan:
-
-Line chart per bulan/minggu
-Breakdown by tipe pasien
-
-
-Cakupan Imunisasi:
-
-Bar chart per jenis vaksin
-Target vs Actual
-
-
-Distribusi Pasien:
-
-Pie chart by tipe
-By gender
-By age group
-
-
-Status Gizi Balita:
-
-Stacked bar chart atau pie
-Trend over time
-
-
-
-Data Tables:
-
-Detail breakdown berdasarkan laporan type
-Sortable columns
-Export individual tables
-
-Design Notes:
-
-Print-optimized layout
-Color-coded charts (consistent palette)
-Responsive charts
-Loading states during generation
-Empty states dengan helpful message
-Professional look untuk print/PDF
-
-2.9 Konten Website Management
-2.9.1 Pengumuman Page:
-
-Table dengan columns:
-
-Judul
-Tipe (badge)
-Status Publish (Published/Draft)
-Tanggal Dibuat
-Aksi (Edit/Delete/Toggle Publish)
-
-
-"Buat Pengumuman Baru" button
-Search dan filter
-
-Form Pengumuman:
-
-Judul (required)
-Tipe (select: Info/Jadwal/Event)
-Konten (rich text editor atau markdown)
-Status Publish (toggle/checkbox)
-Preview button
-Save Draft / Publish buttons
-
-2.9.2 Jadwal Page:
-
-Calendar view atau table view toggle
-Calendar view:
-
-Month view dengan events
-Click to add/edit
-
-
-Table view:
-
-Columns: Tanggal, Judul, Deskripsi, Lokasi, Aksi
-
-
-"Tambah Jadwal" button
-
-Form Jadwal:
-
-Judul Kegiatan (required)
-Tanggal (date picker, required)
-Waktu (time picker)
-Lokasi
-Deskripsi (textarea)
-Save/Cancel buttons
-
-2.9.3 Galeri Page:
-
-Grid view photos
-Upload area (drag & drop)
-Bulk upload support
-Each photo card:
-
-Thumbnail
-Title/caption (editable)
-Upload date
-Uploaded by
-Consent status (checkbox)
-Delete button
-
-
-
-Upload Modal:
-
-Drag & drop zone
-File picker
-Preview sebelum upload
-Title/description fields
-Consent checkbox (IMPORTANT):
-
-"Saya confirm sudah mendapat izin dari yang bersangkutan untuk publish foto ini"
-
-
-Upload button dengan progress bar
-
-Design Notes:
-
-Rich text editor: Simple toolbar (bold, italic, link, list)
-Calendar: Month view dengan event indicators
-Gallery: Masonry grid, lightbox preview
-Image upload: Max size indicator, accepted formats
-Consent reminder prominent
-
-2.10 Pengaturan Page
-Purpose: App settings dan user management
-Content Sections (Tabs):
-Tab 1: Profil Posyandu:
-
-Nama Posyandu (editable)
-Alamat
-Kontak (telepon, email)
-Visi & Misi (textarea)
-Logo Upload
-Jam Operasional (repeater fields)
-Save Changes button
-
-Tab 2: Manajemen User:
-
-Table of users:
-
-Nama
-Email
-Role (Admin/Kader)
-Status (Aktif/Tidak Aktif)
-Aksi (Edit/Deactivate/Delete)
-
-
-"Tambah User Baru" button
-
-Form Add User:
-
-Nama Lengkap
-Email
-Role (select: Admin/Kader)
-Password (auto-generate option)
-Telepon
-Send invitation email (checkbox)
-
-Tab 3: Profil Saya:
-
-Foto profil
-Nama
-Email (read-only)
-Nomor telepon
-Ganti password section:
-
-Password lama
-Password baru
-Konfirmasi password baru
-
-
-Update Profile button
-
-Design Notes:
-
-Separated sections dengan clear headers
-Save confirmation
-Password strength indicator
-Role-based: Hanya admin bisa manage users
-Avatar upload dengan crop tool
-
-
-DESIGN SYSTEM SPECIFICATIONS
-Colors
-Primary Palette:
-
-Primary: #10B981 (Green) - Trust, health
-Primary Dark: #059669
-Primary Light: #D1FAE5
-
-Secondary Palette:
-
-Secondary: #F59E0B (Orange) - Warmth
-Secondary Dark: #D97706
-Secondary Light: #FEF3C7
-
-Neutral:
-
-Gray 50: #F9FAFB
-Gray 100: #F3F4F6
-Gray 200: #E5E7EB
-Gray 300: #D1D5DB
-Gray 400: #9CA3AF
-Gray 500: #6B7280
-Gray 600: #4B5563
-Gray 700: #374151
-Gray 800: #1F2937
-Gray 900: #111827
-
-Semantic:
-
-Success: #10B981
-Warning: #F59E0B
-Danger: #EF4444
-Info: #3B82F6
-
-Typography
-Font Family:
-
-Primary: Inter, system-ui, sans-serif
-Monospace: 'Courier New', monospace (untuk NIK, data sensitif)
-
-Font Sizes:
-
-xs: 0.75rem (12px)
-sm: 0.875rem (14px)
-base: 1rem (16px)
-lg: 1.125rem (18px)
-xl: 1.25rem (20px)
-2xl: 1.5rem (24px)
-3xl: 1.875rem (30px)
-4xl: 2.25rem (36px)
-
-Font Weights:
-
-Normal: 400
-Medium: 500
-Semibold: 600
-Bold: 700
-
-Spacing
-
-Use 4px base unit
-Scale: 0, 1, 2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24, 32, 40, 48, 56, 64
-
-Border Radius
-
-sm: 0.25rem (4px)
-base: 0.375rem (6px)
-md: 0.5rem (8px)
-lg: 0.75rem (12px)
-xl: 1rem (16px)
-2xl: 1.5rem (24px)
-full: 9999px (circle)
-
-Shadows
-
-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05)
-base: 0 1px 3px 0 rgb(0 0 0 / 0.1)
-md: 0 4px 6px -1px rgb(0 0 0 / 0.1)
-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1)
-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1)
-
-Components Standards
-Buttons:
-
-Height: 40px (base), 36px (sm), 44px (lg)
-Padding: 12px 24px (base)
-Border radius: md
-Primary: Green background, white text
-Secondary: White background, green border, green text
-Danger: Red background, white text
-States: Hover (darker), Active (darkest), Disabled (gray + opacity)
-
-Input Fields:
-
-Height: 40px
-Border: 1px solid gray-300
-Border radius: md
-Focus: Border green + shadow
-Error: Border red
-Padding: 8px 12px
-
-Cards:
-
-Background: White
-Border: 1px solid gray-200 (optional)
-Border radius: lg
-Shadow: base or md
-Padding: 16px atau 24px
-
-Tables:
-
-Header: Gray background
-Rows: Striped (alternating white/gray-50) atau hover highlight
-Border: 1px solid gray-200
-Cell padding: 12px 16px
-
-Badges:
-
-Padding: 4px 8px
-Border radius: full
-Font size: xs or sm
-Colors: Match semantic colors (success, warning, danger, info)
-
-Modals:
-
-Backdrop: Black with 50% opacity
-Container: White, centered
-Max width: 600px (depends on content)
-Border radius: xl
-Shadow: xl
-Padding: 24px
-
-Icons
-
-Library: Lucide React
-Sizes: 16px, 20px, 24px
-Stroke width: 2
-Color: Inherit from parent atau semantic colors
-
-Responsive Breakpoints
-
-Mobile: < 640px
-Tablet: 640px - 1024px
-Desktop: > 1024px
-Large Desktop: > 1280px
-
-Accessibility
-
-Minimum contrast ratio: 4.5:1 (text), 3:1 (large text)
-Focus indicators: 2px outline green
-Keyboard navigation support
-ARIA labels untuk icons
-Alt text untuk images
-Form labels properly associated
-
-Animation & Transitions
-
-Duration: 150ms (fast), 300ms (base), 500ms (slow)
-Easing: ease-in-out (default)
-Hover transitions: transform, background, shadow
-Page transitions: fade atau slide
-Loading states: Skeleton screens atau spinners
-
-
-ADDITIONAL NOTES
-Mobile-First Considerations
-
-Touch targets minimum 44x44px
-Hamburger menu untuk navigation
-Swipeable galleries
-Collapsible sections untuk forms
-Bottom navigation (optional untuk admin)
-Sticky action buttons
-
-Performance
-
-Lazy load images
-Pagination untuk large tables
-Infinite scroll (optional)
-Optimize chart rendering
-Code splitting per route
-
-Security Visual Indicators
-
-Masked sensitive data (NIK: ***1234)
-Lock icons untuk secure sections
-Warning badges untuk data yang perlu consent
-Audit trail visibility
-
-Empty States
-
-Friendly illustrations atau icons
-Clear message: "Belum ada data"
-CTA button: "Tambah [item] Pertama"
-Helper text untuk guidance
-
-Error States
-
-Friendly error messages (no technical jargon)
-Suggested actions untuk fix
-Contact support option
-Retry buttons
-
-Success States
-
-Toast notifications
-Checkmark icons
-Green highlights
-Confirmation messages
-
-
-DELIVERABLES EXPECTED
-
-Wireframes (Low-fidelity):
-
-All pages outlined above
-User flows
-
-
-Mockups (High-fidelity):
-
-Landing page (all sections)
-Login page
-Dashboard home
-Sample CRUD pages (min: Pasien, Kunjungan)
-Mobile versions
-
-
-Design System Documentation:
-
-Color palette
-Typography scale
-Component library
-Icon set
-
-
-Prototype (Interactive):
-
-Clickable prototype untuk user flow testing
-Landing page navigation
-Admin dashboard navigation
-Form interactions
-
-
-Assets:
-
-Logo (SVG)
-Icons (SVG)
-Sample images (jika ada)
-Style guide PDF
-
-
-
+Responsive charts (recharts)
+Color-coded status indicators
+Print-friendly PDF output
+Parent-shareable read-only version (via secure link)
+
+
+NEW SECTION: 2.12 Buku KIA Digital (Ibu Hamil)
+Purpose: Digital MCH (Maternal Child Health) handbook
+Structure:
+[Tabs Navigation]
+├─ Data Ibu
+├─ Riwayat Kehamilan
+├─ Grafik Kesehatan Ibu
+├─ Catatan ANC
+└─ Persiapan Persalinan
+
+[Tab: Data Ibu]
+├─ Identitas lengkap
+├─ Riwayat obstetri (GPA)
+└─ Riwayat penyakit
+
+[Tab: Riwayat Kehamilan]
+├─ Timeline kehamilan (visual)
+├─ Trimester saat ini (highlighted)
+├─ Countdown to HPL
+└─ Kenaikan BB chart
+
+[Tab: Grafik Kesehatan]
+├─ Line chart: BB vs Minggu Kehamilan
+├─ Line chart: Tekanan Darah trends
+├─ LILA tracking
+└─ Tinggi Fundus Uteri
+
+[Tab: Catatan ANC]
+├─ Table: Tanggal, Usia Kehamilan, BB, TD, Keluhan, Tindakan
+├─ Checklist K1-K6 dengan status
+├─ Imunisasi TT timeline
+└─ Tablet Tambah Darah tracking
+
+[Tab: Persiapan Persalinan]
+├─ Rencana persalinan
+├─ Tanda bahaya yang harus diwaspadai
+├─ Checklist perlengkapan
+└─ Edukasi ASI & perawatan bayi
+
+[Action Buttons]
+├─ Cetak Buku KIA (PDF)
+├─ Reminder Setting (SMS/WA untuk kontrol)
+└─ Bagikan ke Ibu
+
+UPDATED DESIGN SYSTEM
+Color Coding for Patient Types:
+Bayi (0-11 bulan):     #3B82F6 (Blue)
+Balita (1-5 tahun):    #06B6D4 (Cyan)
+Ibu Hamil:             #EC4899 (Pink)
+Remaja/Dewasa:         #8B5CF6 (Purple)
+Lansia (≥60):          #F59E0B (Orange)
+Status Indicators:
+Gizi (Nutrition):
+Baik:    ●●●●● Green (#10B981)
+Kurang:  ●
+●●○○ Yellow (#F59E0B)
+Buruk:   ●●○○○ Red (#EF4444)
+Stunting: 📏 Orange (#F97316)
+Wasting: 📉 Red (#DC2626)
+
+**Kesehatan Umum:**
+Normal:      ✓ Green
+Perhatian:   ⚠ Yellow
+Bahaya:      ✗ Red
+Perlu Rujuk: 🏥 Red
+
+**IMT (Adults):**
+Underweight:  <18.5  - Blue
+Normal:       18.5-24.9 - Green
+Overweight:   25-29.9 - Yellow
+Obesitas:     ≥30 - Red
+
+**Tekanan Darah:**
+Normal:        <120/80 - Green
+Prehipertensi: 120-139/80-89 - Yellow
+Hipertensi St1: 140-159/90-99 - Orange
+Hipertensi St2: ≥160/≥100 - Red
+
+### Icons Set (Lucide React):
+```javascript
+Patient Types:
+- Baby: "baby" icon
+- Child: "user" icon
+- Pregnant: "heart-pulse" icon (or custom pregnant icon)
+- Adult: "user-check" icon
+- Elderly: "user-cog" icon
+
+Measurements:
+- Weight: "weight" icon
+- Height: "ruler" icon
+- Head circumference: "circle-dashed" icon
+- Blood pressure: "heart-pulse" icon
+- Temperature: "thermometer" icon
+
+Health:
+- Immunization: "shield" or "syringe" icon
+- Vitamin: "pill" icon
+- Lab: "flask-conical" icon
+- Visit: "calendar-check" icon
+- Referral: "hospital" icon
+
+Status:
+- Good: "check-circle" icon (green)
+- Warning: "alert-triangle" icon (yellow)
+- Danger: "alert-circle" icon (red)
+- Info: "info" icon (blue)
+```
+
+### Form Components Additions:
+
+**Number Input with Controls:**
+[Label: Berat Badan]
+┌─────────────────────┐
+│  [-]  15.5  [+]    │ kg
+└─────────────────────┘
+├─ Decrement button (0.1 step)
+├─ Direct input (number)
+└─ Increment button (0.1 step)
+
+**Blood Pressure Input:**
+[Label: Tekanan Darah]
+┌──────┬───┬──────┐
+│ 120  │ / │  80  │ mmHg
+└──────┴───┴──────┘
+├─ Systolic (number)
+└─ Diastolic (number)
+→ Auto-indicator: [●●●○○] Normal
+
+**Status Indicator Badge:**
+┌──────────────────────┐
+│ ✓ Gizi Baik         │ (Green background, white text)
+└──────────────────────┘
+┌──────────────────────┐
+│ ⚠ Risiko Stunting   │ (Yellow background, dark text)
+└──────────────────────┘
+┌──────────────────────┐
+│ ✗ Gizi Buruk        │ (Red background, white text)
+└──────────────────────┘
+
+---
+
+## RESPONSIVE CONSIDERATIONS
+
+### Mobile-First for Forms:
+
+**Patient Type Selection (Mobile):**
+[Vertical Stack of Cards]
+┌─────────────────────┐
+│  👶                 │
+│  Bayi (0-11 bulan) │
+└─────────────────────┘
+┌─────────────────────┐
+│  🧒                 │
+│  Balita (1-5 tahun)│
+└─────────────────────┘
+...
+
+**Measurement Input (Mobile):**
+[Full-width stacked]
+┌─────────────────────┐
+│ Berat Badan        │
+│ [  ] kg            │
+└─────────────────────┘
+┌─────────────────────┐
+│ Tinggi Badan       │
+│ [  ] cm            │
+└─────────────────────┘
+
+**Charts (Mobile):**
+- Horizontal scroll untuk wide charts
+- Simplified legend (collapsible)
+- Touch-friendly zoom & pan
+- Rotate untuk better view (landscape hint)
+
+---
+
+## PRINTING & PDF EXPORT
+
+### KMS Print Layout:
+Page 1: Cover
+├─ Logo Posyandu
+├─ "Kartu Menuju Sehat"
+├─ Foto anak
+└─ Data identitas
+Page 2-3: Growth Charts
+├─ BB/U chart (full page)
+└─ TB/U chart (full page)
+Page 4: Imunisasi
+└─ Table dengan checkmarks
+Page 5: Catatan Kesehatan
+└─ Summary visits
+
+### Report Print Layout:
+Cover Page:
+├─ Logo & Header
+├─ Judul Laporan
+├─ Periode
+└─ Generated by & date
+Content Pages:
+├─ Executive Summary
+├─ Charts (1-2 per page)
+├─ Data Tables
+└─ Recommendations
+Footer:
+├─ Page numbers
+└─ "Dokumen Rahasia - Confidential"
+
+---
+
+## ACCESSIBILITY UPDATES
+
+### For Elderly-Friendly Interface:
+- **Larger font sizes** (base: 18px for lansia forms)
+- **High contrast mode** toggle
+- **Voice input option** (for filling forms)
+- **Print-friendly** (bisa dicetak besar untuk dibaca)
+
+### For Field Workers (Kader):
+- **Offline capability** (save draft locally)
+- **Quick entry mode** (streamlined forms)
+- **Voice notes** (record instead of typ

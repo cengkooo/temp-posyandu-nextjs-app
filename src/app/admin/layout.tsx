@@ -9,7 +9,7 @@ import {
   CalendarCheck, 
   Syringe, 
   BarChart3, 
-  Globe, 
+  Megaphone, 
   Settings, 
   LogOut,
   ChevronDown,
@@ -25,7 +25,7 @@ const menuItems = [
   { icon: CalendarCheck, label: 'Kunjungan', href: '/admin/kunjungan' },
   { icon: Syringe, label: 'Imunisasi', href: '/admin/imunisasi' },
   { icon: BarChart3, label: 'Laporan & Statistik', href: '/admin/laporan' },
-  { icon: Globe, label: 'Konten Website', href: '/admin/konten', hasDropdown: true },
+  { icon: Megaphone, label: 'Pengumuman & Jadwal', href: '/admin/pengumuman' },
   { icon: Settings, label: 'Pengaturan', href: '/admin/pengaturan' },
 ];
 

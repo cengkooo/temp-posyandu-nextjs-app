@@ -33,7 +33,7 @@ export type PregnancyUpdate = Database['public']['Tables']['pregnancies']['Updat
 export type UserRole = 'admin' | 'kader'
 export type AnnouncementType = 'info' | 'schedule' | 'event'
 export type Gender = 'L' | 'P'
-export type PatientType = 'balita' | 'ibu_hamil' | 'lansia'
+export type PatientType = 'bayi' | 'balita' | 'ibu_hamil' | 'remaja_dewasa' | 'lansia'
 export type PregnancyStatus = 'ongoing' | 'completed' | 'miscarriage'
 
 // Extended types dengan relasi

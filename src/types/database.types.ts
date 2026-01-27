@@ -140,7 +140,7 @@ export interface Database {
           gender: 'L' | 'P'
           address: string | null
           phone: string | null
-          patient_type: 'balita' | 'ibu_hamil' | 'lansia'
+          patient_type: 'bayi' | 'balita' | 'ibu_hamil' | 'remaja_dewasa' | 'lansia'
           parent_name: string | null
           created_by: string | null
           created_at: string
@@ -154,7 +154,7 @@ export interface Database {
           gender: 'L' | 'P'
           address?: string | null
           phone?: string | null
-          patient_type: 'balita' | 'ibu_hamil' | 'lansia'
+          patient_type: 'bayi' | 'balita' | 'ibu_hamil' | 'remaja_dewasa' | 'lansia'
           parent_name?: string | null
           created_by?: string | null
           created_at?: string
@@ -168,7 +168,7 @@ export interface Database {
           gender?: 'L' | 'P'
           address?: string | null
           phone?: string | null
-          patient_type?: 'balita' | 'ibu_hamil' | 'lansia'
+          patient_type?: 'bayi' | 'balita' | 'ibu_hamil' | 'remaja_dewasa' | 'lansia'
           parent_name?: string | null
           created_by?: string | null
           created_at?: string
@@ -318,6 +318,167 @@ export interface Database {
           created_at?: string
         }
       }
+      patient_extended_data: {
+        Row: {
+          id: string
+          patient_id: string
+          weight: number | null
+          height: number | null
+          head_circumference: number | null
+          arm_circumference: number | null
+          waist_circumference: number | null
+          measurement_date: string | null
+          asi_exclusive: 'ya' | 'tidak' | 'berlangsung' | null
+          asi_duration_months: number | null
+          mpasi_started: boolean | null
+          mpasi_age_months: number | null
+          mpasi_types: string | null
+          immunizations: Json | null
+          vitamin_a_given: boolean | null
+          vitamin_a_date: string | null
+          ispa_history: boolean | null
+          ispa_last_date: string | null
+          diare_history: boolean | null
+          diare_last_date: string | null
+          other_illness: string | null
+          pregnancy_week: number | null
+          usg_count: number | null
+          pregnancy_risk_level: 'rendah' | 'sedang' | 'tinggi' | null
+          ttd_received: number | null
+          ttd_compliance: 'rutin' | 'kadang' | 'tidak' | null
+          occupation: string | null
+          marital_status: string | null
+          smoking_status: 'tidak_pernah' | 'pernah' | 'aktif' | null
+          cigarettes_per_day: number | null
+          physical_activity: 'kurang' | 'cukup' | 'sangat' | null
+          activity_minutes_per_week: number | null
+          vegetable_portions_per_day: number | null
+          fruit_portions_per_day: number | null
+          blood_sugar_random: number | null
+          blood_sugar_fasting: number | null
+          cholesterol_total: number | null
+          cholesterol_ldl: number | null
+          cholesterol_hdl: number | null
+          triglycerides: number | null
+          uric_acid: number | null
+          adl_score: number | null
+          iadl_score: number | null
+          cognitive_status: string | null
+          chronic_diseases: Json | null
+          current_medications: Json | null
+          special_notes: string | null
+          education_given: Json | null
+          created_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          patient_id: string
+          weight?: number | null
+          height?: number | null
+          head_circumference?: number | null
+          arm_circumference?: number | null
+          waist_circumference?: number | null
+          measurement_date?: string | null
+          asi_exclusive?: 'ya' | 'tidak' | 'berlangsung' | null
+          asi_duration_months?: number | null
+          mpasi_started?: boolean | null
+          mpasi_age_months?: number | null
+          mpasi_types?: string | null
+          immunizations?: Json | null
+          vitamin_a_given?: boolean | null
+          vitamin_a_date?: string | null
+          ispa_history?: boolean | null
+          ispa_last_date?: string | null
+          diare_history?: boolean | null
+          diare_last_date?: string | null
+          other_illness?: string | null
+          pregnancy_week?: number | null
+          usg_count?: number | null
+          pregnancy_risk_level?: 'rendah' | 'sedang' | 'tinggi' | null
+          ttd_received?: number | null
+          ttd_compliance?: 'rutin' | 'kadang' | 'tidak' | null
+          occupation?: string | null
+          marital_status?: string | null
+          smoking_status?: 'tidak_pernah' | 'pernah' | 'aktif' | null
+          cigarettes_per_day?: number | null
+          physical_activity?: 'kurang' | 'cukup' | 'sangat' | null
+          activity_minutes_per_week?: number | null
+          vegetable_portions_per_day?: number | null
+          fruit_portions_per_day?: number | null
+          blood_sugar_random?: number | null
+          blood_sugar_fasting?: number | null
+          cholesterol_total?: number | null
+          cholesterol_ldl?: number | null
+          cholesterol_hdl?: number | null
+          triglycerides?: number | null
+          uric_acid?: number | null
+          adl_score?: number | null
+          iadl_score?: number | null
+          cognitive_status?: string | null
+          chronic_diseases?: Json | null
+          current_medications?: Json | null
+          special_notes?: string | null
+          education_given?: Json | null
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          patient_id?: string
+          weight?: number | null
+          height?: number | null
+          head_circumference?: number | null
+          arm_circumference?: number | null
+          waist_circumference?: number | null
+          measurement_date?: string | null
+          asi_exclusive?: 'ya' | 'tidak' | 'berlangsung' | null
+          asi_duration_months?: number | null
+          mpasi_started?: boolean | null
+          mpasi_age_months?: number | null
+          mpasi_types?: string | null
+          immunizations?: Json | null
+          vitamin_a_given?: boolean | null
+          vitamin_a_date?: string | null
+          ispa_history?: boolean | null
+          ispa_last_date?: string | null
+          diare_history?: boolean | null
+          diare_last_date?: string | null
+          other_illness?: string | null
+          pregnancy_week?: number | null
+          usg_count?: number | null
+          pregnancy_risk_level?: 'rendah' | 'sedang' | 'tinggi' | null
+          ttd_received?: number | null
+          ttd_compliance?: 'rutin' | 'kadang' | 'tidak' | null
+          occupation?: string | null
+          marital_status?: string | null
+          smoking_status?: 'tidak_pernah' | 'pernah' | 'aktif' | null
+          cigarettes_per_day?: number | null
+          physical_activity?: 'kurang' | 'cukup' | 'sangat' | null
+          activity_minutes_per_week?: number | null
+          vegetable_portions_per_day?: number | null
+          fruit_portions_per_day?: number | null
+          blood_sugar_random?: number | null
+          blood_sugar_fasting?: number | null
+          cholesterol_total?: number | null
+          cholesterol_ldl?: number | null
+          cholesterol_hdl?: number | null
+          triglycerides?: number | null
+          uric_acid?: number | null
+          adl_score?: number | null
+          iadl_score?: number | null
+          cognitive_status?: string | null
+          chronic_diseases?: Json | null
+          current_medications?: Json | null
+          special_notes?: string | null
+          education_given?: Json | null
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never
@@ -328,5 +489,37 @@ export interface Database {
     Enums: {
       [_ in never]: never
     }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
+}
+
+type _AddRelationships<T> = T extends {
+  Row: infer R
+  Insert: infer I
+  Update: infer U
+}
+  ? {
+      Row: R
+      Insert: I
+      Update: U
+      Relationships: []
+    }
+  : T
+
+// Supabase JS expects each table to include `Relationships` (even if empty).
+// Keep `Database` as the app-facing type, and use `SupabaseDatabase` for the client.
+export type SupabaseDatabase = {
+  public: {
+    Tables: {
+      [K in keyof Database['public']['Tables']]: _AddRelationships<
+        Database['public']['Tables'][K]
+      >
+    }
+    Views: Database['public']['Views']
+    Functions: Database['public']['Functions']
+    Enums: Database['public']['Enums']
+    CompositeTypes: Database['public']['CompositeTypes']
   }
 }

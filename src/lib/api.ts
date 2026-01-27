@@ -2,10 +2,20 @@ import { createClient } from './supabase'
 import type { 
   AnnouncementInsert, 
   ScheduleInsert, 
+  Profile,
+  Patient,
   PatientInsert,
   PatientUpdate,
-  VisitInsert 
+  Visit,
+  VisitInsert,
+  PatientExtendedDataInsert,
+  PatientExtendedDataUpdate
 } from '@/types'
+
+type VisitWithRelations = Visit & {
+  patient: Patient
+  profile?: Profile | null
+}
 
 // Announcements
 export async function getPublishedAnnouncements() {
@@ -71,7 +81,7 @@ export async function getPatients() {
   return { data, error }
 }
 
-export async function getPatientById(id: string) {
+export async function getPatientById(id: string): Promise<{ data: Patient | null; error: any }> {
   const supabase = createClient()
   
   const { data, error } = await supabase
@@ -106,7 +116,7 @@ export async function getPatientWithVisits(id: string) {
   }
 }
 
-export async function createPatient(patient: PatientInsert) {
+export async function createPatient(patient: PatientInsert): Promise<{ data: Patient | null; error: any }> {
   const supabase = createClient()
   
   const { data, error } = await supabase
@@ -155,7 +165,7 @@ export async function searchPatients(query: string) {
 }
 
 export async function filterPatients(filters: {
-  type?: 'balita' | 'ibu_hamil' | 'lansia'
+  type?: 'bayi' | 'balita' | 'ibu_hamil' | 'remaja_dewasa' | 'lansia'
   gender?: 'L' | 'P'
 }) {
   const supabase = createClient()
@@ -181,32 +191,73 @@ export async function filterPatients(filters: {
 export async function getAllVisits() {
   const supabase = createClient()
   
-  const { data, error } = await supabase
+  const { data: visits, error: visitsError } = await supabase
     .from('visits')
-    .select(`
-      *,
-      patient:patients(*),
-      profile:profiles(*)
-    `)
+    .select('*')
     .order('visit_date', { ascending: false })
-  
-  return { data, error }
+
+  if (visitsError || !visits) return { data: null, error: visitsError }
+  if (visits.length === 0) return { data: [] as VisitWithRelations[], error: null }
+
+  const patientIds = Array.from(new Set(visits.map((v) => v.patient_id)))
+  const createdByIds = Array.from(
+    new Set(visits.map((v) => v.created_by).filter(Boolean) as string[])
+  )
+
+  const [{ data: patients, error: patientsError }, { data: profiles, error: profilesError }] =
+    await Promise.all([
+      supabase.from('patients').select('*').in('id', patientIds),
+      createdByIds.length
+        ? supabase.from('profiles').select('*').in('id', createdByIds)
+        : Promise.resolve({ data: [] as Profile[], error: null }),
+    ])
+
+  const patientMap = new Map((patients ?? []).map((p) => [p.id, p]))
+  const profileMap = new Map((profiles ?? []).map((p) => [p.id, p]))
+
+  const combined = visits
+    .map((visit) => {
+      const patient = patientMap.get(visit.patient_id)
+      if (!patient) return null
+      return {
+        ...visit,
+        patient,
+        profile: visit.created_by ? profileMap.get(visit.created_by) ?? null : null,
+      } satisfies VisitWithRelations
+    })
+    .filter(Boolean) as VisitWithRelations[]
+
+  return { data: combined, error: visitsError || patientsError || profilesError }
 }
 
 export async function getVisitById(id: string) {
   const supabase = createClient()
   
-  const { data, error } = await supabase
+  const { data: visit, error: visitError } = await supabase
     .from('visits')
-    .select(`
-      *,
-      patient:patients(*),
-      profile:profiles(*)
-    `)
+    .select('*')
     .eq('id', id)
     .single()
-  
-  return { data, error }
+
+  if (visitError || !visit) return { data: null, error: visitError }
+
+  const [{ data: patient, error: patientError }, { data: profile, error: profileError }] =
+    await Promise.all([
+      supabase.from('patients').select('*').eq('id', visit.patient_id).single(),
+      visit.created_by
+        ? supabase.from('profiles').select('*').eq('id', visit.created_by).maybeSingle()
+        : Promise.resolve({ data: null as Profile | null, error: null }),
+    ])
+
+  if (patientError || !patient) return { data: null, error: patientError }
+
+  const combined: VisitWithRelations = {
+    ...visit,
+    patient,
+    profile: profile ?? null,
+  }
+
+  return { data: combined, error: visitError || patientError || profileError }
 }
 
 export async function getPatientVisits(patientId: string) {
@@ -285,4 +336,59 @@ export async function getRecentVisits(limit = 10) {
     .limit(limit)
   
   return { data, error }
+}
+
+// Patient Extended Data Functions
+export async function getPatientExtendedData(patientId: string) {
+  const supabase = createClient()
+  
+  const { data, error } = await supabase
+    .from('patient_extended_data')
+    .select('*')
+    .eq('patient_id', patientId)
+    .single()
+  
+  return { data, error }
+}
+
+export async function createPatientExtendedData(extendedData: PatientExtendedDataInsert) {
+  const supabase = createClient()
+  
+  const { data, error } = await supabase
+    .from('patient_extended_data')
+    .insert(extendedData)
+    .select()
+    .single()
+  
+  return { data, error }
+}
+
+export async function updatePatientExtendedData(patientId: string, updates: PatientExtendedDataUpdate) {
+  const supabase = createClient()
+  
+  const { data, error } = await supabase
+    .from('patient_extended_data')
+    .update(updates)
+    .eq('patient_id', patientId)
+    .select()
+    .single()
+  
+  return { data, error }
+}
+
+export async function getPatientWithExtendedData(patientId: string) {
+  const supabase = createClient()
+  
+  const { data: patient, error: patientError } = await getPatientById(patientId)
+  if (patientError || !patient) return { data: null, error: patientError }
+  
+  const { data: extendedData } = await getPatientExtendedData(patientId)
+  
+  return {
+    data: {
+      ...patient,
+      extended_data: extendedData || null
+    },
+    error: null
+  }
 }

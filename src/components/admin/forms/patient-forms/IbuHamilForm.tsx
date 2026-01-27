@@ -1,15 +1,72 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import TabNavigation, { Tab } from '../TabNavigation';
 import NumberInputWithControls from '../NumberInputWithControls';
 import ChecklistInput from '../ChecklistInput';
 import StatusIndicatorBadge from '../StatusIndicatorBadge';
 import { calculateBBU, calculateTBU, calculateIMT, getIMTStatus } from '@/lib/nutritionCalculator';
 
+export type IbuHamilFormData = {
+  full_name: string;
+  nik: string;
+  date_of_birth: string;
+  address: string;
+  phone: string;
+  blood_type: string;
+  rhesus: '+' | '-';
+  husband_name: string;
+  husband_phone: string;
+  education: string;
+  occupation: string;
+  hpht: string;
+  hpl: string;
+  initial_weight: number | undefined;
+  initial_height: number | undefined;
+  lila: number | undefined;
+  gravida: number;
+  para: number;
+  abortus: number;
+  previous_pregnancies: string;
+  chronic_diseases: string[];
+  allergies: string;
+  current_medications: string;
+  family_history: string;
+};
+
+export function createInitialIbuHamilFormData(): IbuHamilFormData {
+  return {
+    full_name: '',
+    nik: '',
+    date_of_birth: '',
+    address: '',
+    phone: '',
+    blood_type: '',
+    rhesus: '+',
+    husband_name: '',
+    husband_phone: '',
+    education: '',
+    occupation: '',
+    hpht: '',
+    hpl: '',
+    initial_weight: undefined,
+    initial_height: undefined,
+    lila: undefined,
+    gravida: 1,
+    para: 0,
+    abortus: 0,
+    previous_pregnancies: '',
+    chronic_diseases: [],
+    allergies: '',
+    current_medications: '',
+    family_history: '',
+  };
+}
+
 interface IbuHamilFormProps {
-  onSubmit: (data: any) => void;
-  initialData?: any;
+  data: IbuHamilFormData;
+  onChange: (data: IbuHamilFormData) => void;
+  disabled?: boolean;
 }
 
 const tabs: Tab[] = [
@@ -19,44 +76,12 @@ const tabs: Tab[] = [
   { id: 'kesehatan', label: 'Riwayat Kesehatan' },
 ];
 
-export default function IbuHamilForm({ onSubmit, initialData }: IbuHamilFormProps) {
+export default function IbuHamilForm({ data, onChange }: IbuHamilFormProps) {
   const [activeTab, setActiveTab] = useState('identitas');
-  const [formData, setFormData] = useState({
-    // Tab 1: Data Ibu
-    full_name: initialData?.full_name || '',
-    nik: initialData?.nik || '',
-    date_of_birth: initialData?.date_of_birth || '',
-    address: initialData?.address || '',
-    phone: initialData?.phone || '',
-    blood_type: initialData?.blood_type || '',
-    rhesus: initialData?.rhesus || '+',
-    husband_name: initialData?.husband_name || '',
-    husband_phone: initialData?.husband_phone || '',
-    education: initialData?.education || '',
-    occupation: initialData?.occupation || '',
+  const formData = data;
 
-    // Tab 2: Data Kehamilan
-    hpht: initialData?.hpht || '', // Hari Pertama Haid Terakhir
-    hpl: initialData?.hpl || '', // Hari Perkiraan Lahir
-    initial_weight: initialData?.initial_weight || '',
-    initial_height: initialData?.initial_height || '',
-    lila: initialData?.lila || '',
-
-    // Tab 3: Riwayat Obstetri
-    gravida: initialData?.gravida || 1,
-    para: initialData?.para || 0,
-    abortus: initialData?.abortus || 0,
-    previous_pregnancies: initialData?.previous_pregnancies || [],
-
-    // Tab 4: Riwayat Kesehatan
-    chronic_diseases: initialData?.chronic_diseases || [],
-    allergies: initialData?.allergies || '',
-    current_medications: initialData?.current_medications || '',
-    family_history: initialData?.family_history || '',
-  });
-
-  const updateField = (field: string, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+  const updateField = <K extends keyof IbuHamilFormData>(field: K, value: IbuHamilFormData[K]) => {
+    onChange({ ...formData, [field]: value });
   };
 
   // Calculate HPL from HPHT
@@ -80,14 +105,14 @@ export default function IbuHamilForm({ onSubmit, initialData }: IbuHamilFormProp
   // IMT calculation
   const calculatePregnancyIMT = () => {
     if (!formData.initial_weight || !formData.initial_height) return null;
-    const imt = parseFloat(formData.initial_weight) / Math.pow(parseFloat(formData.initial_height) / 100, 2);
+    const imt = formData.initial_weight / Math.pow(formData.initial_height / 100, 2);
     return getIMTStatus(imt);
   };
 
   // LILA status
   const getLILAStatus = () => {
     if (!formData.lila) return null;
-    const lila = parseFloat(formData.lila);
+    const lila = formData.lila;
     if (lila >= 23.5) return { type: 'good' as const, label: 'Normal' };
     return { type: 'danger' as const, label: 'Risiko KEK' };
   };
@@ -95,14 +120,6 @@ export default function IbuHamilForm({ onSubmit, initialData }: IbuHamilFormProp
   const pregnancyWeeks = calculatePregnancyWeeks();
   const imtStatus = calculatePregnancyIMT();
   const lilaStatus = getLILAStatus();
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSubmit({
-      ...formData,
-      patient_type: 'ibu_hamil',
-    });
-  };
 
   const chronicDiseaseOptions = [
     { id: 'hipertensi', label: 'Hipertensi' },
@@ -115,8 +132,13 @@ export default function IbuHamilForm({ onSubmit, initialData }: IbuHamilFormProp
     { id: 'hepatitis', label: 'Hepatitis B' },
   ];
 
+  const chronicDiseaseItems = useMemo(
+    () => chronicDiseaseOptions.map((item) => ({ ...item, checked: formData.chronic_diseases.includes(item.id) })),
+    [formData.chronic_diseases]
+  );
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <div className="space-y-6">
       <TabNavigation tabs={tabs} activeTab={activeTab} onChange={setActiveTab} />
 
       {/* Tab 1: Data Ibu */}
@@ -200,7 +222,12 @@ export default function IbuHamilForm({ onSubmit, initialData }: IbuHamilFormProp
               <label className="block text-sm font-medium text-gray-700 mb-2">Rhesus</label>
               <select
                 value={formData.rhesus}
-                onChange={(e) => updateField('rhesus', e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === '+' || value === '-') {
+                    updateField('rhesus', value);
+                  }
+                }}
                 className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
               >
                 <option value="+">Positif (+)</option>
@@ -343,7 +370,7 @@ export default function IbuHamilForm({ onSubmit, initialData }: IbuHamilFormProp
                 <label className="block text-sm font-medium text-gray-700 mb-2">Gravida (G)</label>
                 <NumberInputWithControls
                   value={formData.gravida}
-                  onChange={(val) => updateField('gravida', val)}
+                  onChange={(val) => updateField('gravida', val ?? formData.gravida)}
                   min={1}
                   max={20}
                 />
@@ -353,7 +380,7 @@ export default function IbuHamilForm({ onSubmit, initialData }: IbuHamilFormProp
                 <label className="block text-sm font-medium text-gray-700 mb-2">Para (P)</label>
                 <NumberInputWithControls
                   value={formData.para}
-                  onChange={(val) => updateField('para', val)}
+                  onChange={(val) => updateField('para', val ?? formData.para)}
                   min={0}
                   max={20}
                 />
@@ -363,7 +390,7 @@ export default function IbuHamilForm({ onSubmit, initialData }: IbuHamilFormProp
                 <label className="block text-sm font-medium text-gray-700 mb-2">Abortus (A)</label>
                 <NumberInputWithControls
                   value={formData.abortus}
-                  onChange={(val) => updateField('abortus', val)}
+                  onChange={(val) => updateField('abortus', val ?? formData.abortus)}
                   min={0}
                   max={20}
                 />
@@ -391,9 +418,9 @@ export default function IbuHamilForm({ onSubmit, initialData }: IbuHamilFormProp
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Riwayat Penyakit</label>
             <ChecklistInput
-              items={chronicDiseaseOptions}
-              selectedItems={formData.chronic_diseases}
-              onChange={(items) => updateField('chronic_diseases', items)}
+              items={chronicDiseaseItems}
+              onChange={(items) => updateField('chronic_diseases', items.filter((i) => i.checked).map((i) => i.id))}
+              showDates={false}
             />
           </div>
 
@@ -431,6 +458,6 @@ export default function IbuHamilForm({ onSubmit, initialData }: IbuHamilFormProp
           </div>
         </div>
       )}
-    </form>
+    </div>
   );
 }

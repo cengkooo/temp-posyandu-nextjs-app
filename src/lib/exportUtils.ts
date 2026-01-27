@@ -18,7 +18,7 @@ export function exportToExcel(
 
   // Summary Sheet
   if (data.statistics) {
-    const summaryData = [
+    const summaryData: (string | number)[][] = [
       ['Laporan Posyandu - ' + reportType],
       ['Tanggal Generate:', format(new Date(), 'dd/MM/yyyy HH:mm')],
       [],
@@ -43,7 +43,7 @@ export function exportToExcel(
 
   // Breakdown Sheet
   if (data.breakdown && data.breakdown.length > 0) {
-    const breakdownData = [
+    const breakdownData: (string | number)[][] = [
       ['Detail Breakdown per Kategori'],
       [],
       ['Kategori', 'Jumlah Pasien', 'Kunjungan', 'Rata-rata/Bulan', 'Trend (%)']
@@ -75,7 +75,7 @@ export function exportToExcel(
 
   // Visit Trends Sheet
   if (data.visitTrends && data.visitTrends.length > 0) {
-    const trendsData = [
+    const trendsData: (string | number)[][] = [
       ['Trend Kunjungan per Bulan'],
       [],
       ['Bulan', 'Balita', 'Ibu Hamil', 'Lansia', 'Total']

@@ -21,9 +21,9 @@ export interface BalitaFormData {
 
   // Tab 2: Pengukuran
   measurement_date: string;
-  weight: number | string;
-  height: number | string;
-  lila: number | string;
+  weight: number | undefined;
+  height: number | undefined;
+  lila: number | undefined;
 
   // Tab 3: ASI & MPASI
   asi_exclusive: 'yes_6m' | 'yes_less' | 'no' | 'unknown';
@@ -84,9 +84,9 @@ export function createInitialBalitaFormData(): BalitaFormData {
     address: '',
     blood_type: '',
     measurement_date: new Date().toISOString().split('T')[0],
-    weight: '',
-    height: '',
-    lila: '',
+    weight: undefined,
+    height: undefined,
+    lila: undefined,
     asi_exclusive: 'unknown',
     asi_duration_months: 6,
     mpasi_start_age: 6,
@@ -260,6 +260,18 @@ export default function BalitaForm({ data, onChange, errors = {}, disabled = fal
     const completed = immunizationList.filter(imm => data.immunizations[imm.id]?.given).length;
     return { total, completed, percentage: Math.round((completed / total) * 100) };
   }, [data.immunizations]);
+  const mpasiTypeItems = useMemo(
+    () => mpasiTypes.map((item) => ({ ...item, checked: data.mpasi_types.includes(item.id) })),
+    [data.mpasi_types]
+  );
+  const eatingProblemItems = useMemo(
+    () => eatingProblems.map((item) => ({ ...item, checked: data.eating_problems.includes(item.id) })),
+    [data.eating_problems]
+  );
+  const allergyItems = useMemo(
+    () => allergyOptions.map((item) => ({ ...item, checked: data.allergies.includes(item.id) })),
+    [data.allergies]
+  );
 
   const renderDataTab = () => (
     <div className="space-y-6">
@@ -511,8 +523,8 @@ export default function BalitaForm({ data, onChange, errors = {}, disabled = fal
                 <p className="text-xs text-gray-500">Z-Score: {nutritionStatus.bbu.zScore.toFixed(2)}</p>
               </div>
               <StatusIndicatorBadge
-                status={nutritionStatus.bbu.status === 'Normal' ? 'good' : nutritionStatus.bbu.status.includes('Buruk') ? 'danger' : 'warning'}
-                label={nutritionStatus.bbu.status}
+                status={nutritionStatus.bbu.type}
+                label={nutritionStatus.bbu.label}
                 size="sm"
               />
             </div>
@@ -524,8 +536,8 @@ export default function BalitaForm({ data, onChange, errors = {}, disabled = fal
                 <p className="text-xs text-gray-500">Z-Score: {nutritionStatus.tbu.zScore.toFixed(2)}</p>
               </div>
               <StatusIndicatorBadge
-                status={nutritionStatus.tbu.status === 'Normal' ? 'good' : nutritionStatus.tbu.status.includes('Pendek') ? 'warning' : 'danger'}
-                label={nutritionStatus.tbu.status}
+                status={nutritionStatus.tbu.type}
+                label={nutritionStatus.tbu.label}
                 size="sm"
               />
             </div>
@@ -537,8 +549,8 @@ export default function BalitaForm({ data, onChange, errors = {}, disabled = fal
                 <p className="text-xs text-gray-500">Z-Score: {nutritionStatus.bbtb.zScore.toFixed(2)}</p>
               </div>
               <StatusIndicatorBadge
-                status={nutritionStatus.bbtb.status === 'Gizi Baik' ? 'good' : nutritionStatus.bbtb.status.includes('Buruk') ? 'danger' : 'warning'}
-                label={nutritionStatus.bbtb.status}
+                status={nutritionStatus.bbtb.type}
+                label={nutritionStatus.bbtb.label}
                 size="sm"
               />
             </div>
@@ -656,9 +668,9 @@ export default function BalitaForm({ data, onChange, errors = {}, disabled = fal
               Jenis MP-ASI yang diberikan saat ini
             </label>
             <ChecklistInput
-              items={mpasiTypes}
-              selectedItems={data.mpasi_types}
-              onChange={(items) => updateField('mpasi_types', items)}
+              items={mpasiTypeItems}
+              onChange={(items) => updateField('mpasi_types', items.filter((i) => i.checked).map((i) => i.id))}
+              showDates={false}
               disabled={disabled}
             />
           </div>
@@ -727,9 +739,9 @@ export default function BalitaForm({ data, onChange, errors = {}, disabled = fal
               Masalah Makan (boleh pilih lebih dari 1)
             </label>
             <ChecklistInput
-              items={eatingProblems}
-              selectedItems={data.eating_problems}
-              onChange={(items) => updateField('eating_problems', items)}
+              items={eatingProblemItems}
+              onChange={(items) => updateField('eating_problems', items.filter((i) => i.checked).map((i) => i.id))}
+              showDates={false}
               disabled={disabled}
             />
           </div>
@@ -1020,9 +1032,9 @@ export default function BalitaForm({ data, onChange, errors = {}, disabled = fal
       <div className="p-4 bg-gray-50 rounded-lg">
         <h3 className="font-semibold text-gray-900 mb-4">Alergi</h3>
         <ChecklistInput
-          items={allergyOptions}
-          selectedItems={data.allergies}
-          onChange={(items) => updateField('allergies', items)}
+          items={allergyItems}
+          onChange={(items) => updateField('allergies', items.filter((i) => i.checked).map((i) => i.id))}
+          showDates={false}
           disabled={disabled}
         />
         {data.allergies.length > 0 && !data.allergies.includes('none') && (

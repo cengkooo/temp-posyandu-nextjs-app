@@ -4,9 +4,18 @@ import type {
   VisitTrend,
   NutritionalStatus,
   ImmunizationCoverage,
-  BreakdownRow
+  BreakdownRow,
+  IbuHamilStats
 } from '@/types'
 import { startOfMonth, endOfMonth, subMonths, format, differenceInMonths } from 'date-fns'
+
+const PATIENT_TYPES = ['bayi', 'balita', 'ibu_hamil', 'remaja_dewasa', 'lansia'] as const
+type PatientTypeKey = typeof PATIENT_TYPES[number]
+
+function percentTrend(current: number, previous: number) {
+  if (!previous || previous <= 0) return 0
+  return ((current - previous) / previous) * 100
+}
 
 // Statistics & Reporting
 export async function getStatistics(startDate: string, endDate: string): Promise<{ data: Statistics | null, error: any }> {
@@ -78,6 +87,22 @@ export async function getStatistics(startDate: string, endDate: string): Promise
       .from('patients')
       .select('*', { count: 'exact', head: true })
       .eq('patient_type', 'balita')
+
+    // New Balita - Current Period (for trend approximation)
+    const { count: currentNewBalita } = await supabase
+      .from('patients')
+      .select('*', { count: 'exact', head: true })
+      .eq('patient_type', 'balita')
+      .gte('created_at', startDate)
+      .lte('created_at', endDate)
+
+    // New Balita - Previous Period
+    const { count: prevNewBalita } = await supabase
+      .from('patients')
+      .select('*', { count: 'exact', head: true })
+      .eq('patient_type', 'balita')
+      .gte('created_at', prevStart)
+      .lte('created_at', prevEnd)
     
     // Calculate trends
     const visitsTrend = prevVisits && prevVisits > 0 
@@ -92,6 +117,8 @@ export async function getStatistics(startDate: string, endDate: string): Promise
       ? currentCoverage - prevCoverage
       : 0
     
+    const balitaTrend = percentTrend(currentNewBalita || 0, prevNewBalita || 0)
+
     const data: Statistics = {
       totalVisits: currentVisits || 0,
       totalVisitsTrend: Math.round(visitsTrend),
@@ -100,7 +127,7 @@ export async function getStatistics(startDate: string, endDate: string): Promise
       immunizationCoverage: Math.round(currentCoverage),
       immunizationCoverageTrend: Math.round(coverageTrend),
       totalBalita: currentBalita || 0,
-      totalBalitaTrend: 15, // Placeholder - would need historical data
+      totalBalitaTrend: Math.round(balitaTrend),
     }
     
     return { data, error: null }
@@ -124,25 +151,51 @@ export async function getVisitTrends(startDate: string, endDate: string): Promis
     
     if (error) return { data: null, error }
     
-    // Group by month and patient type
-    const monthlyData: Record<string, { balita: number, ibu_hamil: number, lansia: number }> = {}
-    
+    // Group by month (YYYY-MM) and patient type
+    const monthlyData: Record<string, { monthLabel: string } & Record<PatientTypeKey, number>> = {}
+
     visits?.forEach((visit: any) => {
-      const month = format(new Date(visit.visit_date), 'MMM')
-      if (!monthlyData[month]) {
-        monthlyData[month] = { balita: 0, ibu_hamil: 0, lansia: 0 }
+      const visitDate = new Date(visit.visit_date)
+      const key = format(visitDate, 'yyyy-MM')
+      const monthLabel = format(visitDate, 'MMM')
+
+      if (!monthlyData[key]) {
+        monthlyData[key] = {
+          monthLabel,
+          bayi: 0,
+          balita: 0,
+          ibu_hamil: 0,
+          remaja_dewasa: 0,
+          lansia: 0,
+        }
       }
-      
-      const type = visit.patient?.patient_type
-      if (type === 'balita') monthlyData[month].balita++
-      else if (type === 'ibu_hamil') monthlyData[month].ibu_hamil++
-      else if (type === 'lansia') monthlyData[month].lansia++
+
+      const type = visit.patient?.patient_type as PatientTypeKey | undefined
+      if (type && type in monthlyData[key]) {
+        monthlyData[key][type]++
+      }
     })
-    
-    const trends: VisitTrend[] = Object.entries(monthlyData).map(([month, counts]) => ({
-      month,
-      ...counts
-    }))
+
+    const trends: VisitTrend[] = Object.entries(monthlyData)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([, counts]) => {
+        const total =
+          counts.bayi +
+          counts.balita +
+          counts.ibu_hamil +
+          counts.remaja_dewasa +
+          counts.lansia
+
+        return {
+          month: counts.monthLabel,
+          bayi: counts.bayi,
+          balita: counts.balita,
+          ibu_hamil: counts.ibu_hamil,
+          remaja_dewasa: counts.remaja_dewasa,
+          lansia: counts.lansia,
+          total,
+        }
+      })
     
     return { data: trends, error: null }
   } catch (error) {
@@ -254,22 +307,25 @@ export async function getPatientDistribution(): Promise<{ data: any[] | null, er
     
     if (error) return { data: null, error }
     
-    const distribution = {
+    const distribution: Record<PatientTypeKey, number> = {
+      bayi: 0,
       balita: 0,
       ibu_hamil: 0,
-      lansia: 0
+      remaja_dewasa: 0,
+      lansia: 0,
     }
-    
+
     patients?.forEach((patient: any) => {
-      if (patient.patient_type in distribution) {
-        distribution[patient.patient_type as keyof typeof distribution]++
-      }
+      const type = patient.patient_type as PatientTypeKey | undefined
+      if (type && type in distribution) distribution[type]++
     })
-    
+
     const data = [
-      { name: 'Balita', value: distribution.balita, color: '#14b8a6' },
-      { name: 'Ibu Hamil', value: distribution.ibu_hamil, color: '#f97316' },
-      { name: 'Lansia', value: distribution.lansia, color: '#3b82f6' }
+      { name: 'Bayi', value: distribution.bayi, color: '#3B82F6' },
+      { name: 'Balita', value: distribution.balita, color: '#06B6D4' },
+      { name: 'Ibu Hamil', value: distribution.ibu_hamil, color: '#EC4899' },
+      { name: 'Remaja/Dewasa', value: distribution.remaja_dewasa, color: '#8B5CF6' },
+      { name: 'Lansia', value: distribution.lansia, color: '#F59E0B' },
     ]
     
     return { data, error: null }
@@ -282,40 +338,160 @@ export async function getDetailedBreakdown(startDate: string, endDate: string): 
   const supabase = createClient()
   
   try {
-    const categories = ['balita', 'ibu_hamil', 'lansia']
-    const data: BreakdownRow[] = []
-    
-    const monthsDiff = differenceInMonths(new Date(endDate), new Date(startDate)) || 1
-    
-    for (const category of categories) {
-      // Get patient count
-      const { count: patientCount } = await supabase
-        .from('patients')
-        .select('*', { count: 'exact', head: true })
-        .eq('patient_type', category)
-      
-      // Get visit count in period
-      const { data: visits } = await supabase
+    const start = new Date(startDate)
+    const end = new Date(endDate)
+    const monthsDiff = differenceInMonths(end, start) || 1
+
+    const periodLength = monthsDiff
+    const prevStart = format(subMonths(start, periodLength), 'yyyy-MM-dd')
+    const prevEnd = format(subMonths(end, periodLength), 'yyyy-MM-dd')
+
+    // Patients by type
+    const { data: patients, error: patientsError } = await supabase
+      .from('patients')
+      .select('patient_type')
+
+    if (patientsError) return { data: null, error: patientsError }
+
+    const patientCounts: Record<PatientTypeKey, number> = {
+      bayi: 0,
+      balita: 0,
+      ibu_hamil: 0,
+      remaja_dewasa: 0,
+      lansia: 0,
+    }
+
+    patients?.forEach((p: any) => {
+      const type = p.patient_type as PatientTypeKey | undefined
+      if (type && type in patientCounts) patientCounts[type]++
+    })
+
+    // Visits by type for current and previous periods
+    const [{ data: currentVisits, error: currentVisitsError }, { data: prevVisits, error: prevVisitsError }] = await Promise.all([
+      supabase
         .from('visits')
-        .select('id, patient:patients!inner(patient_type)')
+        .select('id, patient:patients(patient_type)')
         .gte('visit_date', startDate)
-        .lte('visit_date', endDate)
-        .eq('patient.patient_type', category)
-      
-      const visitCount = visits?.length || 0
+        .lte('visit_date', endDate),
+      supabase
+        .from('visits')
+        .select('id, patient:patients(patient_type)')
+        .gte('visit_date', prevStart)
+        .lte('visit_date', prevEnd),
+    ])
+
+    if (currentVisitsError) return { data: null, error: currentVisitsError }
+    if (prevVisitsError) return { data: null, error: prevVisitsError }
+
+    const currentCounts: Record<PatientTypeKey, number> = {
+      bayi: 0,
+      balita: 0,
+      ibu_hamil: 0,
+      remaja_dewasa: 0,
+      lansia: 0,
+    }
+    const prevCounts: Record<PatientTypeKey, number> = {
+      bayi: 0,
+      balita: 0,
+      ibu_hamil: 0,
+      remaja_dewasa: 0,
+      lansia: 0,
+    }
+
+    currentVisits?.forEach((v: any) => {
+      const type = v.patient?.patient_type as PatientTypeKey | undefined
+      if (type && type in currentCounts) currentCounts[type]++
+    })
+    prevVisits?.forEach((v: any) => {
+      const type = v.patient?.patient_type as PatientTypeKey | undefined
+      if (type && type in prevCounts) prevCounts[type]++
+    })
+
+    const labels: Record<PatientTypeKey, string> = {
+      bayi: 'Bayi',
+      balita: 'Balita',
+      ibu_hamil: 'Ibu Hamil',
+      remaja_dewasa: 'Remaja/Dewasa',
+      lansia: 'Lansia',
+    }
+
+    const data: BreakdownRow[] = PATIENT_TYPES.map((type) => {
+      const visitCount = currentCounts[type]
+      const previousVisitCount = prevCounts[type]
       const averagePerMonth = visitCount / monthsDiff
-      
-      const categoryLabel = category === 'balita' ? 'Balita' : category === 'ibu_hamil' ? 'Ibu Hamil' : 'Lansia'
-      
-      data.push({
-        category: categoryLabel,
-        patientCount: patientCount || 0,
+      const trend = percentTrend(visitCount, previousVisitCount)
+
+      return {
+        category: labels[type],
+        patientCount: patientCounts[type],
         visitCount,
         averagePerMonth: Math.round(averagePerMonth),
-        trend: Math.floor(Math.random() * 20) + 5 // Placeholder - would need historical comparison
-      })
+        trend: Math.round(trend),
+      }
+    })
+
+    return { data, error: null }
+  } catch (error) {
+    return { data: null, error }
+  }
+}
+
+export async function getIbuHamilStats(): Promise<{ data: IbuHamilStats | null, error: any }> {
+  const supabase = createClient()
+
+  try {
+    const { data: ibuHamilPatients, error: patientsError } = await supabase
+      .from('patients')
+      .select('id')
+      .eq('patient_type', 'ibu_hamil')
+
+    if (patientsError) return { data: null, error: patientsError }
+
+    const ids = (ibuHamilPatients || []).map((p: any) => p.id)
+
+    if (ids.length === 0) {
+      return {
+        data: {
+          totalIbuHamil: 0,
+          risikoTinggi: 0,
+          trimester1: 0,
+          trimester2: 0,
+          trimester3: 0,
+        },
+        error: null,
+      }
     }
-    
+
+    const { data: extended, error: extendedError } = await supabase
+      .from('patient_extended_data')
+      .select('patient_id, pregnancy_week, pregnancy_risk_level')
+      .in('patient_id', ids)
+
+    if (extendedError) return { data: null, error: extendedError }
+
+    let trimester1 = 0
+    let trimester2 = 0
+    let trimester3 = 0
+    let risikoTinggi = 0
+
+    extended?.forEach((row: any) => {
+      if (row.pregnancy_risk_level === 'tinggi') risikoTinggi++
+      const week = row.pregnancy_week
+      if (typeof week === 'number') {
+        if (week <= 12) trimester1++
+        else if (week <= 27) trimester2++
+        else trimester3++
+      }
+    })
+
+    const data: IbuHamilStats = {
+      totalIbuHamil: ids.length,
+      risikoTinggi,
+      trimester1,
+      trimester2,
+      trimester3,
+    }
+
     return { data, error: null }
   } catch (error) {
     return { data: null, error }

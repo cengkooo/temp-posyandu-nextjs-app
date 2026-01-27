@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Users,
   CalendarCheck,
@@ -16,75 +16,85 @@ import DonutChart from '@/components/admin/charts/DonutChart';
 import DataTable from '@/components/admin/tables/DataTable';
 import Button from '@/components/admin/forms/Button';
 import Card from '@/components/admin/ui/Card';
+import { getNutritionalStatus } from '@/lib/statisticsApi';
+import { getAdminDashboardSummary, getDashboardVisitTrends, getRecentVisits } from '@/lib/dashboardApi';
+import type { NutritionalStatus, VisitTrend } from '@/types';
 
 export default function AdminDashboard() {
   const [selectedPeriod, setSelectedPeriod] = useState('6');
 
-  // Line Chart Data
-  const lineChartData = {
-    labels: ['Agu', 'Sep', 'Okt', 'Nov', 'Des'],
-    datasets: [
-      {
-        label: 'Kunjungan',
-        data: [200, 290, 200, 300, 280, 290],
-        borderColor: '#10b981',
-        backgroundColor: 'rgba(16, 185, 129, 0.1)',
-        tension: 0.4,
-        fill: true,
-      },
-    ],
-  };
+  const [loading, setLoading] = useState(true);
+  const [nutrition, setNutrition] = useState<NutritionalStatus[]>([]);
+  const [visitTrends, setVisitTrends] = useState<VisitTrend[]>([]);
+  const [recentVisits, setRecentVisits] = useState<any[]>([]);
+  const [summary, setSummary] = useState({
+    totalPatients: 0,
+    visitsThisMonth: 0,
+    immunizationsPending: 0,
+    balitaGiziBuruk: 0,
+  });
 
-  // Donut Chart Data
-  const donutChartData = {
-    labels: ['Gizi Baik', 'Gizi Kurang', 'Gizi Buruk', 'Stunting'],
-    datasets: [
-      {
-        data: [850, 250, 100, 47],
-        backgroundColor: ['#10b981', '#fbbf24', '#f97316', '#ef4444'],
-        borderWidth: 0,
-      },
-    ],
-  };
+  useEffect(() => {
+    let cancelled = false;
+    const load = async () => {
+      setLoading(true);
 
-  // Recent visits data
-  const recentVisits = [
-    {
-      name: 'Budi Santoso',
-      type: 'Balita',
-      date: '17 Jan 2024',
-      officer: 'Ibu Sari',
-      typeColor: 'text-teal-600 bg-teal-50',
-    },
-    {
-      name: 'Ani Rahayu',
-      type: 'Ibu Hamil',
-      date: '17 Jan 2024',
-      officer: 'Ibu Dewi',
-      typeColor: 'text-orange-600 bg-orange-50',
-    },
-    {
-      name: 'Pak Joko',
-      type: 'Lansia',
-      date: '16 Jan 2024',
-      officer: 'Ibu Sari',
-      typeColor: 'text-blue-600 bg-blue-50',
-    },
-    {
-      name: 'Maya Putri',
-      type: 'Balita',
-      date: '16 Jan 2024',
-      officer: 'Ibu Dewi',
-      typeColor: 'text-teal-600 bg-teal-50',
-    },
-    {
-      name: 'Siti Aminah',
-      type: 'Ibu Hamil',
-      date: '15 Jan 2024',
-      officer: 'Ibu Sari',
-      typeColor: 'text-orange-600 bg-orange-50',
-    },
-  ];
+      const months = Number.parseInt(selectedPeriod, 10) || 6;
+      const [nutritionRes, trendsRes, recentRes] = await Promise.all([
+        getNutritionalStatus(),
+        getDashboardVisitTrends(months),
+        getRecentVisits(5),
+      ]);
+
+      const nutritionData = nutritionRes.data || [];
+      const summaryRes = await getAdminDashboardSummary(nutritionData);
+
+      if (cancelled) return;
+
+      if (nutritionRes.data) setNutrition(nutritionRes.data);
+      if (trendsRes.data) setVisitTrends(trendsRes.data);
+      if (recentRes.data) setRecentVisits(recentRes.data);
+      if (summaryRes.data) setSummary(summaryRes.data);
+
+      setLoading(false);
+    };
+
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedPeriod]);
+
+  const lineChartData = useMemo(() => {
+    return {
+      labels: visitTrends.map((t) => t.month),
+      datasets: [
+        {
+          label: 'Kunjungan',
+          data: visitTrends.map((t) => t.total),
+          borderColor: '#10b981',
+          backgroundColor: 'rgba(16, 185, 129, 0.1)',
+          tension: 0.4,
+          fill: true,
+        },
+      ],
+    };
+  }, [visitTrends]);
+
+  const donutChartData = useMemo(() => {
+    const labels = ['Gizi Baik', 'Gizi Kurang', 'Gizi Buruk', 'Stunting'];
+    const byStatus = new Map(nutrition.map((n) => [n.status, n.count]));
+    return {
+      labels,
+      datasets: [
+        {
+          data: labels.map((l) => byStatus.get(l as any) || 0),
+          backgroundColor: ['#10b981', '#fbbf24', '#f97316', '#ef4444'],
+          borderWidth: 0,
+        },
+      ],
+    };
+  }, [nutrition]);
 
   // Table columns configuration
   const tableColumns = [
@@ -109,25 +119,21 @@ export default function AdminDashboard() {
         <StatCard
           icon={Users}
           title="Total Pasien Aktif"
-          value={1247}
-          trend="up"
-          trendValue="+5%"
+          value={summary.totalPatients}
           bgColor="bg-teal-50"
           iconColor="text-teal-600"
         />
         <StatCard
           icon={CalendarCheck}
           title="Kunjungan Bulan Ini"
-          value={342}
-          trend="up"
-          trendValue="+12%"
+          value={summary.visitsThisMonth}
           bgColor="bg-blue-50"
           iconColor="text-blue-600"
         />
         <StatCard
           icon={Syringe}
           title="Imunisasi Pending"
-          value={23}
+          value={summary.immunizationsPending}
           label="Perlu follow up"
           bgColor="bg-orange-50"
           iconColor="text-orange-600"
@@ -135,7 +141,7 @@ export default function AdminDashboard() {
         <StatCard
           icon={AlertTriangle}
           title="Balita Gizi Buruk"
-          value={8}
+          value={summary.balitaGiziBuruk}
           label="Perhatian khusus"
           bgColor="bg-red-50"
           iconColor="text-red-600"

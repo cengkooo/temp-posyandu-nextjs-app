@@ -15,11 +15,19 @@ import {
   ChevronDown,
   Heart,
   Bell,
-  Search
+  Search,
+  type LucideIcon
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase';
 
-const menuItems = [
+type MenuItem = {
+  icon: LucideIcon
+  label: string
+  href: string
+  hasDropdown?: boolean
+}
+
+const menuItems: MenuItem[] = [
   { icon: LayoutDashboard, label: 'Dashboard', href: '/admin' },
   { icon: Users, label: 'Data Pasien', href: '/admin/pasien' },
   { icon: CalendarCheck, label: 'Kunjungan', href: '/admin/kunjungan' },

@@ -117,20 +117,24 @@ export default function PasienPage() {
 
   const getPatientTypeBadge = (type: string) => {
     const badges = {
-      balita: 'bg-teal-50 text-teal-600',
-      ibu_hamil: 'bg-orange-50 text-orange-600',
-      lansia: 'bg-blue-50 text-blue-600',
+      bayi: 'bg-blue-50 text-blue-600',
+      balita: 'bg-cyan-50 text-cyan-600',
+      ibu_hamil: 'bg-pink-50 text-pink-600',
+      remaja_dewasa: 'bg-purple-50 text-purple-600',
+      lansia: 'bg-orange-50 text-orange-600',
     };
     
     const labels = {
+      bayi: 'Bayi',
       balita: 'Balita',
       ibu_hamil: 'Ibu Hamil',
+      remaja_dewasa: 'Remaja/Dewasa',
       lansia: 'Lansia',
     };
     
     return (
-      <span className={`px-2 py-1 rounded-full text-xs font-medium ${badges[type as keyof typeof badges]}`}>
-        {labels[type as keyof typeof labels]}
+      <span className={`px-2 py-1 rounded-full text-xs font-medium ${badges[type as keyof typeof badges] || 'bg-gray-50 text-gray-600'}`}>
+        {labels[type as keyof typeof labels] || type}
       </span>
     );
   };

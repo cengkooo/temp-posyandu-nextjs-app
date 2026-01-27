@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import TabNavigation, { Tab } from '../TabNavigation';
 import NumberInputWithControls from '../NumberInputWithControls';
 import BloodPressureInput from '../BloodPressureInput';
@@ -8,9 +8,78 @@ import ChecklistInput from '../ChecklistInput';
 import StatusIndicatorBadge from '../StatusIndicatorBadge';
 import { calculateIMT, getIMTStatus } from '@/lib/nutritionCalculator';
 
+export type LansiaFormData = {
+  full_name: string;
+  nik: string;
+  date_of_birth: string;
+  gender: 'L' | 'P';
+  address: string;
+  phone: string;
+  family_name: string;
+  family_phone: string;
+  family_relation: string;
+  living_status: 'dengan_keluarga' | 'sendiri' | 'panti';
+  weight: number | undefined;
+  height: number | undefined;
+  knee_height: number | undefined;
+  waist_circumference: number | undefined;
+  blood_pressure_systolic: number | undefined;
+  blood_pressure_diastolic: number | undefined;
+  chronic_diseases: string[];
+  current_medications: string;
+  allergies: string;
+  surgery_history: string;
+  hospitalization_history: string;
+  adl_eating: 'mandiri' | 'bantuan_sebagian' | 'bantuan_penuh';
+  adl_bathing: 'mandiri' | 'bantuan_sebagian' | 'bantuan_penuh';
+  adl_dressing: 'mandiri' | 'bantuan_sebagian' | 'bantuan_penuh';
+  adl_toileting: 'mandiri' | 'bantuan_sebagian' | 'bantuan_penuh';
+  adl_mobility: 'mandiri' | 'bantuan_sebagian' | 'bantuan_penuh';
+  uses_assistive_device: boolean;
+  assistive_device_type: string;
+  fall_history: boolean;
+  fall_count_last_year: number;
+};
+
+export function createInitialLansiaFormData(): LansiaFormData {
+  return {
+    full_name: '',
+    nik: '',
+    date_of_birth: '',
+    gender: 'L',
+    address: '',
+    phone: '',
+    family_name: '',
+    family_phone: '',
+    family_relation: '',
+    living_status: 'dengan_keluarga',
+    weight: undefined,
+    height: undefined,
+    knee_height: undefined,
+    waist_circumference: undefined,
+    blood_pressure_systolic: undefined,
+    blood_pressure_diastolic: undefined,
+    chronic_diseases: [],
+    current_medications: '',
+    allergies: '',
+    surgery_history: '',
+    hospitalization_history: '',
+    adl_eating: 'mandiri',
+    adl_bathing: 'mandiri',
+    adl_dressing: 'mandiri',
+    adl_toileting: 'mandiri',
+    adl_mobility: 'mandiri',
+    uses_assistive_device: false,
+    assistive_device_type: '',
+    fall_history: false,
+    fall_count_last_year: 0,
+  };
+}
+
 interface LansiaFormProps {
-  onSubmit: (data: any) => void;
-  initialData?: any;
+  data: LansiaFormData;
+  onChange: (data: LansiaFormData) => void;
+  disabled?: boolean;
 }
 
 const tabs: Tab[] = [
@@ -20,55 +89,17 @@ const tabs: Tab[] = [
   { id: 'fungsional', label: 'Status Fungsional' },
 ];
 
-export default function LansiaForm({ onSubmit, initialData }: LansiaFormProps) {
+export default function LansiaForm({ data, onChange }: LansiaFormProps) {
   const [activeTab, setActiveTab] = useState('identitas');
-  const [formData, setFormData] = useState({
-    // Tab 1: Data Lansia
-    full_name: initialData?.full_name || '',
-    nik: initialData?.nik || '',
-    date_of_birth: initialData?.date_of_birth || '',
-    gender: initialData?.gender || 'L',
-    address: initialData?.address || '',
-    phone: initialData?.phone || '',
-    family_name: initialData?.family_name || '',
-    family_phone: initialData?.family_phone || '',
-    family_relation: initialData?.family_relation || '',
-    living_status: initialData?.living_status || 'dengan_keluarga',
+  const formData = data;
 
-    // Tab 2: Antropometri
-    weight: initialData?.weight || '',
-    height: initialData?.height || '',
-    knee_height: initialData?.knee_height || '',
-    waist_circumference: initialData?.waist_circumference || '',
-    blood_pressure_systolic: initialData?.blood_pressure_systolic || '',
-    blood_pressure_diastolic: initialData?.blood_pressure_diastolic || '',
-
-    // Tab 3: Riwayat Kesehatan
-    chronic_diseases: initialData?.chronic_diseases || [],
-    current_medications: initialData?.current_medications || '',
-    allergies: initialData?.allergies || '',
-    surgery_history: initialData?.surgery_history || '',
-    hospitalization_history: initialData?.hospitalization_history || '',
-
-    // Tab 4: Status Fungsional
-    adl_eating: initialData?.adl_eating || 'mandiri',
-    adl_bathing: initialData?.adl_bathing || 'mandiri',
-    adl_dressing: initialData?.adl_dressing || 'mandiri',
-    adl_toileting: initialData?.adl_toileting || 'mandiri',
-    adl_mobility: initialData?.adl_mobility || 'mandiri',
-    uses_assistive_device: initialData?.uses_assistive_device || false,
-    assistive_device_type: initialData?.assistive_device_type || '',
-    fall_history: initialData?.fall_history || false,
-    fall_count_last_year: initialData?.fall_count_last_year || 0,
-  });
-
-  const updateField = (field: string, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+  const updateField = <K extends keyof LansiaFormData>(field: K, value: LansiaFormData[K]) => {
+    onChange({ ...formData, [field]: value });
   };
 
   // IMT calculation
-  const imtStatus = formData.weight && formData.height
-    ? getIMTStatus(calculateIMT(parseFloat(formData.weight), parseFloat(formData.height)))
+  const imtStatus = formData.weight !== undefined && formData.height !== undefined
+    ? getIMTStatus(calculateIMT(formData.weight, formData.height))
     : null;
 
   // ADL Score calculation
@@ -92,14 +123,6 @@ export default function LansiaForm({ onSubmit, initialData }: LansiaFormProps) {
 
   const adlResult = calculateADLScore();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSubmit({
-      ...formData,
-      patient_type: 'lansia',
-    });
-  };
-
   const chronicDiseaseOptions = [
     { id: 'hipertensi', label: 'Hipertensi' },
     { id: 'diabetes', label: 'Diabetes Melitus' },
@@ -113,6 +136,11 @@ export default function LansiaForm({ onSubmit, initialData }: LansiaFormProps) {
     { id: 'ginjal', label: 'Penyakit Ginjal' },
   ];
 
+  const chronicDiseaseItems = useMemo(
+    () => chronicDiseaseOptions.map((item) => ({ ...item, checked: formData.chronic_diseases.includes(item.id) })),
+    [formData.chronic_diseases]
+  );
+
   const adlOptions = [
     { value: 'mandiri', label: 'Mandiri' },
     { value: 'bantuan_sebagian', label: 'Bantuan Sebagian' },
@@ -120,7 +148,7 @@ export default function LansiaForm({ onSubmit, initialData }: LansiaFormProps) {
   ];
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <div className="space-y-6">
       <TabNavigation tabs={tabs} activeTab={activeTab} onChange={setActiveTab} />
 
       {/* Tab 1: Data Lansia */}
@@ -170,7 +198,12 @@ export default function LansiaForm({ onSubmit, initialData }: LansiaFormProps) {
               </label>
               <select
                 value={formData.gender}
-                onChange={(e) => updateField('gender', e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === 'L' || value === 'P') {
+                    updateField('gender', value);
+                  }
+                }}
                 className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
               >
                 <option value="L">Laki-laki</option>
@@ -202,7 +235,12 @@ export default function LansiaForm({ onSubmit, initialData }: LansiaFormProps) {
             <label className="block text-sm font-medium text-gray-700 mb-2">Status Tinggal</label>
             <select
               value={formData.living_status}
-              onChange={(e) => updateField('living_status', e.target.value)}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (value === 'dengan_keluarga' || value === 'sendiri' || value === 'panti') {
+                  updateField('living_status', value);
+                }
+              }}
               className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
             >
               <option value="dengan_keluarga">Tinggal dengan Keluarga</option>
@@ -330,9 +368,9 @@ export default function LansiaForm({ onSubmit, initialData }: LansiaFormProps) {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Penyakit yang Diderita</label>
             <ChecklistInput
-              items={chronicDiseaseOptions}
-              selectedItems={formData.chronic_diseases}
-              onChange={(items) => updateField('chronic_diseases', items)}
+              items={chronicDiseaseItems}
+              onChange={(items) => updateField('chronic_diseases', items.filter((i) => i.checked).map((i) => i.id))}
+              showDates={false}
             />
           </div>
 
@@ -377,17 +415,22 @@ export default function LansiaForm({ onSubmit, initialData }: LansiaFormProps) {
             <h3 className="font-semibold text-gray-900 mb-4">Penilaian Aktivitas Harian (ADL)</h3>
             <div className="space-y-3">
               {[
-                { key: 'adl_eating', label: 'Makan' },
-                { key: 'adl_bathing', label: 'Mandi' },
-                { key: 'adl_dressing', label: 'Berpakaian' },
-                { key: 'adl_toileting', label: 'Ke Toilet' },
-                { key: 'adl_mobility', label: 'Berpindah/Mobilitas' },
+                { key: 'adl_eating' as const, label: 'Makan' },
+                { key: 'adl_bathing' as const, label: 'Mandi' },
+                { key: 'adl_dressing' as const, label: 'Berpakaian' },
+                { key: 'adl_toileting' as const, label: 'Ke Toilet' },
+                { key: 'adl_mobility' as const, label: 'Berpindah/Mobilitas' },
               ].map((item) => (
                 <div key={item.key} className="flex items-center justify-between">
                   <span className="text-sm text-gray-700">{item.label}</span>
                   <select
                     value={formData[item.key as keyof typeof formData] as string}
-                    onChange={(e) => updateField(item.key, e.target.value)}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (value === 'mandiri' || value === 'bantuan_sebagian' || value === 'bantuan_penuh') {
+                        updateField(item.key, value);
+                      }
+                    }}
                     className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
                   >
                     {adlOptions.map((opt) => (
@@ -459,7 +502,7 @@ export default function LansiaForm({ onSubmit, initialData }: LansiaFormProps) {
                 <span className="text-sm text-gray-600">Berapa kali:</span>
                 <NumberInputWithControls
                   value={formData.fall_count_last_year}
-                  onChange={(val) => updateField('fall_count_last_year', val)}
+                  onChange={(val) => updateField('fall_count_last_year', val ?? formData.fall_count_last_year)}
                   min={1}
                   max={20}
                 />
@@ -468,6 +511,6 @@ export default function LansiaForm({ onSubmit, initialData }: LansiaFormProps) {
           </div>
         </div>
       )}
-    </form>
+    </div>
   );
 }

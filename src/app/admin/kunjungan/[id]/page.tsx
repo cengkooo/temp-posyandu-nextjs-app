@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Calendar, User, Activity, FileText, AlertCircle, Stethoscope } from 'lucide-react';
 import { getVisitById } from '@/lib/api';
@@ -13,18 +13,19 @@ type VisitWithRelations = Visit & {
   profile?: Profile;
 };
 
-export default function VisitDetailPage({ params }: { params: { id: string } }) {
+export default function VisitDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
+  const { id } = use(params);
   const [visit, setVisit] = useState<VisitWithRelations | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadVisit();
-  }, [params.id]);
+  }, [id]);
 
   const loadVisit = async () => {
     setLoading(true);
-    const { data, error } = await getVisitById(params.id);
+    const { data, error } = await getVisitById(id);
     if (data) {
       setVisit(data as VisitWithRelations);
     }

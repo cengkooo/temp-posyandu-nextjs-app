@@ -5,48 +5,80 @@ import Navbar from '@/components/landing/Navbar';
 import Footer from '@/components/landing/Footer';
 import '@/styles/landing.css';
 import '@/styles/event-detail.css';
-
+import { createClient } from '@/lib/supabase';
 
 export default async function EventDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const supabase = createClient();
   
-  // Mock data - in real app, fetch based on id
+  // Fetch real schedule data
+  const { data: schedule, error } = await supabase
+    .from('schedules')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  // Fallback data if not found
+  if (error || !schedule) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Jadwal tidak ditemukan</h1>
+          <Link href="/#jadwal" className="text-teal-600 hover:text-teal-700">
+            Kembali ke Jadwal
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  // Format date
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+    const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    return `${days[date.getDay()]}, ${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
+  };
+
+  // Parse time to display format
+  const formatTime = (time: string | null) => {
+    if (!time) return '';
+    return time;
+  };
+
   const event = {
-    id: id,
-    title: 'Imunisasi Bulanan',
-    subtitle: 'Program Vaksinasi Balita',
-    date: 'Senin, 27 Januari 2025',
-    time: '08:00 - 12:00 WIB',
-    duration: '4 Jam',
-    location: 'Balai Desa Sukamaju',
-    fullAddress: 'Jl. Kesehatan No. 45, Kec. Sukamaju, Kab. Sejahtera',
-    mapLink: '#',
-    capacity: '50 Peserta',
-    registered: '32 terdaftar (18 tersisa)',
-    price: 'GRATIS',
-    priceNote: 'Didukung oleh Pemerintah',
-    description: 'Program imunisasi lengkap rutin Posyandu Sehat Mandiri untuk memberikan perlindungan kesehatan optimal bagi balita. Kegiatan ini meliputi pemberian vaksin lengkap sesuai jadwal yang telah ditetapkan oleh Kementerian Kesehatan RI.\n\nDalam kegiatan ini, setiap balita akan mendapatkan pemeriksaan kesehatan dasar, konsultasi mengenai tumbuh kembang, pemberian vaksin yang sesuai dengan usia dan kondisi kesehatan anak. Orang tua juga akan mendapatkan edukasi tentang pentingnya imunisasi dan cara merawat anak pasca vaksinasi.',
+    id: schedule.id,
+    title: schedule.title,
+    subtitle: (schedule as any).subtitle || schedule.description || 'Program Layanan Posyandu',
+    date: formatDate(schedule.date),
+    time: schedule.time || '08:00 - 12:00 WIB',
+    duration: (schedule as any).duration || '4 Jam',
+    location: schedule.location || 'Posyandu Sehat Mandiri',
+    fullAddress: (schedule as any).full_address || schedule.location || 'Jl. Kesehatan No. 45, Kec. Sukamaju, Kab. Sejahtera',
+    mapLink: (schedule as any).map_link || '#',
+    capacity: `${(schedule as any).capacity || 50} Peserta`,
+    price: (schedule as any).price || 'GRATIS',
+    priceNote: (schedule as any).price_note || 'Didukung oleh Pemerintah',
+    description: schedule.description || 'Program layanan kesehatan Posyandu Sehat Mandiri untuk memberikan pelayanan kesehatan optimal bagi masyarakat.',
     coordinator: {
-      name: 'dr. Siti Nurhaliza',
-      role: 'Bidan Kepala',
+      name: (schedule as any).coordinator_name || 'dr. Siti Nurhaliza',
+      role: (schedule as any).coordinator_role || 'Bidan Kepala',
     },
     contact: {
-      phone: '0812-3456-7890',
-      whatsapp: 'WhatsApp tersedia',
+      phone: (schedule as any).contact_phone || '0812-3456-7890',
+      whatsapp: (schedule as any).contact_whatsapp || 'WhatsApp tersedia',
     },
-    requirements: [
-      'Membawa Kartu Menuju Sehat (KMS) atau buku kesehatan anak',
-      'Anak dalam kondisi sehat (tidak demam atau sakit)',
-      'Membawa fotokopi Kartu Keluarga (KK)',
-      'Orang tua/wali mendampingi anak',
-      'Datang 15 menit sebelum jadwal untuk registrasi',
+    requirements: (schedule as any).requirements || [
+      'Membawa kartu identitas (KTP/KK)',
+      'Datang tepat waktu sesuai jadwal',
       'Mengikuti protokol kesehatan yang berlaku',
+      'Untuk pelayanan khusus, harap mendaftar terlebih dahulu',
     ],
     importantNote: {
-      title: 'Catatan Penting',
-      message: 'Jika anak memiliki riwayat alergi atau kondisi kesehatan khusus, harap konsultasikan dengan petugas kesehatan sebelum imunisasi.',
+      title: (schedule as any).important_note_title || 'Catatan Penting',
+      message: (schedule as any).important_note_message || 'Jika memiliki kondisi kesehatan khusus, harap konsultasikan dengan petugas kesehatan terlebih dahulu.',
     },
-    tags: ['Imunisasi', '0-5 Tahun'],
+    tags: (schedule as any).tags || [schedule.title],
   };
 
   return (
@@ -79,7 +111,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
               <div className="event-left">
                 {/* Tags */}
                 <div className="event-tags">
-                  {event.tags.map((tag, index) => (
+                  {event.tags.map((tag: string, index: number) => (
                     <span key={index} className="event-tag">{tag}</span>
                   ))}
                   <button className="share-button">
@@ -91,7 +123,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                 <div className="event-section">
                   <h2 className="section-heading">Deskripsi Kegiatan</h2>
                   <div className="event-description">
-                    {event.description.split('\n\n').map((paragraph, index) => (
+                    {event.description.split('\n\n').map((paragraph: string, index: number) => (
                       <p key={index}>{paragraph}</p>
                     ))}
                   </div>
@@ -129,7 +161,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                 <div className="event-section">
                   <h2 className="section-heading">Syarat & Ketentuan</h2>
                   <ul className="requirements-list">
-                    {event.requirements.map((req, index) => (
+                    {event.requirements.map((req: string, index: number) => (
                       <li key={index} className="requirement-item">
                         <CheckCircle size={20} />
                         <span>{req}</span>
@@ -195,7 +227,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                     <div className="info-content">
                       <p className="info-label">Kapasitas</p>
                       <p className="info-value">{event.capacity}</p>
-                      <p className="info-registered">{event.registered}</p>
+                      <p className="info-note">Kuota tersedia</p>
                     </div>
                   </div>
 
@@ -210,18 +242,6 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                     </div>
                   </div>
 
-                  <div className="info-actions">
-                    <button className="btn-register">
-                      Daftar Sekarang
-                    </button>
-                    <button className="btn-save">
-                      Simpan Kegiatan
-                    </button>
-                  </div>
-
-                  <p className="info-disclaimer">
-                    * Pendaftaran akan dikonfirmasi
-                  </p>
                 </div>
               </div>
             </div>

@@ -46,12 +46,18 @@ export default function NumberInputWithControls({
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value;
+    
+    // Allow empty input
     if (inputValue === '') {
       onChange(undefined);
       return;
     }
+    
+    // Parse the value
     const parsedValue = parseFloat(inputValue);
-    if (!isNaN(parsedValue) && parsedValue >= min && parsedValue <= max) {
+    
+    // Allow typing (even if temporarily invalid)
+    if (!isNaN(parsedValue)) {
       onChange(parsedValue);
     }
   };

@@ -6,7 +6,6 @@ import ScheduleSection from '@/components/landing/ScheduleSection';
 import TeamSection from '@/components/landing/TeamSection';
 import FAQSection from '@/components/landing/FAQSection';
 import Footer from '@/components/landing/Footer';
-import '@/styles/landing.css';
 
 export default function Home() {
   return (
@@ -14,9 +13,9 @@ export default function Home() {
       <Navbar />
       <main id="beranda">
         <HeroSection />
+        <ScheduleSection />
         <AboutSection />
         <ServicesSection />
-        <ScheduleSection />
         <TeamSection />
         <FAQSection />
       </main>

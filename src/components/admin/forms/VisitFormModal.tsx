@@ -168,11 +168,8 @@ export default function VisitFormModal({
         head_circumference: bayiBalitaData.head_circumference || null,
         arm_circumference: bayiBalitaData.arm_circumference || null,
         notes: bayiBalitaData.notes || null,
-        metadata: {
-          complaints: bayiBalitaData.complaints,
-          physical_exam: bayiBalitaData.physical_exam,
-          actions: bayiBalitaData.actions,
-        },
+        complaints: bayiBalitaData.complaints || null,
+        recommendations: `Pemeriksaan fisik: ${bayiBalitaData.physical_exam || '-'}\nTindakan: ${bayiBalitaData.actions || '-'}`,
       };
     } else if (patientType === 'ibu_hamil') {
       typeSpecificData = {
@@ -183,18 +180,8 @@ export default function VisitFormModal({
           ? `${ibuHamilData.systolic}/${ibuHamilData.diastolic}`
           : null,
         notes: ibuHamilData.notes || null,
-        metadata: {
-          pregnancy_weeks: ibuHamilData.pregnancy_weeks,
-          fundal_height: ibuHamilData.fundal_height,
-          fetal_heart_rate: ibuHamilData.fetal_heart_rate,
-          fetal_presentation: ibuHamilData.fetal_presentation,
-          edema: ibuHamilData.edema,
-          protein_urine: ibuHamilData.protein_urine,
-          ttd_given: ibuHamilData.ttd_given,
-          immunization_tt: ibuHamilData.immunization_tt,
-          counseling: ibuHamilData.counseling,
-          complaints: ibuHamilData.complaints,
-        },
+        complaints: ibuHamilData.complaints || null,
+        recommendations: `Usia kehamilan: ${ibuHamilData.pregnancy_weeks || '-'} minggu\nTinggi fundus: ${ibuHamilData.fundal_height || '-'} cm\nDJJ: ${ibuHamilData.fetal_heart_rate || '-'} bpm\nPresentasi: ${ibuHamilData.fetal_presentation || '-'}\nEdema: ${ibuHamilData.edema || '-'}\nProtein urine: ${ibuHamilData.protein_urine || '-'}\nTTD: ${ibuHamilData.ttd_given ? 'Ya' : 'Tidak'}\nImunisasi TT: ${ibuHamilData.immunization_tt || '-'}\nKonseling: ${ibuHamilData.counseling || '-'}`,
       };
     } else if (patientType === 'remaja_dewasa') {
       typeSpecificData = {
@@ -204,21 +191,8 @@ export default function VisitFormModal({
           ? `${remajaDewasaData.systolic}/${remajaDewasaData.diastolic}`
           : null,
         notes: remajaDewasaData.notes || null,
-        metadata: {
-          waist_circumference: remajaDewasaData.waist_circumference,
-          blood_sugar: remajaDewasaData.blood_sugar,
-          cholesterol: remajaDewasaData.cholesterol,
-          uric_acid: remajaDewasaData.uric_acid,
-          physical_activity: remajaDewasaData.physical_activity,
-          vegetable_fruit_portions: remajaDewasaData.vegetable_fruit_portions,
-          smoking_status: remajaDewasaData.smoking_status,
-          cigarettes_per_day: remajaDewasaData.cigarettes_per_day,
-          complaints: remajaDewasaData.complaints,
-          examination: remajaDewasaData.examination,
-          counseling: remajaDewasaData.counseling,
-          referral_needed: remajaDewasaData.referral_needed,
-          referral_to: remajaDewasaData.referral_to,
-        },
+        complaints: remajaDewasaData.complaints || null,
+        recommendations: `Lingkar pinggang: ${remajaDewasaData.waist_circumference || '-'} cm\nGula darah: ${remajaDewasaData.blood_sugar || '-'} mg/dL\nKolesterol: ${remajaDewasaData.cholesterol || '-'} mg/dL\nAsam urat: ${remajaDewasaData.uric_acid || '-'} mg/dL\nAktivitas fisik: ${remajaDewasaData.physical_activity || '-'}\nPorsi sayur/buah: ${remajaDewasaData.vegetable_fruit_portions || '-'}\nStatus merokok: ${remajaDewasaData.smoking_status || '-'}${remajaDewasaData.cigarettes_per_day ? ` (${remajaDewasaData.cigarettes_per_day} batang/hari)` : ''}\nPemeriksaan: ${remajaDewasaData.examination || '-'}\nKonseling: ${remajaDewasaData.counseling || '-'}${remajaDewasaData.referral_needed ? `\nRujukan ke: ${remajaDewasaData.referral_to || '-'}` : ''}`,
       };
     } else if (patientType === 'lansia') {
       typeSpecificData = {
@@ -228,28 +202,8 @@ export default function VisitFormModal({
           ? `${lansiaData.systolic}/${lansiaData.diastolic}`
           : null,
         notes: lansiaData.notes || null,
-        metadata: {
-          knee_height: lansiaData.knee_height,
-          pulse_rate: lansiaData.pulse_rate,
-          blood_sugar: lansiaData.blood_sugar,
-          temperature: lansiaData.temperature,
-          eating_independence: lansiaData.eating_independence,
-          dressing_independence: lansiaData.dressing_independence,
-          bathing_independence: lansiaData.bathing_independence,
-          toileting_independence: lansiaData.toileting_independence,
-          mobility_independence: lansiaData.mobility_independence,
-          mobility_type: lansiaData.mobility_type,
-          mental_status: lansiaData.mental_status,
-          fall_risk_items: lansiaData.fall_risk_items,
-          pain_scale: lansiaData.pain_scale,
-          main_complaint: lansiaData.main_complaint,
-          examination: lansiaData.examination,
-          medication_given: lansiaData.medication_given,
-          counseling: lansiaData.counseling,
-          referral_needed: lansiaData.referral_needed,
-          referral_to: lansiaData.referral_to,
-          next_visit_date: lansiaData.next_visit_date,
-        },
+        complaints: lansiaData.main_complaint || null,
+        recommendations: `Tinggi lutut: ${lansiaData.knee_height || '-'} cm\nNadi: ${lansiaData.pulse_rate || '-'} x/menit\nGula darah: ${lansiaData.blood_sugar || '-'} mg/dL\nSuhu: ${lansiaData.temperature || '-'}°C\nKemandirian makan: ${lansiaData.eating_independence || '-'}\nKemandirian berpakaian: ${lansiaData.dressing_independence || '-'}\nKemandirian mandi: ${lansiaData.bathing_independence || '-'}\nKemandirian toileting: ${lansiaData.toileting_independence || '-'}\nKemandirian mobilitas: ${lansiaData.mobility_independence || '-'}${lansiaData.mobility_type ? ` (${lansiaData.mobility_type})` : ''}\nStatus mental: ${lansiaData.mental_status || '-'}\nRisiko jatuh: ${lansiaData.fall_risk_items || '-'}\nSkala nyeri: ${lansiaData.pain_scale || '-'}\nPemeriksaan: ${lansiaData.examination || '-'}\nObat: ${lansiaData.medication_given || '-'}\nKonseling: ${lansiaData.counseling || '-'}${lansiaData.referral_needed ? `\nRujukan ke: ${lansiaData.referral_to || '-'}` : ''}`,
       };
     }
 

@@ -119,6 +119,94 @@ export default function DetailPasienPage() {
     loadPatientData();
   }, [patientId]);
 
+  useEffect(() => {
+    // Add print styles dynamically
+    const style = document.createElement('style');
+    style.innerHTML = `
+      @media print {
+        /* Hide everything by default */
+        body * {
+          visibility: hidden;
+        }
+        
+        /* Show only patient card */
+        .print-patient-card,
+        .print-patient-card * {
+          visibility: visible;
+        }
+        
+        /* Position patient card */
+        .print-patient-card {
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: 100%;
+          max-width: 900px;
+          margin: 0 auto;
+        }
+        
+        /* Hide action buttons */
+        .print-hide {
+          display: none !important;
+        }
+        
+        /* Hide tab navigation buttons */
+        .print-hide-tabs {
+          display: none !important;
+        }
+        
+        /* Show all tab content in print */
+        .print-show-all-tabs > div {
+          display: block !important;
+          page-break-inside: avoid;
+          margin-bottom: 20px;
+        }
+        
+        /* Page setup */
+        @page {
+          size: A4 portrait;
+          margin: 1.5cm;
+        }
+        
+        /* Adjust card layout for print */
+        .print-patient-card .space-y-6 > div {
+          page-break-inside: avoid;
+          margin-bottom: 15px;
+        }
+        
+        /* Ensure background colors print */
+        * {
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+        }
+        
+        /* Make text in header black for print */
+        .print-text-black {
+          color: #000000 !important;
+        }
+        
+        /* Adjust font sizes for print */
+        h1 {
+          font-size: 20pt !important;
+        }
+        
+        h3 {
+          font-size: 14pt !important;
+        }
+        
+        /* Tables in print */
+        table {
+          font-size: 9pt;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+    
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
+
   const loadPatientData = async () => {
     setLoading(true);
 
@@ -519,14 +607,14 @@ export default function DetailPasienPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 print-patient-card">
       {/* Header with gradient */}
       <div className={`bg-gradient-to-r ${typeColors.bg} rounded-xl p-6 text-white`}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
               onClick={() => router.back()}
-              className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+              className="p-2 hover:bg-white/20 rounded-lg transition-colors print-hide"
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
@@ -536,13 +624,13 @@ export default function DetailPasienPage() {
                 <User className="w-8 h-8" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold">{patient.full_name}</h1>
+                <h1 className="text-2xl font-bold print-text-black">{patient.full_name}</h1>
                 <div className="flex items-center gap-3 mt-1 text-white/90">
-                  <span className="text-sm">{formatAge(patient.date_of_birth)}</span>
-                  <span className="text-white/50">•</span>
-                  <span className="text-sm">{patient.gender === 'L' ? 'Laki-laki' : 'Perempuan'}</span>
-                  <span className="text-white/50">•</span>
-                  <span className="px-2 py-0.5 bg-white/20 rounded-full text-xs font-medium">
+                  <span className="text-sm print-text-black">{formatAge(patient.date_of_birth)}</span>
+                  <span className="text-white/50 print-hide">•</span>
+                  <span className="text-sm print-text-black">{patient.gender === 'L' ? 'Laki-laki' : 'Perempuan'}</span>
+                  <span className="text-white/50 print-hide">•</span>
+                  <span className="px-2 py-0.5 bg-white/20 rounded-full text-xs font-medium print-text-black">
                     {getPatientTypeLabel(patient.patient_type)}
                   </span>
                 </div>
@@ -550,7 +638,7 @@ export default function DetailPasienPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 print-hide">
             <Button
               variant="outline"
               onClick={() => window.print()}
@@ -685,8 +773,47 @@ export default function DetailPasienPage() {
 
       {/* Tabs Content */}
       <Card>
-        <TabNavigation tabs={tabs} activeTab={activeTab} onChange={setActiveTab} className="mb-6" />
-        <div className="pt-2">{renderTabContent()}</div>
+        <div className="print-hide-tabs">
+          <TabNavigation tabs={tabs} activeTab={activeTab} onChange={setActiveTab} className="mb-6" />
+        </div>
+        
+        {/* For screen: show active tab only */}
+        <div className="pt-2 print-hide">
+          {renderTabContent()}
+        </div>
+        
+        {/* For print: show all tabs */}
+        <div className="hidden print:block print-show-all-tabs space-y-8">
+          {patient.patient_type === 'bayi' || patient.patient_type === 'balita' ? (
+            <>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b-2 border-teal-500">Riwayat Kunjungan</h3>
+                {renderKunjunganTab()}
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b-2 border-teal-500">Grafik Pertumbuhan</h3>
+                {renderPlaceholderTab('Grafik Pertumbuhan', 'Grafik BB/U, TB/U, BB/TB dengan kurva WHO')}
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b-2 border-teal-500">Imunisasi</h3>
+                {renderPlaceholderTab('Imunisasi', 'Checklist imunisasi dasar dan lanjutan dengan tanggal')}
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b-2 border-teal-500">ASI & MP-ASI</h3>
+                {renderPlaceholderTab('ASI & MP-ASI', 'Log pemberian ASI eksklusif dan status MPASI')}
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b-2 border-teal-500">Riwayat Sakit</h3>
+                {renderPlaceholderTab('Riwayat Sakit', 'History penyakit, diare, ISPA, dll dengan tanggal')}
+              </div>
+            </>
+          ) : (
+            <div>
+              <h3 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b-2 border-teal-500">Riwayat Kunjungan</h3>
+              {renderKunjunganTab()}
+            </div>
+          )}
+        </div>
       </Card>
     </div>
   );

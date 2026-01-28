@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import * as XLSX from 'xlsx';
 import {
   Search,
   Plus,
@@ -11,6 +12,9 @@ import {
   Trash2,
   ChevronLeft,
   ChevronRight,
+  Download,
+  Upload,
+  Printer,
 } from 'lucide-react';
 import { getPatients, deletePatient, searchPatients, filterPatients } from '@/lib/api';
 import type { Patient } from '@/types';
@@ -19,6 +23,7 @@ import Button from '@/components/admin/forms/Button';
 
 export default function PasienPage() {
   const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [patients, setPatients] = useState<Patient[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -96,6 +101,258 @@ export default function PasienPage() {
     }
   };
 
+  const handleExport = () => {
+    try {
+      const exportData = patients.map(patient => ({
+        'Nama Lengkap': patient.full_name,
+        'NIK': patient.nik || '-',
+        'Umur': calculateAge(patient.date_of_birth),
+        'J/K': patient.gender === 'L' ? 'Laki-laki' : 'Perempuan',
+        'Tipe': getPatientTypeLabel(patient.patient_type),
+        'Orang Tua': patient.parent_name || '-',
+        'Telepon': patient.phone || '-',
+      }));
+
+      const ws = XLSX.utils.json_to_sheet(exportData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Data Pasien');
+
+      const date = new Date().toISOString().split('T')[0];
+      XLSX.writeFile(wb, `Data_Pasien_${date}.xlsx`);
+    } catch (error) {
+      console.error('Error exporting:', error);
+      alert('Gagal mengekspor data');
+    }
+  };
+
+  const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        const data = event.target?.result;
+        const workbook = XLSX.read(data, { type: 'binary' });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+        // Validate and process data
+        const validData: any[] = [];
+        const invalidRows: number[] = [];
+        
+        for (let i = 0; i < (jsonData as any[]).length; i++) {
+          const row = (jsonData as any[])[i];
+          
+          // Validate required fields
+          if (row['Nama Lengkap'] && row['NIK'] && row['Tipe'] && row['Umur'] && row['J/K']) {
+            validData.push({
+              full_name: row['Nama Lengkap'],
+              nik: row['NIK'],
+              date_of_birth: calculateDateOfBirth(row['Umur']),
+              gender: row['J/K'] === 'Laki-laki' ? 'L' : 'P',
+              patient_type: getPatientTypeFromLabel(row['Tipe']),
+              parent_name: row['Orang Tua'] && row['Orang Tua'] !== '-' ? row['Orang Tua'] : null,
+              phone: row['Telepon'] && row['Telepon'] !== '-' ? row['Telepon'] : null,
+              address: null,
+            });
+          } else {
+            invalidRows.push(i + 2); // +2 because Excel rows start at 1 and has header
+          }
+        }
+
+        if (validData.length === 0) {
+          alert('Tidak ada data valid untuk diimpor. Pastikan semua kolom required terisi.');
+          return;
+        }
+
+        // Show confirmation
+        let confirmMessage = `Ditemukan ${validData.length} data valid`;
+        if (invalidRows.length > 0) {
+          confirmMessage += `\n${invalidRows.length} baris diabaikan (baris: ${invalidRows.join(', ')})`;
+        }
+        confirmMessage += '\n\nLanjutkan import?';
+
+        if (!confirm(confirmMessage)) {
+          return;
+        }
+
+        // Send to API
+        setLoading(true);
+        const response = await fetch('/api/patients/batch', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ patients: validData }),
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          alert(result.message || `Berhasil mengimpor ${validData.length} pasien`);
+          await loadPatients(); // Reload data
+        } else {
+          throw new Error(result.error || 'Gagal mengimpor data');
+        }
+        
+      } catch (error) {
+        console.error('Error importing:', error);
+        alert(error instanceof Error ? error.message : 'Gagal mengimpor data. Pastikan format file sesuai.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    reader.readAsBinaryString(file);
+    
+    // Reset input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handlePrint = () => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    const printContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Data Pasien - Posyandu</title>
+          <style>
+            @media print {
+              @page { 
+                size: A4 landscape;
+                margin: 1.5cm; 
+              }
+            }
+            body {
+              font-family: Arial, sans-serif;
+              padding: 20px;
+            }
+            h1 {
+              text-align: center;
+              color: #0d9488;
+              margin-bottom: 10px;
+            }
+            .subtitle {
+              text-align: center;
+              color: #666;
+              margin-bottom: 30px;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              margin-top: 20px;
+              font-size: 10px;
+            }
+            th, td {
+              border: 1px solid #ddd;
+              padding: 8px;
+              text-align: left;
+            }
+            th {
+              background-color: #0d9488;
+              color: white;
+              font-weight: bold;
+            }
+            tr:nth-child(even) {
+              background-color: #f9f9f9;
+            }
+            .footer {
+              margin-top: 30px;
+              text-align: center;
+              color: #666;
+              font-size: 12px;
+            }
+          </style>
+        </head>
+        <body>
+          <h1>Data Pasien Posyandu</h1>
+          <div class="subtitle">${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</div>
+          
+          <table>
+            <thead>
+              <tr>
+                <th>No</th>
+                <th>Nama Lengkap</th>
+                <th>NIK</th>
+                <th>Umur</th>
+                <th>J/K</th>
+                <th>Tipe</th>
+                <th>Orang Tua</th>
+                <th>Telepon</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${patients.map((patient, index) => `
+                <tr>
+                  <td>${index + 1}</td>
+                  <td>${patient.full_name}</td>
+                  <td>${patient.nik || '-'}</td>
+                  <td>${calculateAge(patient.date_of_birth)}</td>
+                  <td>${patient.gender === 'L' ? 'Laki-laki' : 'Perempuan'}</td>
+                  <td>${getPatientTypeLabel(patient.patient_type)}</td>
+                  <td>${patient.parent_name || '-'}</td>
+                  <td>${patient.phone || '-'}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+
+          <div class="footer">
+            <p>Dicetak pada: ${new Date().toLocaleString('id-ID')}</p>
+            <p>Total Pasien: ${patients.length}</p>
+          </div>
+        </body>
+      </html>
+    `;
+
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+      printWindow.print();
+    }, 250);
+  };
+
+  const getPatientTypeLabel = (type: string) => {
+    const labels: Record<string, string> = {
+      bayi: 'Bayi',
+      balita: 'Balita',
+      ibu_hamil: 'Ibu Hamil',
+      remaja_dewasa: 'Remaja/Dewasa',
+      lansia: 'Lansia',
+    };
+    return labels[type] || type;
+  };
+
+  const getPatientTypeFromLabel = (label: string) => {
+    const types: Record<string, string> = {
+      'Bayi': 'bayi',
+      'Balita': 'balita',
+      'Ibu Hamil': 'ibu_hamil',
+      'Remaja/Dewasa': 'remaja_dewasa',
+      'Lansia': 'lansia',
+    };
+    return types[label] || 'balita';
+  };
+
+  const calculateDateOfBirth = (ageString: string) => {
+    // Simple calculation - convert age to approximate date of birth
+    const today = new Date();
+    if (ageString.includes('bulan')) {
+      const months = parseInt(ageString);
+      today.setMonth(today.getMonth() - months);
+    } else {
+      const years = parseInt(ageString);
+      today.setFullYear(today.getFullYear() - years);
+    }
+    return today.toISOString().split('T')[0];
+  };
+
   const calculateAge = (dateOfBirth: string) => {
     const today = new Date();
     const birthDate = new Date(dateOfBirth);
@@ -157,6 +414,44 @@ export default function PasienPage() {
 
   return (
     <div className="space-y-6">
+      {/* Header with Action Buttons */}
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-gray-900">Data Pasien</h1>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="secondary"
+            onClick={handleExport}
+            className="flex items-center gap-2"
+          >
+            <Download className="w-4 h-4" />
+            Ekspor
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={() => fileInputRef.current?.click()}
+            className="flex items-center gap-2"
+          >
+            <Upload className="w-4 h-4" />
+            Impor
+          </Button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".xlsx,.xls"
+            onChange={handleImport}
+            className="hidden"
+          />
+          <Button
+            variant="secondary"
+            onClick={handlePrint}
+            className="flex items-center gap-2"
+          >
+            <Printer className="w-4 h-4" />
+            Print
+          </Button>
+        </div>
+      </div>
+
       {/* Search and Filter Bar */}
       <Card>
         <div className="flex flex-col md:flex-row gap-4">

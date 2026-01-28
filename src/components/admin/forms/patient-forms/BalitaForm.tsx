@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import TabNavigation, { Tab } from '../TabNavigation';
 import NumberInputWithControls from '../NumberInputWithControls';
 import ChecklistInput from '../ChecklistInput';
 import StatusIndicatorBadge from '../StatusIndicatorBadge';
-import { calculateBBU, calculateTBU, calculateBBTB, getIMTStatus } from '@/lib/nutritionCalculator';
-import { Baby, Ruler, Utensils, Syringe, HeartPulse, AlertTriangle, Info, CheckCircle } from 'lucide-react';
+import { calculateBBU, calculateTBU, calculateBBTB } from '@/lib/nutritionCalculator';
+import { Baby, Ruler, Utensils, Syringe, HeartPulse, AlertTriangle, Info } from 'lucide-react';
 
 export interface BalitaFormData {
   // Tab 1: Data Balita
@@ -192,7 +192,7 @@ const allergyOptions = [
 export default function BalitaForm({ data, onChange, errors = {}, disabled = false }: BalitaFormProps) {
   const [activeTab, setActiveTab] = useState('data');
 
-  const updateField = (field: keyof BalitaFormData, value: any) => {
+  const updateField = (field: keyof BalitaFormData, value: unknown) => {
     onChange({ ...data, [field]: value });
   };
 
@@ -1006,18 +1006,18 @@ export default function BalitaForm({ data, onChange, errors = {}, disabled = fal
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="checkbox"
-                    checked={(data as any)[`${disease.key}_ever`]}
-                    onChange={(e) => updateField(`${disease.key}_ever` as any, e.target.checked)}
+                    checked={data[`${disease.key}_ever` as keyof BalitaFormData] as boolean}
+                    onChange={(e) => updateField(`${disease.key}_ever` as keyof BalitaFormData, e.target.checked)}
                     disabled={disabled}
                     className="w-4 h-4 text-cyan-600 rounded focus:ring-cyan-500"
                   />
                   <span className="text-gray-700">{disease.label}</span>
                 </label>
-                {(data as any)[`${disease.key}_ever`] && (
+                {data[`${disease.key}_ever` as keyof BalitaFormData] && (
                   <input
                     type="date"
-                    value={(data as any)[`${disease.key}_date`]}
-                    onChange={(e) => updateField(`${disease.key}_date` as any, e.target.value)}
+                    value={data[`${disease.key}_date` as keyof BalitaFormData] as string}
+                    onChange={(e) => updateField(`${disease.key}_date` as keyof BalitaFormData, e.target.value)}
                     disabled={disabled}
                     className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm w-36"
                   />
@@ -1139,8 +1139,8 @@ export default function BalitaForm({ data, onChange, errors = {}, disabled = fal
                       type="radio"
                       name={dev.key}
                       value={opt.value}
-                      checked={(data as any)[dev.key] === opt.value}
-                      onChange={(e) => updateField(dev.key as any, e.target.value)}
+                      checked={data[dev.key as keyof BalitaFormData] === opt.value}
+                      onChange={(e) => updateField(dev.key as keyof BalitaFormData, e.target.value)}
                       disabled={disabled}
                       className="w-4 h-4 text-cyan-600 focus:ring-cyan-500"
                     />

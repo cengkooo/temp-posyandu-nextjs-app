@@ -1,24 +1,24 @@
 import React from 'react';
 
-interface Column {
+interface Column<T> {
   key: string;
   label: string;
-  render?: (value: any, row: any) => React.ReactNode;
+  render?: (value: unknown, row: T) => React.ReactNode;
 }
 
-interface DataTableProps {
-  columns: Column[];
-  data: any[];
-  onRowClick?: (row: any) => void;
+interface DataTableProps<T> {
+  columns: Column<T>[];
+  data: T[];
+  onRowClick?: (row: T) => void;
   className?: string;
 }
 
-export default function DataTable({
+export default function DataTable<T extends Record<string, unknown>>({
   columns,
   data,
   onRowClick,
   className = '',
-}: DataTableProps) {
+}: DataTableProps<T>) {
   return (
     <div className={`overflow-x-auto ${className}`}>
       <table className="w-full">
@@ -47,7 +47,7 @@ export default function DataTable({
                 <td key={column.key} className="py-3 px-4 text-sm text-gray-900">
                   {column.render
                     ? column.render(row[column.key], row)
-                    : row[column.key]}
+                    : (row[column.key] as React.ReactNode)}
                 </td>
               ))}
             </tr>

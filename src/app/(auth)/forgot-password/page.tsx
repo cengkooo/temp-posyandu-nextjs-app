@@ -30,7 +30,7 @@ export default function ForgotPasswordPage() {
 
       setSuccess(true);
       setIsLoading(false);
-    } catch (err) {
+    } catch {
       setError('Terjadi kesalahan. Silakan coba lagi.');
       setIsLoading(false);
     }

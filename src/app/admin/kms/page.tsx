@@ -66,26 +66,26 @@ const tabs: Tab[] = [
 ];
 
 // WHO Growth Standards (simplified - real implementation would use full WHO data)
-const whoStandards = {
-  weight: {
-    male: [
-      { month: 0, median: 3.3, sd1: 3.9, sd2: 4.4, sd_1: 2.9, sd_2: 2.5 },
-      { month: 6, median: 7.9, sd1: 8.8, sd2: 9.8, sd_1: 7.1, sd_2: 6.4 },
-      { month: 12, median: 9.6, sd1: 10.8, sd2: 12.0, sd_1: 8.6, sd_2: 7.7 },
-      { month: 18, median: 10.9, sd1: 12.2, sd2: 13.7, sd_1: 9.8, sd_2: 8.8 },
-      { month: 24, median: 12.2, sd1: 13.6, sd2: 15.3, sd_1: 10.8, sd_2: 9.7 },
-    ],
-  },
-  height: {
-    male: [
-      { month: 0, median: 49.9, sd1: 51.8, sd2: 53.7, sd_1: 48.0, sd_2: 46.1 },
-      { month: 6, median: 67.6, sd1: 69.8, sd2: 71.9, sd_1: 65.4, sd_2: 63.3 },
-      { month: 12, median: 75.7, sd1: 78.0, sd2: 80.5, sd_1: 73.4, sd_2: 71.0 },
-      { month: 18, median: 82.3, sd1: 84.9, sd2: 87.7, sd_1: 79.6, sd_2: 76.9 },
-      { month: 24, median: 87.8, sd1: 90.7, sd2: 93.9, sd_1: 84.8, sd_2: 81.7 },
-    ],
-  },
-};
+// const _whoStandards = {
+//   weight: {
+//     male: [
+//       { month: 0, median: 3.3, sd1: 3.9, sd2: 4.4, sd_1: 2.9, sd_2: 2.5 },
+//       { month: 6, median: 7.9, sd1: 8.8, sd2: 9.8, sd_1: 7.1, sd_2: 6.4 },
+//       { month: 12, median: 9.6, sd1: 10.8, sd2: 12.0, sd_1: 8.6, sd_2: 7.7 },
+//       { month: 18, median: 10.9, sd1: 12.2, sd2: 13.7, sd_1: 9.8, sd_2: 8.8 },
+//       { month: 24, median: 12.2, sd1: 13.6, sd2: 15.3, sd_1: 10.8, sd_2: 9.7 },
+//     ],
+//   },
+//   height: {
+//     male: [
+//       { month: 0, median: 49.9, sd1: 51.8, sd2: 53.7, sd_1: 48.0, sd_2: 46.1 },
+//       { month: 6, median: 67.6, sd1: 69.8, sd2: 71.9, sd_1: 65.4, sd_2: 63.3 },
+//       { month: 12, median: 75.7, sd1: 78.0, sd2: 80.5, sd_1: 73.4, sd_2: 71.0 },
+//       { month: 18, median: 82.3, sd1: 84.9, sd2: 87.7, sd_1: 79.6, sd_2: 76.9 },
+//       { month: 24, median: 87.8, sd1: 90.7, sd2: 93.9, sd_1: 84.8, sd_2: 81.7 },
+//     ],
+//   },
+// };
 
 export default function KMSDigitalPage() {
   const router = useRouter();
@@ -106,7 +106,7 @@ export default function KMSDigitalPage() {
   // Calculate nutritional status
   const nutritionalStatus = useMemo(() => {
     const weight = latestVisit.weight;
-    const ageMonths = latestVisit.age_months;
+    const _ageMonths = latestVisit.age_months;
     
     // Simplified Z-score calculation
     const medianWeight = 10.9; // Approximate for 18 months
@@ -302,7 +302,7 @@ export default function KMSDigitalPage() {
         </div>
         
         <div className="h-40 flex items-end justify-between gap-2 px-4">
-          {mockVisits.slice(0, 6).reverse().map((visit, index) => (
+          {mockVisits.slice(0, 6).reverse().map((visit, _index) => (
             <div key={visit.date} className="flex-1 flex flex-col items-center gap-1">
               <div 
                 className="w-full bg-teal-500 rounded-t-sm transition-all hover:bg-teal-600"
@@ -342,12 +342,12 @@ export default function KMSDigitalPage() {
               <div className="absolute w-full border-t border-dashed border-red-300" style={{ top: '85%' }} />
               
               {/* Data Points */}
-              {mockVisits.slice(0, 6).reverse().map((visit, index) => (
+              {mockVisits.slice(0, 6).reverse().map((visit, _index) => (
                 <div
                   key={visit.date}
                   className="absolute w-3 h-3 bg-teal-600 rounded-full border-2 border-white shadow-sm"
                   style={{
-                    left: `${10 + index * 15}%`,
+                    left: `${10 + _index * 15}%`,
                     bottom: `${(visit.weight / 15) * 100}%`,
                   }}
                   title={`${visit.weight} kg - ${visit.age_months} bulan`}
@@ -428,12 +428,12 @@ export default function KMSDigitalPage() {
           <div className="relative">
             <div className="h-64 bg-gradient-to-b from-green-50 via-yellow-50 to-red-50 rounded-lg border border-gray-200 relative overflow-hidden">
               {/* Data Points */}
-              {mockVisits.slice(0, 6).reverse().map((visit, index) => (
+              {mockVisits.slice(0, 6).reverse().map((visit, _index) => (
                 <div
                   key={visit.date}
                   className="absolute w-3 h-3 bg-orange-600 rounded-full border-2 border-white shadow-sm"
                   style={{
-                    left: `${10 + index * 15}%`,
+                    left: `${10 + _index * 15}%`,
                     bottom: `${(visit.head_circumference / 55) * 100}%`,
                   }}
                   title={`${visit.head_circumference} cm - ${visit.age_months} bulan`}
@@ -536,7 +536,7 @@ export default function KMSDigitalPage() {
       <Card>
         <h3 className="font-semibold text-gray-900 mb-4">Daftar Imunisasi</h3>
         <div className="space-y-3">
-          {mockImmunizations.map((imm, index) => (
+          {mockImmunizations.map((imm, _index) => (
             <div
               key={imm.name}
               className={`flex items-center justify-between p-4 rounded-lg border ${

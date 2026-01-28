@@ -5,7 +5,7 @@ import TabNavigation, { Tab } from '../TabNavigation';
 import NumberInputWithControls from '../NumberInputWithControls';
 import ChecklistInput from '../ChecklistInput';
 import StatusIndicatorBadge from '../StatusIndicatorBadge';
-import { calculateBBU, calculateTBU, calculateIMT, getIMTStatus } from '@/lib/nutritionCalculator';
+import { getIMTStatus } from '@/lib/nutritionCalculator';
 
 export type IbuHamilFormData = {
   full_name: string;
@@ -134,7 +134,7 @@ export default function IbuHamilForm({ data, onChange }: IbuHamilFormProps) {
 
   const chronicDiseaseItems = useMemo(
     () => chronicDiseaseOptions.map((item) => ({ ...item, checked: formData.chronic_diseases.includes(item.id) })),
-    [formData.chronic_diseases]
+    [formData.chronic_diseases, chronicDiseaseOptions]
   );
 
   return (

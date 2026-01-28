@@ -8,7 +8,14 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 interface DonutChartProps {
-  data: any;
+  data: {
+    labels: string[];
+    datasets: Array<{
+      data: number[];
+      backgroundColor: string[];
+      borderWidth: number;
+    }>;
+  };
   title: string;
   labels: string[];
   className?: string;

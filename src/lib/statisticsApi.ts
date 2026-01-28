@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createClient } from './supabase'
 import type { 
   Statistics,
@@ -7,7 +8,7 @@ import type {
   BreakdownRow,
   IbuHamilStats
 } from '@/types'
-import { startOfMonth, endOfMonth, subMonths, format, differenceInMonths } from 'date-fns'
+import { subMonths, format, differenceInMonths } from 'date-fns'
 
 const PATIENT_TYPES = ['bayi', 'balita', 'ibu_hamil', 'remaja_dewasa', 'lansia'] as const
 type PatientTypeKey = typeof PATIENT_TYPES[number]
@@ -18,7 +19,7 @@ function percentTrend(current: number, previous: number) {
 }
 
 // Statistics & Reporting
-export async function getStatistics(startDate: string, endDate: string): Promise<{ data: Statistics | null, error: any }> {
+export async function getStatistics(startDate: string, endDate: string): Promise<{ data: Statistics | null, error: Error | null }> {
   const supabase = createClient()
   
   // Calculate previous period for trend comparison
@@ -132,11 +133,11 @@ export async function getStatistics(startDate: string, endDate: string): Promise
     
     return { data, error: null }
   } catch (error) {
-    return { data: null, error }
+    return { data: null, error: error as Error }
   }
 }
 
-export async function getVisitTrends(startDate: string, endDate: string): Promise<{ data: VisitTrend[] | null, error: any }> {
+export async function getVisitTrends(startDate: string, endDate: string): Promise<{ data: VisitTrend[] | null, error: Error | null }> {
   const supabase = createClient()
   
   try {
@@ -149,12 +150,13 @@ export async function getVisitTrends(startDate: string, endDate: string): Promis
       .gte('visit_date', startDate)
       .lte('visit_date', endDate)
     
-    if (error) return { data: null, error }
+    if (error) return { data: null, error: error as Error }
     
     // Group by month (YYYY-MM) and patient type
     const monthlyData: Record<string, { monthLabel: string } & Record<PatientTypeKey, number>> = {}
 
-    visits?.forEach((visit: any) => {
+    // @ts-expect-error - Supabase relation type issue
+    visits?.forEach((visit: { visit_date: string; patient: { patient_type: string } | null }) => {
       const visitDate = new Date(visit.visit_date)
       const key = format(visitDate, 'yyyy-MM')
       const monthLabel = format(visitDate, 'MMM')
@@ -199,11 +201,11 @@ export async function getVisitTrends(startDate: string, endDate: string): Promis
     
     return { data: trends, error: null }
   } catch (error) {
-    return { data: null, error }
+    return { data: null, error: error as Error }
   }
 }
 
-export async function getNutritionalStatus(): Promise<{ data: NutritionalStatus[] | null, error: any }> {
+export async function getNutritionalStatus(): Promise<{ data: NutritionalStatus[] | null, error: Error | null }> {
   const supabase = createClient()
   
   try {
@@ -254,11 +256,11 @@ export async function getNutritionalStatus(): Promise<{ data: NutritionalStatus[
     
     return { data, error: null }
   } catch (error) {
-    return { data: null, error }
+    return { data: null, error: error as Error }
   }
 }
 
-export async function getImmunizationCoverage(): Promise<{ data: ImmunizationCoverage[] | null, error: any }> {
+export async function getImmunizationCoverage(): Promise<{ data: ImmunizationCoverage[] | null, error: Error | null }> {
   const supabase = createClient()
   
   try {
@@ -293,11 +295,11 @@ export async function getImmunizationCoverage(): Promise<{ data: ImmunizationCov
     
     return { data, error: null }
   } catch (error) {
-    return { data: null, error }
+    return { data: null, error: error as Error }
   }
 }
 
-export async function getPatientDistribution(): Promise<{ data: any[] | null, error: any }> {
+export async function getPatientDistribution(): Promise<{ data: Array<{ name: string; value: number; color: string }> | null, error: Error | null }> {
   const supabase = createClient()
   
   try {
@@ -305,7 +307,7 @@ export async function getPatientDistribution(): Promise<{ data: any[] | null, er
       .from('patients')
       .select('patient_type')
     
-    if (error) return { data: null, error }
+    if (error) return { data: null, error: error as Error }
     
     const distribution: Record<PatientTypeKey, number> = {
       bayi: 0,
@@ -315,7 +317,7 @@ export async function getPatientDistribution(): Promise<{ data: any[] | null, er
       lansia: 0,
     }
 
-    patients?.forEach((patient: any) => {
+    patients?.forEach((patient: { patient_type: string }) => {
       const type = patient.patient_type as PatientTypeKey | undefined
       if (type && type in distribution) distribution[type]++
     })
@@ -330,11 +332,11 @@ export async function getPatientDistribution(): Promise<{ data: any[] | null, er
     
     return { data, error: null }
   } catch (error) {
-    return { data: null, error }
+    return { data: null, error: error as Error }
   }
 }
 
-export async function getDetailedBreakdown(startDate: string, endDate: string): Promise<{ data: BreakdownRow[] | null, error: any }> {
+export async function getDetailedBreakdown(startDate: string, endDate: string): Promise<{ data: BreakdownRow[] | null, error: Error | null }> {
   const supabase = createClient()
   
   try {
@@ -361,7 +363,7 @@ export async function getDetailedBreakdown(startDate: string, endDate: string): 
       lansia: 0,
     }
 
-    patients?.forEach((p: any) => {
+    patients?.forEach((p: { patient_type: string }) => {
       const type = p.patient_type as PatientTypeKey | undefined
       if (type && type in patientCounts) patientCounts[type]++
     })
@@ -398,11 +400,13 @@ export async function getDetailedBreakdown(startDate: string, endDate: string): 
       lansia: 0,
     }
 
-    currentVisits?.forEach((v: any) => {
+    // @ts-expect-error - Supabase relation type issue
+    currentVisits?.forEach((v: { patient: { patient_type: string } | null }) => {
       const type = v.patient?.patient_type as PatientTypeKey | undefined
       if (type && type in currentCounts) currentCounts[type]++
     })
-    prevVisits?.forEach((v: any) => {
+    // @ts-expect-error - Supabase relation type issue
+    prevVisits?.forEach((v: { patient: { patient_type: string } | null }) => {
       const type = v.patient?.patient_type as PatientTypeKey | undefined
       if (type && type in prevCounts) prevCounts[type]++
     })
@@ -432,11 +436,11 @@ export async function getDetailedBreakdown(startDate: string, endDate: string): 
 
     return { data, error: null }
   } catch (error) {
-    return { data: null, error }
+    return { data: null, error: error as Error }
   }
 }
 
-export async function getIbuHamilStats(): Promise<{ data: IbuHamilStats | null, error: any }> {
+export async function getIbuHamilStats(): Promise<{ data: IbuHamilStats | null, error: Error | null }> {
   const supabase = createClient()
 
   try {
@@ -447,7 +451,7 @@ export async function getIbuHamilStats(): Promise<{ data: IbuHamilStats | null, 
 
     if (patientsError) return { data: null, error: patientsError }
 
-    const ids = (ibuHamilPatients || []).map((p: any) => p.id)
+    const ids = (ibuHamilPatients || []).map((p: { id: string }) => p.id)
 
     if (ids.length === 0) {
       return {
@@ -474,7 +478,7 @@ export async function getIbuHamilStats(): Promise<{ data: IbuHamilStats | null, 
     let trimester3 = 0
     let risikoTinggi = 0
 
-    extended?.forEach((row: any) => {
+    extended?.forEach((row: { pregnancy_week: number | null; pregnancy_risk_level: string | null }) => {
       if (row.pregnancy_risk_level === 'tinggi') risikoTinggi++
       const week = row.pregnancy_week
       if (typeof week === 'number') {
@@ -494,6 +498,6 @@ export async function getIbuHamilStats(): Promise<{ data: IbuHamilStats | null, 
 
     return { data, error: null }
   } catch (error) {
-    return { data: null, error }
+    return { data: null, error: error as Error }
   }
 }

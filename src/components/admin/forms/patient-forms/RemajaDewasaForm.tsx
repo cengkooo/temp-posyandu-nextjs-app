@@ -3,7 +3,6 @@
 import { useState, useMemo } from 'react';
 import TabNavigation, { Tab } from '../TabNavigation';
 import NumberInputWithControls from '../NumberInputWithControls';
-import BloodPressureInput from '../BloodPressureInput';
 import ChecklistInput from '../ChecklistInput';
 import StatusIndicatorBadge from '../StatusIndicatorBadge';
 import { calculateIMT, getIMTStatus } from '@/lib/nutritionCalculator';
@@ -98,7 +97,7 @@ const tabs: Tab[] = [
 export default function RemajaDewasaForm({ data, onChange, errors = {}, disabled = false }: RemajaDewasaFormProps) {
   const [activeTab, setActiveTab] = useState('identitas');
 
-  const updateField = (field: keyof RemajaDewasaFormData, value: any) => {
+  const updateField = (field: keyof RemajaDewasaFormData, value: unknown) => {
     onChange({ ...data, [field]: value });
   };
 
@@ -401,7 +400,7 @@ export default function RemajaDewasaForm({ data, onChange, errors = {}, disabled
                     value={item.value}
                     disabled={disabled}
                     checked={data.smoking_status === item.value}
-                    onChange={(e) => updateField('smoking_status', e.target.value as any)}
+                    onChange={(e) => updateField('smoking_status', e.target.value as 'tidak' | 'aktif' | 'mantan')}
                     className="w-4 h-4 text-purple-600 focus:ring-purple-500"
                   />
                   <span className="text-sm text-gray-700">{item.label}</span>
@@ -437,7 +436,7 @@ export default function RemajaDewasaForm({ data, onChange, errors = {}, disabled
                     value={item.value}
                     disabled={disabled}
                     checked={data.physical_activity === item.value}
-                    onChange={(e) => updateField('physical_activity', e.target.value as any)}
+                    onChange={(e) => updateField('physical_activity', e.target.value as 'tidak_aktif' | 'ringan' | 'sedang' | 'berat')}
                     className="w-4 h-4 text-purple-600 focus:ring-purple-500"
                   />
                   <span className="text-sm text-gray-700">{item.label}</span>

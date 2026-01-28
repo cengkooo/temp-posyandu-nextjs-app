@@ -6,6 +6,28 @@ import Footer from '@/components/landing/Footer';
 import '@/styles/landing.css';
 import '@/styles/event-detail.css';
 import { createClient } from '@/lib/supabase';
+import type { Database } from '@/types/database.types';
+
+type Schedule = Database['public']['Tables']['schedules']['Row'];
+
+// Extended type for runtime schedule properties
+interface ExtendedSchedule extends Schedule {
+  subtitle?: string;
+  duration?: string;
+  full_address?: string;
+  map_link?: string;
+  capacity?: number;
+  price?: string;
+  price_note?: string;
+  coordinator_name?: string;
+  coordinator_role?: string;
+  contact_phone?: string;
+  contact_whatsapp?: string;
+  requirements?: string[];
+  important_note_title?: string;
+  important_note_message?: string;
+  tags?: string[];
+}
 
 export default async function EventDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -49,36 +71,36 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
   const event = {
     id: schedule.id,
     title: schedule.title,
-    subtitle: (schedule as any).subtitle || schedule.description || 'Program Layanan Posyandu',
+    subtitle: (schedule as ExtendedSchedule).subtitle || schedule.description || 'Program Layanan Posyandu',
     date: formatDate(schedule.date),
     time: schedule.time || '08:00 - 12:00 WIB',
-    duration: (schedule as any).duration || '4 Jam',
+    duration: (schedule as ExtendedSchedule).duration || '4 Jam',
     location: schedule.location || 'Posyandu Sehat Mandiri',
-    fullAddress: (schedule as any).full_address || schedule.location || 'Jl. Kesehatan No. 45, Kec. Sukamaju, Kab. Sejahtera',
-    mapLink: (schedule as any).map_link || '#',
-    capacity: `${(schedule as any).capacity || 50} Peserta`,
-    price: (schedule as any).price || 'GRATIS',
-    priceNote: (schedule as any).price_note || 'Didukung oleh Pemerintah',
+    fullAddress: (schedule as ExtendedSchedule).full_address || schedule.location || 'Jl. Kesehatan No. 45, Kec. Sukamaju, Kab. Sejahtera',
+    mapLink: (schedule as ExtendedSchedule).map_link || '#',
+    capacity: `${(schedule as ExtendedSchedule).capacity || 50} Peserta`,
+    price: (schedule as ExtendedSchedule).price || 'GRATIS',
+    priceNote: (schedule as ExtendedSchedule).price_note || 'Didukung oleh Pemerintah',
     description: schedule.description || 'Program layanan kesehatan Posyandu Sehat Mandiri untuk memberikan pelayanan kesehatan optimal bagi masyarakat.',
     coordinator: {
-      name: (schedule as any).coordinator_name || 'dr. Siti Nurhaliza',
-      role: (schedule as any).coordinator_role || 'Bidan Kepala',
+      name: (schedule as ExtendedSchedule).coordinator_name || 'dr. Siti Nurhaliza',
+      role: (schedule as ExtendedSchedule).coordinator_role || 'Bidan Kepala',
     },
     contact: {
-      phone: (schedule as any).contact_phone || '0812-3456-7890',
-      whatsapp: (schedule as any).contact_whatsapp || 'WhatsApp tersedia',
+      phone: (schedule as ExtendedSchedule).contact_phone || '0812-3456-7890',
+      whatsapp: (schedule as ExtendedSchedule).contact_whatsapp || 'WhatsApp tersedia',
     },
-    requirements: (schedule as any).requirements || [
+    requirements: (schedule as ExtendedSchedule).requirements || [
       'Membawa kartu identitas (KTP/KK)',
       'Datang tepat waktu sesuai jadwal',
       'Mengikuti protokol kesehatan yang berlaku',
       'Untuk pelayanan khusus, harap mendaftar terlebih dahulu',
     ],
     importantNote: {
-      title: (schedule as any).important_note_title || 'Catatan Penting',
-      message: (schedule as any).important_note_message || 'Jika memiliki kondisi kesehatan khusus, harap konsultasikan dengan petugas kesehatan terlebih dahulu.',
+      title: (schedule as ExtendedSchedule).important_note_title || 'Catatan Penting',
+      message: (schedule as ExtendedSchedule).important_note_message || 'Jika memiliki kondisi kesehatan khusus, harap konsultasikan dengan petugas kesehatan terlebih dahulu.',
     },
-    tags: (schedule as any).tags || [schedule.title],
+    tags: (schedule as ExtendedSchedule).tags || [schedule.title],
   };
 
   return (
@@ -111,8 +133,8 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
               <div className="event-left">
                 {/* Tags */}
                 <div className="event-tags">
-                  {event.tags.map((tag: string, index: number) => (
-                    <span key={index} className="event-tag">{tag}</span>
+                  {event.tags.map((tag: string, _index: number) => (
+                    <span key={_index} className="event-tag">{tag}</span>
                   ))}
                   <button className="share-button">
                     <Share2 size={16} />

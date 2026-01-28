@@ -345,7 +345,7 @@ function ScheduleModal({
 }: {
   schedule: Schedule | null;
   onClose: () => void;
-  onSave: (data: any) => void;
+  onSave: (data: Record<string, unknown>) => void;
 }) {
   const [formData, setFormData] = useState({
     title: schedule?.title || '',

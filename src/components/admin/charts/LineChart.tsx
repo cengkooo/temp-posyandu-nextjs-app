@@ -25,7 +25,16 @@ ChartJS.register(
 );
 
 interface LineChartProps {
-  data: any;
+  data: {
+    labels: string[];
+    datasets: Array<{
+      label: string;
+      data: number[];
+      borderColor: string;
+      backgroundColor: string;
+      tension?: number;
+    }>;
+  };
   title: string;
   selectedPeriod?: string;
   onPeriodChange?: (period: string) => void;

@@ -6,10 +6,6 @@ import { ArrowLeft, Save, Loader2 } from 'lucide-react';
 import Card from '@/components/admin/ui/Card';
 import Button from '@/components/admin/forms/Button';
 import TabNavigation, { Tab } from '@/components/admin/forms/TabNavigation';
-import NumberInputWithControls from '@/components/admin/forms/NumberInputWithControls';
-import BloodPressureInput from '@/components/admin/forms/BloodPressureInput';
-import ChecklistInput from '@/components/admin/forms/ChecklistInput';
-import StatusIndicatorBadge from '@/components/admin/forms/StatusIndicatorBadge';
 import { getPatientById, updatePatient } from '@/lib/api';
 import type { Patient } from '@/types';
 
@@ -76,12 +72,17 @@ export default function EditPasienPage() {
       address: data.address || '',
       phone: data.phone || '',
       parent_name: data.parent_name || '',
-      blood_type: (data as any).blood_type || '',
+      blood_type: (data as Patient & { blood_type?: string }).blood_type || '',
     });
     setLoading(false);
   };
 
-  const updateField = (field: string, value: any) => {
+  useEffect(() => {
+    loadPatient();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [patientId]);
+
+  const updateField = (field: string, value: unknown) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 

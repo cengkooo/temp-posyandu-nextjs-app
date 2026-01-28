@@ -12,7 +12,6 @@ import {
   Clock,
   AlertTriangle,
   Baby,
-  ChevronRight,
   Download,
   Printer,
   Eye,
@@ -38,7 +37,7 @@ interface PatientImmunization {
   status: 'complete' | 'on_track' | 'overdue';
 }
 
-interface ImmunizationRecord {
+type ImmunizationRecord = {
   id: string;
   vaccine_name: string;
   vaccine_date: string;
@@ -70,90 +69,6 @@ const vaccineSchedule: VaccineSchedule[] = [
   { vaccine: 'Campak/MR (Booster)', target_age: '18 bulan', description: 'Booster' },
 ];
 
-// Mock data for patients immunization tracking
-const mockPatients: PatientImmunization[] = [
-  {
-    id: '1',
-    patient_id: 'P001',
-    patient_name: 'Ahmad Rizky',
-    patient_type: 'balita',
-    date_of_birth: '2023-06-15',
-    age_months: 19,
-    completed: 10,
-    total: 13,
-    nextDue: '2025-01-15',
-    nextVaccine: 'Campak/MR (Booster)',
-    status: 'on_track',
-  },
-  {
-    id: '2',
-    patient_id: 'P002',
-    patient_name: 'Siti Fatimah',
-    patient_type: 'bayi',
-    date_of_birth: '2024-03-20',
-    age_months: 10,
-    completed: 8,
-    total: 13,
-    nextDue: '2024-12-20',
-    nextVaccine: 'Campak/MR',
-    status: 'overdue',
-  },
-  {
-    id: '3',
-    patient_id: 'P003',
-    patient_name: 'Muhammad Fauzi',
-    patient_type: 'bayi',
-    date_of_birth: '2024-08-10',
-    age_months: 5,
-    completed: 6,
-    total: 13,
-    nextDue: '2025-02-10',
-    nextVaccine: 'DPT-HB-Hib 3',
-    status: 'on_track',
-  },
-  {
-    id: '4',
-    patient_id: 'P004',
-    patient_name: 'Aisyah Putri',
-    patient_type: 'balita',
-    date_of_birth: '2022-11-05',
-    age_months: 26,
-    completed: 13,
-    total: 13,
-    nextDue: null,
-    nextVaccine: null,
-    status: 'complete',
-  },
-  {
-    id: '5',
-    patient_id: 'P005',
-    patient_name: 'Budi Santoso',
-    patient_type: 'bayi',
-    date_of_birth: '2024-06-25',
-    age_months: 7,
-    completed: 7,
-    total: 13,
-    nextDue: '2025-01-25',
-    nextVaccine: 'IPV',
-    status: 'on_track',
-  },
-];
-
-// Mock coverage data
-const coverageData = [
-  { vaccine: 'HB0', target: 200, actual: 195, percentage: 97.5 },
-  { vaccine: 'BCG', target: 200, actual: 188, percentage: 94.0 },
-  { vaccine: 'Polio 1', target: 200, actual: 192, percentage: 96.0 },
-  { vaccine: 'DPT-HB-Hib 1', target: 180, actual: 172, percentage: 95.6 },
-  { vaccine: 'Polio 2', target: 180, actual: 168, percentage: 93.3 },
-  { vaccine: 'DPT-HB-Hib 2', target: 160, actual: 148, percentage: 92.5 },
-  { vaccine: 'Polio 3', target: 160, actual: 145, percentage: 90.6 },
-  { vaccine: 'DPT-HB-Hib 3', target: 140, actual: 125, percentage: 89.3 },
-  { vaccine: 'Polio 4', target: 140, actual: 118, percentage: 84.3 },
-  { vaccine: 'IPV', target: 140, actual: 130, percentage: 92.9 },
-  { vaccine: 'Campak/MR', target: 120, actual: 102, percentage: 85.0 },
-];
-
 const tabs: Tab[] = [
   { id: 'tracking', label: 'Tracking Imunisasi', icon: <Syringe className="w-4 h-4" /> },
   { id: 'coverage', label: 'Cakupan', icon: <CheckCircle className="w-4 h-4" /> },
@@ -171,8 +86,8 @@ export default function ImunisasiPage() {
   // State for data from database
   const [patients, setPatients] = useState<PatientImmunization[]>([]);
   const [summary, setSummary] = useState({ complete: 0, on_track: 0, overdue: 0, total: 0 });
-  const [coverageData, setCoverageData] = useState<any[]>([]);
-  const [overallCoverage, setOverallCoverage] = useState<any>({ percentage: 0, complete: 0, total: 0, target: 95 });
+  const [coverageData, setCoverageData] = useState<Array<{ vaccine: string; target_age: string; description: string; percentage: number; complete: number; total: number; actual?: number; target?: number }>>([]);
+  const [overallCoverage, setOverallCoverage] = useState<{ percentage: number; complete: number; total: number; target: number }>({ percentage: 0, complete: 0, total: 0, target: 95 });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -180,11 +95,11 @@ export default function ImunisasiPage() {
   const [formData, setFormData] = useState({
     vaccine_name: '',
     vaccine_date: '',
-    notes: '',
+    notes: ''
   });
   const [isSaving, setIsSaving] = useState(false);
-  const [editingRecord, setEditingRecord] = useState<any>(null);
-  const [patientHistory, setPatientHistory] = useState<any[]>([]);
+  const [editingRecord, setEditingRecord] = useState<ImmunizationRecord | null>(null);
+  const [patientHistory, setPatientHistory] = useState<ImmunizationRecord[]>([]);
 
   // Fetch tracking data
   useEffect(() => {
@@ -313,7 +228,7 @@ export default function ImunisasiPage() {
     }
   };
 
-  const handleEditRecord = (record: any) => {
+  const handleEditRecord = (record: ImmunizationRecord) => {
     setEditingRecord(record);
     setFormData({
       vaccine_name: record.vaccine_name,
@@ -372,9 +287,9 @@ export default function ImunisasiPage() {
           const immunizations = result.data || [];
           
           // Create vaccine status object
-          const vaccineStatus: any = {};
+          const vaccineStatus: Record<string, string> = {};
           vaccineList.forEach(vaccine => {
-            const hasVaccine = immunizations.some((imm: any) => imm.vaccine_name === vaccine);
+            const hasVaccine = immunizations.some((imm: ImmunizationRecord) => imm.vaccine_name === vaccine);
             vaccineStatus[vaccine] = hasVaccine ? 'Sudah' : 'Belum';
           });
 
@@ -435,9 +350,9 @@ export default function ImunisasiPage() {
           const immunizations = result.data || [];
           
           // Create vaccine status object
-          const vaccineStatus: { [key: string]: string } = {};
+          const vaccineStatus: Record<string, string> = {};
           vaccineList.forEach(vaccine => {
-            const hasVaccine = immunizations.some((imm: any) => imm.vaccine_name === vaccine);
+            const hasVaccine = immunizations.some((imm: ImmunizationRecord) => imm.vaccine_name === vaccine);
             vaccineStatus[vaccine] = hasVaccine ? 'Sudah' : 'Belum';
           });
 
@@ -615,14 +530,6 @@ export default function ImunisasiPage() {
     }
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('id-ID', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-    });
-  };
-
   const renderTrackingTab = () => (
     <div className="space-y-4">
       {/* Loading State */}
@@ -712,7 +619,7 @@ export default function ImunisasiPage() {
               <Filter className="w-4 h-4 text-gray-400" />
               <select
                 value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value as any)}
+                onChange={(e) => setFilterStatus(e.target.value as 'all' | 'complete' | 'on_track' | 'overdue')}
                 className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
               >
                 <option value="all">Semua Status</option>
@@ -1343,7 +1250,7 @@ export default function ImunisasiPage() {
                       setFormData({
                         vaccine_name: '',
                         vaccine_date: '',
-                        notes: '',
+                        notes: ''
                       });
                     }}
                     disabled={isSaving}

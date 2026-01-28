@@ -168,6 +168,7 @@ export default function TambahPasienPage() {
 
       // Save extended data if patient was created successfully
       if (result && result.id) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let extendedData: any = {
           patient_id: result.id,
         };
@@ -261,7 +262,7 @@ export default function TambahPasienPage() {
         }
 
         // Insert extended data
-        const { error: extError } = await createPatientExtendedData(extendedData);
+        const { error: extError } = await createPatientExtendedData(extendedData as Parameters<typeof createPatientExtendedData>[0]);
         if (extError) {
           console.error('Warning: Failed to save extended data:', extError);
           // Don't block the process, just log the error

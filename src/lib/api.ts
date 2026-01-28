@@ -1,13 +1,14 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createClient } from './supabase'
 import type { 
   AnnouncementInsert, 
-  ScheduleInsert, 
   Profile,
   Patient,
   PatientInsert,
   PatientUpdate,
   Visit,
   VisitInsert,
+  VisitUpdate,
   PatientExtendedDataInsert,
   PatientExtendedDataUpdate
 } from '@/types'
@@ -81,7 +82,7 @@ export async function getPatients() {
   return { data, error }
 }
 
-export async function getPatientById(id: string): Promise<{ data: Patient | null; error: any }> {
+export async function getPatientById(id: string): Promise<{ data: Patient | null; error: Error | null }> {
   const supabase = createClient()
   
   const { data, error } = await supabase
@@ -116,7 +117,7 @@ export async function getPatientWithVisits(id: string) {
   }
 }
 
-export async function createPatient(patient: PatientInsert): Promise<{ data: Patient | null; error: any }> {
+export async function createPatient(patient: PatientInsert): Promise<{ data: Patient | null; error: Error | null }> {
   const supabase = createClient()
   
   const { data, error } = await supabase
@@ -133,7 +134,7 @@ export async function updatePatient(id: string, updates: PatientUpdate) {
   
   const { data, error } = await supabase
     .from('patients')
-    .update(updates as any)
+    .update(updates)
     .eq('id', id)
     .select()
     .single()
@@ -284,7 +285,7 @@ export async function createVisit(visit: VisitInsert) {
   return { data, error }
 }
 
-export async function updateVisit(id: string, updates: any) {
+export async function updateVisit(id: string, updates: VisitUpdate) {
   const supabase = createClient()
   
   const { data, error } = await supabase

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import {
   Users,
   CalendarCheck,
@@ -23,10 +24,10 @@ import type { NutritionalStatus, VisitTrend } from '@/types';
 export default function AdminDashboard() {
   const [selectedPeriod, setSelectedPeriod] = useState('6');
 
-  const [loading, setLoading] = useState(true);
+  const [_loading, setLoading] = useState(true);
   const [nutrition, setNutrition] = useState<NutritionalStatus[]>([]);
   const [visitTrends, setVisitTrends] = useState<VisitTrend[]>([]);
-  const [recentVisits, setRecentVisits] = useState<any[]>([]);
+  const [recentVisits, setRecentVisits] = useState<Array<Record<string, unknown>>>([]);
   const [summary, setSummary] = useState({
     totalPatients: 0,
     visitsThisMonth: 0,
@@ -82,13 +83,13 @@ export default function AdminDashboard() {
   }, [visitTrends]);
 
   const donutChartData = useMemo(() => {
-    const labels = ['Gizi Baik', 'Gizi Kurang', 'Gizi Buruk', 'Stunting'];
-    const byStatus = new Map(nutrition.map((n) => [n.status, n.count]));
+    const labels: string[] = ['Gizi Baik', 'Gizi Kurang', 'Gizi Buruk', 'Stunting'];
+    const byStatus = new Map<string, number>(nutrition.map((n) => [n.status, n.count]));
     return {
       labels,
       datasets: [
         {
-          data: labels.map((l) => byStatus.get(l as any) || 0),
+          data: labels.map((l) => byStatus.get(l) || 0),
           backgroundColor: ['#10b981', '#fbbf24', '#f97316', '#ef4444'],
           borderWidth: 0,
         },
@@ -102,13 +103,17 @@ export default function AdminDashboard() {
     {
       key: 'type',
       label: 'Tipe',
-      render: (value: string, row: any) => (
-        <span className={`text-xs px-2 py-1 rounded-full font-medium ${row.typeColor}`}>
-          {value}
+      render: (value: unknown, row: Record<string, unknown>) => (
+        <span className={`text-xs px-2 py-1 rounded-full font-medium ${row.typeColor as string}`}>
+          {value as string}
         </span>
       ),
     },
-    { key: 'date', label: 'Tanggal' },
+    {
+      key: 'date',
+      label: 'Tanggal',
+      render: (value: unknown) => new Date(value as string).toLocaleDateString('id-ID'),
+    },
     { key: 'officer', label: 'Petugas' },
   ];
 
@@ -173,12 +178,12 @@ export default function AdminDashboard() {
         <Card className="lg:col-span-2">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-lg font-bold text-gray-900">Kunjungan Terbaru</h2>
-            <a
+            <Link
               href="/admin/kunjungan"
               className="text-sm font-medium text-teal-600 hover:text-teal-700"
             >
               Lihat Semua
-            </a>
+            </Link>
           </div>
           <DataTable columns={tableColumns} data={recentVisits} />
         </Card>

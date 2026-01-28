@@ -37,7 +37,7 @@ export default function PasienPage() {
 
   const loadPatients = async () => {
     setLoading(true);
-    const { data, error } = await getPatients();
+    const { data, error: _error } = await getPatients();
     if (data) {
       setPatients(data);
     }

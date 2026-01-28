@@ -138,7 +138,7 @@ export default function LansiaForm({ data, onChange }: LansiaFormProps) {
 
   const chronicDiseaseItems = useMemo(
     () => chronicDiseaseOptions.map((item) => ({ ...item, checked: formData.chronic_diseases.includes(item.id) })),
-    [formData.chronic_diseases]
+    [formData.chronic_diseases, chronicDiseaseOptions]
   );
 
   const adlOptions = [

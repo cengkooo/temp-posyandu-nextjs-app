@@ -2,26 +2,22 @@
 
 import { useState } from 'react';
 import {
-  Settings,
   User,
   Users,
   Building,
   Bell,
   Shield,
   Database,
-  Palette,
   Save,
   Upload,
   Camera,
   Mail,
   Phone,
-  MapPin,
   Clock,
   CheckCircle,
   Plus,
   Trash2,
   Edit,
-  MoreVertical,
 } from 'lucide-react';
 import Card from '@/components/admin/ui/Card';
 import Button from '@/components/admin/forms/Button';
@@ -41,7 +37,7 @@ export default function PengaturanPage() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [showAddUserModal, setShowAddUserModal] = useState(false);
-  const [editingUser, setEditingUser] = useState<any>(null);
+  const [_editingUser, setEditingUser] = useState<Record<string, unknown> | null>(null);
 
   // Profil Posyandu
   const [posyanduData, setPosyanduData] = useState({

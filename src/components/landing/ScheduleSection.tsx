@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Calendar, Clock, MapPin, ChevronRight } from 'lucide-react';
+import { Clock, MapPin, ChevronRight } from 'lucide-react';
 
 interface Schedule {
   id: string;

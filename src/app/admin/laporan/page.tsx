@@ -19,7 +19,6 @@ import {
   Heart,
   AlertTriangle,
   CheckCircle,
-  UserCheck,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { differenceInMonths } from 'date-fns';
@@ -35,8 +34,6 @@ import {
   PieChart,
   Pie,
   Cell,
-  LineChart,
-  Line,
   AreaChart,
   Area,
 } from 'recharts';
@@ -84,13 +81,12 @@ export default function LaporanPage() {
   const [activeTab, setActiveTab] = useState('overview');
   const [startDate, setStartDate] = useState(format(new Date(new Date().getFullYear(), 0, 1), 'yyyy-MM-dd'));
   const [endDate, setEndDate] = useState(format(new Date(), 'yyyy-MM-dd'));
-  const [reportType, setReportType] = useState<'kunjungan' | 'imunisasi' | 'lengkap'>('lengkap');
   const [loading, setLoading] = useState(false);
 
   const [statistics, setStatistics] = useState<Statistics | null>(null);
   const [visitTrends, setVisitTrends] = useState<VisitTrend[]>([]);
   const [nutritionalStatus, setNutritionalStatus] = useState<NutritionalStatus[]>([]);
-  const [patientDistribution, setPatientDistribution] = useState<any[]>([]);
+  const [patientDistribution, setPatientDistribution] = useState<Array<{ name: string; value: number; color: string }>>([]);
   const [breakdown, setBreakdown] = useState<BreakdownRow[]>([]);
   const [immunizationCoverage, setImmunizationCoverage] = useState<ImmunizationCoverage[]>([]);
   const [ibuHamilStats, setIbuHamilStats] = useState<IbuHamilStats | null>(null);
@@ -123,13 +119,18 @@ export default function LaporanPage() {
     setLoading(false);
   };
 
+  useEffect(() => {
+    loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const monthsDiff = Math.max(1, differenceInMonths(new Date(endDate), new Date(startDate)) || 1);
   const totalPatientsInBreakdown = breakdown.reduce((sum, row) => sum + (row.patientCount || 0), 0);
   const totalNutrition = nutritionalStatus.reduce((sum, row) => sum + (row.count || 0), 0);
   const nutritionByStatus = (status: NutritionalStatus['status']) => nutritionalStatus.find((s) => s.status === status);
 
   const handleExportExcel = () => {
-    const filename = `laporan-${reportType}-${format(new Date(), 'yyyy-MM-dd')}`;
+    const filename = `laporan-posyandu-${format(new Date(), 'yyyy-MM-dd')}`;
     exportToExcel(
       {
         statistics: statistics || undefined,
@@ -137,12 +138,12 @@ export default function LaporanPage() {
         visitTrends: visitTrends
       },
       filename,
-      reportType
+      'posyandu'
     );
   };
 
   const handleExportPDF = () => {
-    const filename = `laporan-${reportType}-${format(new Date(), 'yyyy-MM-dd')}`;
+    const filename = `laporan-posyandu-${format(new Date(), 'yyyy-MM-dd')}`;
     exportToPDF(
       {
         statistics: statistics || undefined,
@@ -150,7 +151,7 @@ export default function LaporanPage() {
         dateRange: { start: startDate, end: endDate }
       },
       filename,
-      reportType
+      'posyandu'
     );
   };
 
@@ -161,7 +162,7 @@ export default function LaporanPage() {
         breakdown: breakdown,
         dateRange: { start: startDate, end: endDate }
       },
-      reportType
+      'posyandu'
     );
   };
 
@@ -289,7 +290,7 @@ export default function LaporanPage() {
                 paddingAngle={3}
                 dataKey="value"
               >
-                {patientDistribution.map((entry: any, index: number) => (
+                {patientDistribution.map((entry, index: number) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
               </Pie>
@@ -452,7 +453,10 @@ export default function LaporanPage() {
                 outerRadius={100}
                 paddingAngle={3}
                 dataKey="count"
-                label={(entry: any) => `${entry.status}: ${(entry.percentage || 0).toFixed(1)}%`}
+                label={(props) => {
+                  const entry = nutritionalStatus[props.index];
+                  return `${entry.status}: ${(entry.percentage || 0).toFixed(1)}%`;
+                }}
               >
                 {nutritionalStatus.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color || NUTRITION_COLORS[entry.status]} />

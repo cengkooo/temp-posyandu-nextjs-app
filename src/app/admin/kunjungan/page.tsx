@@ -35,17 +35,10 @@ export default function KunjunganPage() {
   const [editingVisit, setEditingVisit] = useState<VisitWithRelations | null>(null);
   const itemsPerPage = 10;
 
-  useEffect(() => {
-    loadVisits();
-  }, []);
-
-  useEffect(() => {
-    filterVisits();
-  }, [visits, searchQuery, typeFilter]);
 
   const loadVisits = async () => {
     setLoading(true);
-    const { data, error } = await getAllVisits();
+    const { data, error: _error } = await getAllVisits();
     if (data) {
       setVisits(data as VisitWithRelations[]);
     }
@@ -71,6 +64,15 @@ export default function KunjunganPage() {
     setFilteredVisits(filtered);
     setCurrentPage(1);
   };
+
+  useEffect(() => {
+    loadVisits();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    filterVisits();
+  }, [visits, searchQuery, typeFilter]);
 
   const handleDelete = async (id: string, patientName: string) => {
     if (!confirm(`Apakah Anda yakin ingin menghapus data kunjungan "${patientName}"?`)) {

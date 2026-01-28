@@ -291,7 +291,7 @@ export default function BukuKIAPage() {
           </div>
           
           <div className="flex items-center gap-2 mb-4">
-            {['K1', 'K2', 'K3', 'K4', 'K5', 'K6'].map((k, index) => {
+            {['K1', 'K2', 'K3', 'K4', 'K5', 'K6'].map((k, _index) => {
               const visitExists = mockANCVisits.find(v => v.visit_number === k);
               return (
                 <div
@@ -430,7 +430,7 @@ export default function BukuKIAPage() {
         <Card>
           <h3 className="font-semibold text-gray-900 mb-4">Trend Tekanan Darah</h3>
           <div className="space-y-3">
-            {mockANCVisits.slice(0, 4).map((visit, index) => (
+            {mockANCVisits.slice(0, 4).map((visit, _index) => (
               <div key={visit.date} className="flex items-center gap-4">
                 <span className="text-sm text-gray-500 w-8">{visit.visit_number}</span>
                 <div className="flex-1 flex items-center gap-2">

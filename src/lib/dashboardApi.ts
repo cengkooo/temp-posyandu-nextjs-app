@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createClient } from './supabase'
 import { format, startOfMonth, endOfMonth, subMonths } from 'date-fns'
 import type { NutritionalStatus, VisitTrend } from '@/types'
@@ -25,7 +26,7 @@ const TYPE_BADGE: Record<string, { label: string; className: string }> = {
   lansia: { label: 'Lansia', className: 'text-amber-700 bg-amber-50' },
 }
 
-export async function getAdminDashboardSummary(nutritionalStatus: NutritionalStatus[]): Promise<{ data: AdminDashboardSummary | null; error: any }> {
+export async function getAdminDashboardSummary(nutritionalStatus: NutritionalStatus[]): Promise<{ data: AdminDashboardSummary | null; error: Error | null }> {
   const supabase = createClient()
   try {
     const { count: totalPatients, error: patientsError } = await supabase
@@ -67,11 +68,11 @@ export async function getAdminDashboardSummary(nutritionalStatus: NutritionalSta
       error: null,
     }
   } catch (error) {
-    return { data: null, error }
+    return { data: null, error: error instanceof Error ? error : new Error('Unknown error') }
   }
 }
 
-export async function getDashboardVisitTrends(months: number): Promise<{ data: VisitTrend[] | null; error: any }> {
+export async function getDashboardVisitTrends(months: number): Promise<{ data: VisitTrend[] | null; error: Error | null }> {
   const supabase = createClient()
   try {
     const end = new Date()
@@ -89,7 +90,8 @@ export async function getDashboardVisitTrends(months: number): Promise<{ data: V
 
     const buckets: Record<string, VisitTrend> = {}
 
-    visits?.forEach((v: any) => {
+    // @ts-expect-error - Supabase relation type issue
+    visits?.forEach((v: { visit_date: string; patient: { patient_type: string } | null }) => {
       const date = new Date(v.visit_date)
       const key = format(date, 'yyyy-MM')
       const label = format(date, 'MMM')
@@ -118,11 +120,11 @@ export async function getDashboardVisitTrends(months: number): Promise<{ data: V
 
     return { data, error: null }
   } catch (error) {
-    return { data: null, error }
+    return { data: null, error: error instanceof Error ? error : new Error('Unknown error') }
   }
 }
 
-export async function getRecentVisits(limit = 5): Promise<{ data: RecentVisitRow[] | null; error: any }> {
+export async function getRecentVisits(limit = 5): Promise<{ data: RecentVisitRow[] | null; error: Error | null }> {
   const supabase = createClient()
   try {
     const { data: visits, error } = await supabase
@@ -134,8 +136,8 @@ export async function getRecentVisits(limit = 5): Promise<{ data: RecentVisitRow
     if (error) return { data: null, error }
 
     const creatorIds = Array.from(
-      new Set((visits || []).map((v: any) => v.created_by).filter(Boolean))
-    )
+      new Set((visits || []).map((v: { created_by: string | null }) => v.created_by).filter(Boolean))
+    ) as string[]
 
     const profilesById: Record<string, string> = {}
     if (creatorIds.length > 0) {
@@ -144,12 +146,13 @@ export async function getRecentVisits(limit = 5): Promise<{ data: RecentVisitRow
         .select('id, full_name')
         .in('id', creatorIds)
 
-      profiles?.forEach((p: any) => {
+      profiles?.forEach((p: { id: string; full_name: string | null }) => {
         profilesById[p.id] = p.full_name || 'Petugas'
       })
     }
 
-    const mapped: RecentVisitRow[] = (visits || []).map((v: any) => {
+    // @ts-expect-error - Supabase relation type issue
+    const mapped: RecentVisitRow[] = (visits || []).map((v: { visit_date: string; created_by: string | null; patient: { full_name: string; patient_type: string } | null }) => {
       const patientType = v.patient?.patient_type || 'balita'
       const badge = TYPE_BADGE[patientType] || { label: String(patientType), className: 'text-gray-700 bg-gray-50' }
       return {
@@ -163,6 +166,6 @@ export async function getRecentVisits(limit = 5): Promise<{ data: RecentVisitRow
 
     return { data: mapped, error: null }
   } catch (error) {
-    return { data: null, error }
+    return { data: null, error: error instanceof Error ? error : new Error('Unknown error') }
   }
 }

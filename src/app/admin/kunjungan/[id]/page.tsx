@@ -11,6 +11,8 @@ import Button from '@/components/admin/forms/Button';
 type VisitWithRelations = Visit & {
   patient: Patient;
   profile?: Profile;
+  complaints?: string;
+  recommendations?: string;
 };
 
 export default function VisitDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -19,18 +21,19 @@ export default function VisitDetailPage({ params }: { params: Promise<{ id: stri
   const [visit, setVisit] = useState<VisitWithRelations | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadVisit();
-  }, [id]);
-
   const loadVisit = async () => {
     setLoading(true);
-    const { data, error } = await getVisitById(id);
+    const { data, error: _error } = await getVisitById(id);
     if (data) {
       setVisit(data as VisitWithRelations);
     }
     setLoading(false);
   };
+
+  useEffect(() => {
+    loadVisit();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -212,24 +215,24 @@ export default function VisitDetailPage({ params }: { params: Promise<{ id: stri
         )}
 
         {/* Keluhan */}
-        {(visit as any).complaints && (
+        {visit.complaints && (
           <Card>
             <div className="flex items-center gap-2 mb-3">
               <AlertCircle className="w-5 h-5 text-orange-600" />
               <h3 className="text-lg font-semibold text-gray-900">Keluhan</h3>
             </div>
-            <p className="text-gray-700 whitespace-pre-wrap">{(visit as any).complaints}</p>
+            <p className="text-gray-700 whitespace-pre-wrap">{visit.complaints}</p>
           </Card>
         )}
 
         {/* Tindakan/Rekomendasi */}
-        {(visit as any).recommendations && (
+        {visit.recommendations && (
           <Card>
             <div className="flex items-center gap-2 mb-3">
               <Stethoscope className="w-5 h-5 text-teal-600" />
               <h3 className="text-lg font-semibold text-gray-900">Tindakan/Rekomendasi</h3>
             </div>
-            <p className="text-gray-700 whitespace-pre-wrap">{(visit as any).recommendations}</p>
+            <p className="text-gray-700 whitespace-pre-wrap">{visit.recommendations}</p>
           </Card>
         )}
       </div>

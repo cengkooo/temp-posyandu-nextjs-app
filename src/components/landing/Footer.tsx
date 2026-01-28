@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import Link from 'next/link';
 import { Heart, MapPin, Phone, Mail, Facebook, Instagram, MessageCircle } from 'lucide-react';
 
 export default function Footer() {

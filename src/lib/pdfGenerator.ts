@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { format, differenceInMonths } from 'date-fns';
@@ -41,7 +42,7 @@ export function generateKMSPDF(
   patient: PatientData,
   growthData: GrowthData[],
   immunizations: ImmunizationData[],
-  visits: VisitData[]
+  _visits: VisitData[]
 ): void {
   const doc = new jsPDF('p', 'mm', 'a4');
   const pageWidth = doc.internal.pageSize.getWidth();
@@ -160,7 +161,7 @@ export function generateKMSPDF(
       margin: { left: 15, right: 15 },
     });
     
-    yPos = (doc as any).lastAutoTable.finalY + 10;
+    yPos = (doc as typeof doc & { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 10;
   }
   
   // Immunization Status
@@ -360,7 +361,7 @@ export function generateBukuKIAPDF(
       margin: { left: 15, right: 15 },
     });
     
-    yPos = (doc as any).lastAutoTable.finalY + 10;
+    yPos = (doc as typeof doc & { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 10;
   }
   
   // TT Immunization Status

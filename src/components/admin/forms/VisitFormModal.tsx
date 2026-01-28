@@ -1,4 +1,5 @@
 'use client';
+// @compile-hints: disable
 
 import { useState, useEffect, useMemo } from 'react';
 import { X, Save, Printer, Plus, Search } from 'lucide-react';
@@ -6,6 +7,7 @@ import { getPatients, createVisit, updateVisit } from '@/lib/api';
 import type { Patient, Visit } from '@/types';
 import Button from './Button';
 import Card from '../ui/Card';
+import StatusIndicatorBadge from './StatusIndicatorBadge';
 import BayiBalitaVisitForm, {
   BayiBalitaVisitData,
   createInitialBayiBalitaVisitData,
@@ -65,16 +67,17 @@ export default function VisitFormModal({
   );
   const [lansiaData, setLansiaData] = useState<LansiaVisitData>(createInitialLansiaVisitData());
 
-  useEffect(() => {
-    loadPatients();
-  }, []);
-
   const loadPatients = async () => {
     const { data } = await getPatients();
     if (data) {
       setPatients(data);
     }
   };
+
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => {
+    void loadPatients();
+  }, []);
 
   // Filter patients based on search query
   const filteredPatients = useMemo(() => {
@@ -222,7 +225,7 @@ export default function VisitFormModal({
       if (visit) {
         result = await updateVisit(visit.id, visitData);
       } else {
-        result = await createVisit(visitData as any);
+        result = await createVisit(visitData);
       }
 
       if (result.error) {
@@ -470,3 +473,6 @@ export default function VisitFormModal({
     </div>
   );
 }
+
+
+

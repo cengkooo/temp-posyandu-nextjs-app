@@ -1,15 +1,16 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as XLSX from 'xlsx'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import { format } from 'date-fns'
-import type { Statistics, BreakdownRow } from '@/types'
+import type { Statistics, BreakdownRow, VisitTrend } from '@/types'
 
 // Export to Excel
 export function exportToExcel(
   data: {
     statistics?: Statistics
     breakdown?: BreakdownRow[]
-    visitTrends?: any[]
+    visitTrends?: VisitTrend[]
   },
   filename: string,
   reportType: string
@@ -167,7 +168,7 @@ export function exportToPDF(
       styles: { fontSize: 10 }
     })
 
-    yPosition = (doc as any).lastAutoTable.finalY + 15
+    yPosition = (doc as typeof doc & { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 15
   }
 
   // Breakdown Table

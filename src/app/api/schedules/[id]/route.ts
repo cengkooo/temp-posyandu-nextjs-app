@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase';
+import { bumpCacheVersion, cachedJson, checkRateLimit } from '@/lib/upstash';
 
 // GET /api/schedules/[id] - Get single schedule
 export async function GET(
@@ -7,23 +8,60 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await params;
-    const supabase = createClient();
+    const rl = await checkRateLimit(request, {
+      prefix: 'api_schedules_id_get',
+      limit: 240,
+      window: '1 m',
+    });
 
-    const { data, error } = await supabase
-      .from('schedules')
-      .select('*')
-      .eq('id', id)
-      .single();
-
-    if (error) {
+    if (!('bypass' in rl) && !rl.ok) {
       return NextResponse.json(
-        { error: 'Schedule not found', details: error.message },
-        { status: 404 }
+        { error: 'Too many requests' },
+        {
+          status: 429,
+          headers: {
+            'x-ratelimit-limit': String(rl.limit),
+            'x-ratelimit-remaining': String(rl.remaining),
+            'x-ratelimit-reset': String(rl.reset),
+          },
+        }
       );
     }
 
-    return NextResponse.json({ data });
+    const { id } = await params;
+    const supabase = createClient();
+
+    const cached = await cachedJson({
+      namespace: 'schedules',
+      key: `id:${id}`,
+      ttlSeconds: 120,
+      producer: async () => {
+        const { data, error } = await supabase
+          .from('schedules')
+          .select('*')
+          .eq('id', id)
+          .single();
+
+        if (error) {
+          throw new Error(error.message);
+        }
+
+        return { data };
+      },
+    });
+
+    return NextResponse.json(cached.value, {
+      headers: {
+        'x-cache': cached.cache,
+        ...(!('bypass' in rl)
+          ? {
+              'x-ratelimit-limit': String(rl.limit),
+              'x-ratelimit-remaining': String(rl.remaining),
+              'x-ratelimit-reset': String(rl.reset),
+            }
+          : {}),
+      },
+    });
   } catch (error) {
     console.error('Error in GET /api/schedules/[id]:', error);
     return NextResponse.json(
@@ -79,6 +117,8 @@ export async function PUT(
       );
     }
 
+    await bumpCacheVersion('schedules');
+
     return NextResponse.json({ data });
   } catch (error) {
     console.error('Error in PUT /api/schedules/[id]:', error);
@@ -109,6 +149,8 @@ export async function DELETE(
         { status: 500 }
       );
     }
+
+    await bumpCacheVersion('schedules');
 
     return NextResponse.json({ message: 'Schedule deleted successfully' });
   } catch (error) {

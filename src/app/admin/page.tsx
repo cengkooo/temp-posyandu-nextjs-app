@@ -7,24 +7,19 @@ import {
   CalendarCheck,
   Syringe,
   AlertTriangle,
-  UserPlus,
-  ClipboardList,
-  Stethoscope,
 } from 'lucide-react';
 import StatCard from '@/components/admin/ui/StatCard';
 import LineChart from '@/components/admin/charts/LineChart';
 import DonutChart from '@/components/admin/charts/DonutChart';
 import DataTable from '@/components/admin/tables/DataTable';
-import Button from '@/components/admin/forms/Button';
 import Card from '@/components/admin/ui/Card';
-import { getNutritionalStatus } from '@/lib/statisticsApi';
-import { getAdminDashboardSummary, getDashboardVisitTrends, getRecentVisits } from '@/lib/dashboardApi';
 import type { NutritionalStatus, VisitTrend } from '@/types';
 
 export default function AdminDashboard() {
   const [selectedPeriod, setSelectedPeriod] = useState('6');
 
   const [_loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [nutrition, setNutrition] = useState<NutritionalStatus[]>([]);
   const [visitTrends, setVisitTrends] = useState<VisitTrend[]>([]);
   const [recentVisits, setRecentVisits] = useState<Array<Record<string, unknown>>>([]);
@@ -39,23 +34,41 @@ export default function AdminDashboard() {
     let cancelled = false;
     const load = async () => {
       setLoading(true);
+      setLoadError(null);
 
       const months = Number.parseInt(selectedPeriod, 10) || 6;
-      const [nutritionRes, trendsRes, recentRes] = await Promise.all([
-        getNutritionalStatus(),
-        getDashboardVisitTrends(months),
-        getRecentVisits(5),
-      ]);
+      const params = new URLSearchParams({
+        months: String(months),
+        recentLimit: '5',
+      });
 
-      const nutritionData = nutritionRes.data || [];
-      const summaryRes = await getAdminDashboardSummary(nutritionData);
+      const res = await fetch(`/api/dashboard?${params.toString()}`);
+      const json = (await res.json()) as {
+        error?: string;
+        summary?: {
+          totalPatients: number;
+          visitsThisMonth: number;
+          immunizationsPending: number;
+          balitaGiziBuruk: number;
+        };
+        nutrition?: NutritionalStatus[];
+        visitTrends?: VisitTrend[];
+        recentVisits?: Array<Record<string, unknown>>;
+      };
 
       if (cancelled) return;
 
-      if (nutritionRes.data) setNutrition(nutritionRes.data);
-      if (trendsRes.data) setVisitTrends(trendsRes.data);
-      if (recentRes.data) setRecentVisits(recentRes.data);
-      if (summaryRes.data) setSummary(summaryRes.data);
+      if (!res.ok) {
+        console.warn('Dashboard API error:', json);
+        setLoadError(json.error || 'Gagal memuat dashboard');
+        setLoading(false);
+        return;
+      }
+
+      if (json.nutrition) setNutrition(json.nutrition);
+      if (json.visitTrends) setVisitTrends(json.visitTrends);
+      if (json.recentVisits) setRecentVisits(json.recentVisits);
+      if (json.summary) setSummary(json.summary);
 
       setLoading(false);
     };
@@ -119,6 +132,11 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-6">
+      {loadError && (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          Dashboard belum bisa memuat sebagian data. Cek Console untuk detail.
+        </div>
+      )}
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
@@ -186,29 +204,6 @@ export default function AdminDashboard() {
             </Link>
           </div>
           <DataTable columns={tableColumns} data={recentVisits} />
-        </Card>
-
-        {/* Quick Actions */}
-        <Card>
-          <h2 className="text-lg font-bold text-gray-900 mb-6">Aksi Cepat</h2>
-          <div className="space-y-3">
-            <Button variant="primary" fullWidth className="flex items-center gap-3 justify-start">
-              <UserPlus className="w-5 h-5" />
-              <span className="text-sm font-medium">Tambah Pasien Baru</span>
-            </Button>
-            <Button variant="secondary" fullWidth className="flex items-center gap-3 justify-start">
-              <ClipboardList className="w-5 h-5" />
-              <span className="text-sm font-medium">Catat Kunjungan</span>
-            </Button>
-            <Button
-              variant="outline"
-              fullWidth
-              className="flex items-center gap-3 justify-start border-orange-500 text-orange-600 hover:bg-orange-50"
-            >
-              <Stethoscope className="w-5 h-5" />
-              <span className="text-sm font-medium">Input Imunisasi</span>
-            </Button>
-          </div>
         </Card>
       </div>
     </div>

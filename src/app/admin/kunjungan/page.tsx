@@ -12,7 +12,7 @@ import {
   ChevronRight,
   UserCircle2,
 } from 'lucide-react';
-import { getAllVisits, deleteVisit } from '@/lib/api';
+import { deleteVisit } from '@/lib/api';
 import type { Visit, Patient, Profile } from '@/types';
 import Card from '@/components/admin/ui/Card';
 import Button from '@/components/admin/forms/Button';
@@ -26,53 +26,78 @@ type VisitWithRelations = Visit & {
 export default function KunjunganPage() {
   const router = useRouter();
   const [visits, setVisits] = useState<VisitWithRelations[]>([]);
-  const [filteredVisits, setFilteredVisits] = useState<VisitWithRelations[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('all');
+  const [sortField, setSortField] = useState<'visit_date' | 'created_at'>('visit_date');
+  const [sortDir, setSortDir] = useState<'desc' | 'asc'>('desc');
   const [currentPage, setCurrentPage] = useState(1);
+  const [total, setTotal] = useState(0);
   const [showModal, setShowModal] = useState(false);
   const [editingVisit, setEditingVisit] = useState<VisitWithRelations | null>(null);
   const itemsPerPage = 10;
 
 
-  const loadVisits = async () => {
+  const loadVisits = async (opts?: {
+    page?: number;
+    q?: string;
+    type?: string;
+    sort?: 'visit_date' | 'created_at';
+    dir?: 'desc' | 'asc';
+  }) => {
+    const page = opts?.page ?? currentPage;
+    const q = (opts?.q ?? searchQuery).trim();
+    const type = (opts?.type ?? typeFilter).trim();
+    const sort = (opts?.sort ?? sortField).trim();
+    const dir = (opts?.dir ?? sortDir).trim();
+
     setLoading(true);
-    const { data, error: _error } = await getAllVisits();
-    if (data) {
-      setVisits(data as VisitWithRelations[]);
+    try {
+      const params = new URLSearchParams({
+        page: String(page),
+        limit: String(itemsPerPage),
+      });
+      if (q) params.set('q', q);
+      if (type && type !== 'all') params.set('type', type);
+      if (sort) params.set('sort', sort);
+      if (dir) params.set('dir', dir);
+
+      const res = await fetch(`/api/visits?${params.toString()}`);
+      const json = (await res.json()) as {
+        data: VisitWithRelations[];
+        page: number;
+        limit: number;
+        total: number;
+        totalPages: number;
+      };
+
+      if (!res.ok) {
+        console.error('Failed to fetch visits:', json);
+        setVisits([]);
+        setTotal(0);
+        return;
+      }
+
+      setVisits(json.data ?? []);
+      setTotal(json.total ?? 0);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-  };
-
-  const filterVisits = () => {
-    let filtered = [...visits];
-
-    // Search filter
-    if (searchQuery.trim() !== '') {
-      filtered = filtered.filter((visit) =>
-        visit.patient.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        visit.visit_date.includes(searchQuery)
-      );
-    }
-
-    // Type filter
-    if (typeFilter !== 'all') {
-      filtered = filtered.filter((visit) => visit.patient.patient_type === typeFilter);
-    }
-
-    setFilteredVisits(filtered);
-    setCurrentPage(1);
   };
 
   useEffect(() => {
-    loadVisits();
+    loadVisits({ page: 1 });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    filterVisits();
-  }, [visits, searchQuery, typeFilter]);
+    const handle = setTimeout(() => {
+      setCurrentPage(1);
+      loadVisits({ page: 1 });
+    }, 250);
+    return () => clearTimeout(handle);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchQuery, typeFilter, sortField, sortDir]);
 
   const handleDelete = async (id: string, patientName: string) => {
     if (!confirm(`Apakah Anda yakin ingin menghapus data kunjungan "${patientName}"?`)) {
@@ -99,7 +124,7 @@ export default function KunjunganPage() {
   };
 
   const handleSuccess = () => {
-    loadVisits();
+    loadVisits({ page: 1 });
     handleCloseModal();
   };
 
@@ -136,11 +161,11 @@ export default function KunjunganPage() {
     );
   };
 
-  // Pagination
-  const totalPages = Math.ceil(filteredVisits.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentVisits = filteredVisits.slice(startIndex, endIndex);
+  // Pagination (server-side)
+  const totalPages = Math.ceil(total / itemsPerPage);
+  const startIndex = total === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
+  const endIndex = total === 0 ? 0 : (currentPage - 1) * itemsPerPage + visits.length;
+  const currentVisits = visits;
 
   return (
     <div className="space-y-6">
@@ -173,9 +198,31 @@ export default function KunjunganPage() {
             className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
           >
             <option value="all">Semua Tipe</option>
+            <option value="bayi">Bayi</option>
             <option value="balita">Balita</option>
             <option value="ibu_hamil">Ibu Hamil</option>
+            <option value="remaja_dewasa">Remaja/Dewasa</option>
             <option value="lansia">Lansia</option>
+          </select>
+
+          {/* Sort */}
+          <select
+            value={sortField}
+            onChange={(e) => setSortField(e.target.value as 'visit_date' | 'created_at')}
+            className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+            title="Urutkan berdasarkan"
+          >
+            <option value="visit_date">Tanggal Kunjungan</option>
+            <option value="created_at">Waktu Dibuat</option>
+          </select>
+          <select
+            value={sortDir}
+            onChange={(e) => setSortDir(e.target.value as 'desc' | 'asc')}
+            className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+            title="Arah urutan"
+          >
+            <option value="desc">Terbaru</option>
+            <option value="asc">Terlama</option>
           </select>
 
           {/* Add Button */}
@@ -271,15 +318,18 @@ export default function KunjunganPage() {
         </div>
 
         {/* Pagination */}
-        {!loading && filteredVisits.length > 0 && (
+        {!loading && total > 0 && (
           <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-200">
             <div className="text-sm text-gray-600">
-              Menampilkan {startIndex + 1}-{Math.min(endIndex, filteredVisits.length)} dari{' '}
-              {filteredVisits.length} kunjungan
+              Menampilkan {startIndex}-{endIndex} dari {total} kunjungan
             </div>
             <div className="flex items-center gap-2">
               <button
-                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                onClick={() => {
+                  const next = Math.max(1, currentPage - 1);
+                  setCurrentPage(next);
+                  loadVisits({ page: next });
+                }}
                 disabled={currentPage === 1}
                 className="p-2 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
@@ -301,7 +351,10 @@ export default function KunjunganPage() {
                   return (
                     <button
                       key={pageNum}
-                      onClick={() => setCurrentPage(pageNum)}
+                      onClick={() => {
+                        setCurrentPage(pageNum);
+                        loadVisits({ page: pageNum });
+                      }}
                       className={`w-8 h-8 rounded-lg ${
                         currentPage === pageNum
                           ? 'bg-teal-500 text-white'
@@ -314,7 +367,11 @@ export default function KunjunganPage() {
                 })}
               </div>
               <button
-                onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                onClick={() => {
+                  const next = Math.min(totalPages, currentPage + 1);
+                  setCurrentPage(next);
+                  loadVisits({ page: next });
+                }}
                 disabled={currentPage === totalPages}
                 className="p-2 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >

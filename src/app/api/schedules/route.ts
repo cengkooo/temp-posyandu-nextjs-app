@@ -1,40 +1,80 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase';
+import { bumpCacheVersion, cachedJson, checkRateLimit } from '@/lib/upstash';
 
 // GET /api/schedules - Get all schedules
 export async function GET(request: NextRequest) {
   try {
+    const rl = await checkRateLimit(request, {
+      prefix: 'api_schedules_get',
+      limit: 120,
+      window: '1 m',
+    });
+
+    if (!('bypass' in rl) && !rl.ok) {
+      return NextResponse.json(
+        { error: 'Too many requests' },
+        {
+          status: 429,
+          headers: {
+            'x-ratelimit-limit': String(rl.limit),
+            'x-ratelimit-remaining': String(rl.remaining),
+            'x-ratelimit-reset': String(rl.reset),
+          },
+        }
+      );
+    }
+
     const supabase = createClient();
     const searchParams = request.nextUrl.searchParams;
     const upcoming = searchParams.get('upcoming');
     const limit = searchParams.get('limit');
 
-    let query = supabase
-      .from('schedules')
-      .select('*')
-      .order('date', { ascending: true });
+    const today = new Date().toISOString().split('T')[0];
+    const cacheKey = `upcoming=${upcoming === 'true'}:limit=${limit ?? 'none'}:today=${today}`;
 
-    // Filter upcoming events
-    if (upcoming === 'true') {
-      const today = new Date().toISOString().split('T')[0];
-      query = query.gte('date', today);
-    }
+    const cached = await cachedJson({
+      namespace: 'schedules',
+      key: cacheKey,
+      ttlSeconds: 60,
+      producer: async () => {
+        let query = supabase
+          .from('schedules')
+          .select('*')
+          .order('date', { ascending: true });
 
-    // Limit results
-    if (limit) {
-      query = query.limit(parseInt(limit));
-    }
+        // Filter upcoming events
+        if (upcoming === 'true') {
+          query = query.gte('date', today);
+        }
 
-    const { data, error } = await query;
+        // Limit results
+        if (limit) {
+          query = query.limit(parseInt(limit));
+        }
 
-    if (error) {
-      return NextResponse.json(
-        { error: 'Failed to fetch schedules', details: error.message },
-        { status: 500 }
-      );
-    }
+        const { data, error } = await query;
 
-    return NextResponse.json({ data });
+        if (error) {
+          throw new Error(error.message);
+        }
+
+        return { data };
+      },
+    });
+
+    return NextResponse.json(cached.value, {
+      headers: {
+        'x-cache': cached.cache,
+        ...(!('bypass' in rl)
+          ? {
+              'x-ratelimit-limit': String(rl.limit),
+              'x-ratelimit-remaining': String(rl.remaining),
+              'x-ratelimit-reset': String(rl.reset),
+            }
+          : {}),
+      },
+    });
   } catch (error) {
     console.error('Error in GET /api/schedules:', error);
     return NextResponse.json(
@@ -89,6 +129,8 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
+
+    await bumpCacheVersion('schedules');
 
     console.log('Successfully created schedule:', data);
     return NextResponse.json({ data }, { status: 201 });

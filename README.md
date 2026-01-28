@@ -16,6 +16,12 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+## Caching & Rate Limit (Upstash Redis)
+
+Project ini bisa pakai Upstash Redis buat serverless caching + rate limiting (tetap pakai Supabase sebagai database utama).
+
+Lihat panduan setup: [documentation/UPSTASH_REDIS_SUPABASE_SETUP.md](documentation/UPSTASH_REDIS_SUPABASE_SETUP.md)
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.

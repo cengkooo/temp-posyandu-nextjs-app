@@ -33,8 +33,6 @@ export async function getAdminDashboardSummary(nutritionalStatus: NutritionalSta
       .from('patients')
       .select('*', { count: 'exact', head: true })
 
-    if (patientsError) return { data: null, error: patientsError }
-
     const start = format(startOfMonth(new Date()), 'yyyy-MM-dd')
     const end = format(endOfMonth(new Date()), 'yyyy-MM-dd')
 
@@ -44,8 +42,6 @@ export async function getAdminDashboardSummary(nutritionalStatus: NutritionalSta
       .gte('visit_date', start)
       .lte('visit_date', end)
 
-    if (visitsError) return { data: null, error: visitsError }
-
     // Heuristic: consider immunizations "pending" if next_schedule exists and is due today or earlier.
     const today = format(new Date(), 'yyyy-MM-dd')
     const { count: immunizationsPending, error: immunizationsError } = await supabase
@@ -54,18 +50,18 @@ export async function getAdminDashboardSummary(nutritionalStatus: NutritionalSta
       .not('next_schedule', 'is', null)
       .lte('next_schedule', today)
 
-    if (immunizationsError) return { data: null, error: immunizationsError }
-
     const balitaGiziBuruk = nutritionalStatus.find((s) => s.status === 'Gizi Buruk')?.count || 0
+
+    const firstError = patientsError || visitsError || immunizationsError || null
 
     return {
       data: {
-        totalPatients: totalPatients || 0,
-        visitsThisMonth: visitsThisMonth || 0,
-        immunizationsPending: immunizationsPending || 0,
+        totalPatients: patientsError ? 0 : (totalPatients || 0),
+        visitsThisMonth: visitsError ? 0 : (visitsThisMonth || 0),
+        immunizationsPending: immunizationsError ? 0 : (immunizationsPending || 0),
         balitaGiziBuruk,
       },
-      error: null,
+      error: firstError,
     }
   } catch (error) {
     return { data: null, error: error instanceof Error ? error : new Error('Unknown error') }

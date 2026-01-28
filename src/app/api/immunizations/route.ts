@@ -1,22 +1,101 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { bumpCacheVersion, cachedJson, checkRateLimit } from '@/lib/upstash'
 import type { Patient, Immunization } from '@/types'
 
 export async function GET(request: NextRequest) {
   try {
+    const rl = await checkRateLimit(request, {
+      prefix: 'api_immunizations_get',
+      limit: 60,
+      window: '1 m',
+    })
+
+    if ('bypass' in rl && rl.bypass !== true) {
+      // no-op, keeps TS happy
+    }
+
+    if (!('bypass' in rl) && !rl.ok) {
+      return NextResponse.json(
+        { error: 'Too many requests' },
+        {
+          status: 429,
+          headers: {
+            'x-ratelimit-limit': String(rl.limit),
+            'x-ratelimit-remaining': String(rl.remaining),
+            'x-ratelimit-reset': String(rl.reset),
+          },
+        }
+      )
+    }
+
     const supabase = await createServerSupabaseClient()
     const searchParams = request.nextUrl.searchParams
     const type = searchParams.get('type') // 'tracking' or 'coverage'
     const patientId = searchParams.get('patient_id') // for patient history
 
     if (patientId) {
-      return await getPatientImmunizationHistory(supabase, patientId)
+      const cached = await cachedJson({
+        namespace: 'immunizations',
+        key: `history:patient:${patientId}`,
+        ttlSeconds: 120,
+        producer: async () => fetchPatientImmunizationHistory(supabase, patientId),
+      })
+
+      return NextResponse.json(cached.value, {
+        headers: {
+          'x-cache': cached.cache,
+          ...(!('bypass' in rl)
+            ? {
+                'x-ratelimit-limit': String(rl.limit),
+                'x-ratelimit-remaining': String(rl.remaining),
+                'x-ratelimit-reset': String(rl.reset),
+              }
+            : {}),
+        },
+      })
     }
 
     if (type === 'tracking') {
-      return await getImmunizationTracking(supabase)
+      const cached = await cachedJson({
+        namespace: 'immunizations',
+        key: 'tracking',
+        ttlSeconds: 180,
+        producer: async () => fetchImmunizationTracking(supabase),
+      })
+
+      return NextResponse.json(cached.value, {
+        headers: {
+          'x-cache': cached.cache,
+          ...(!('bypass' in rl)
+            ? {
+                'x-ratelimit-limit': String(rl.limit),
+                'x-ratelimit-remaining': String(rl.remaining),
+                'x-ratelimit-reset': String(rl.reset),
+              }
+            : {}),
+        },
+      })
     } else if (type === 'coverage') {
-      return await getImmunizationCoverage(supabase)
+      const cached = await cachedJson({
+        namespace: 'immunizations',
+        key: 'coverage',
+        ttlSeconds: 300,
+        producer: async () => fetchImmunizationCoverage(supabase),
+      })
+
+      return NextResponse.json(cached.value, {
+        headers: {
+          'x-cache': cached.cache,
+          ...(!('bypass' in rl)
+            ? {
+                'x-ratelimit-limit': String(rl.limit),
+                'x-ratelimit-remaining': String(rl.remaining),
+                'x-ratelimit-reset': String(rl.reset),
+              }
+            : {}),
+        },
+      })
     }
 
     return NextResponse.json({ error: 'Invalid type parameter' }, { status: 400 })
@@ -65,6 +144,8 @@ export async function POST(request: NextRequest) {
       throw error
     }
 
+    await bumpCacheVersion('immunizations')
+
     return NextResponse.json({ success: true, data })
   } catch (error) {
     console.error('Error saving immunization:', error)
@@ -109,6 +190,8 @@ export async function PUT(request: NextRequest) {
       throw error
     }
 
+    await bumpCacheVersion('immunizations')
+
     return NextResponse.json({ success: true, data })
   } catch (error) {
     console.error('Error updating immunization:', error)
@@ -145,6 +228,8 @@ export async function DELETE(request: NextRequest) {
       throw error
     }
 
+    await bumpCacheVersion('immunizations')
+
     return NextResponse.json({ success: true, message: 'Immunization record deleted successfully' })
   } catch (error) {
     console.error('Error deleting immunization:', error)
@@ -157,7 +242,7 @@ export async function DELETE(request: NextRequest) {
 }
 
 // Get patient immunization history
-async function getPatientImmunizationHistory(
+async function fetchPatientImmunizationHistory(
   supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>,
   patientId: string
 ) {
@@ -172,7 +257,7 @@ async function getPatientImmunizationHistory(
       throw error
     }
 
-    return NextResponse.json({ data })
+    return { data }
   } catch (error) {
     console.error('Error fetching patient immunization history:', error)
     throw error
@@ -180,7 +265,9 @@ async function getPatientImmunizationHistory(
 }
 
 // Get immunization tracking data for patients
-async function getImmunizationTracking(supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>) {
+async function fetchImmunizationTracking(
+  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>
+) {
   try {
     // Fetch all patients with type bayi or balita
     const { data: patients, error: patientsError } = await supabase
@@ -285,7 +372,7 @@ async function getImmunizationTracking(supabase: Awaited<ReturnType<typeof creat
       total: trackingData.length,
     }
 
-    return NextResponse.json({ data: trackingData, summary })
+    return { data: trackingData, summary }
   } catch (error) {
     console.error('Error in getImmunizationTracking:', error)
     throw error
@@ -293,7 +380,9 @@ async function getImmunizationTracking(supabase: Awaited<ReturnType<typeof creat
 }
 
 // Get immunization coverage data
-async function getImmunizationCoverage(supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>) {
+async function fetchImmunizationCoverage(
+  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>
+) {
   // Fetch all immunizations
   const { data: immunizations, error: immunizationsError } = await supabase
     .from('immunizations')
@@ -396,7 +485,7 @@ async function getImmunizationCoverage(supabase: Awaited<ReturnType<typeof creat
 
   const overallCoverage = totalPatients && totalPatients > 0 ? (completePatients / totalPatients) * 100 : 0
 
-  return NextResponse.json({
+  return {
     coverage: coverageData,
     overall: {
       percentage: Math.round(overallCoverage * 10) / 10,
@@ -404,5 +493,5 @@ async function getImmunizationCoverage(supabase: Awaited<ReturnType<typeof creat
       total: totalPatients || 0,
       target: 95, // UCI target
     },
-  })
+  }
 }

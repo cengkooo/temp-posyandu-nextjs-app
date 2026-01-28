@@ -3,7 +3,6 @@
 import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Calendar, User, Activity, FileText, AlertCircle, Stethoscope } from 'lucide-react';
-import { getVisitById } from '@/lib/api';
 import type { Visit, Patient, Profile } from '@/types';
 import Card from '@/components/admin/ui/Card';
 import Button from '@/components/admin/forms/Button';
@@ -23,9 +22,16 @@ export default function VisitDetailPage({ params }: { params: Promise<{ id: stri
 
   const loadVisit = async () => {
     setLoading(true);
-    const { data, error: _error } = await getVisitById(id);
-    if (data) {
-      setVisit(data as VisitWithRelations);
+    try {
+      const res = await fetch(`/api/visits/${id}`);
+      const json = (await res.json()) as { data?: VisitWithRelations };
+      if (res.ok && json.data) {
+        setVisit(json.data);
+      } else {
+        setVisit(null);
+      }
+    } finally {
+      // noop
     }
     setLoading(false);
   };

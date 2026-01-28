@@ -484,7 +484,24 @@ export interface Database {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      dashboard_nutrition_counts: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          status: string
+          count: number
+        }[]
+      }
+      dashboard_visit_trends: {
+        Args: {
+          start_date: string
+          end_date: string
+        }
+        Returns: {
+          month: string
+          patient_type: Database['public']['Tables']['patients']['Row']['patient_type'] | string
+          total: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

@@ -189,13 +189,15 @@ export async function filterPatients(filters: {
 }
 
 // Visits
-export async function getAllVisits() {
+export async function getAllVisits(limit?: number) {
   const supabase = createClient()
-  
-  const { data: visits, error: visitsError } = await supabase
-    .from('visits')
-    .select('*')
-    .order('visit_date', { ascending: false })
+
+  let visitsQuery = supabase.from('visits').select('*').order('visit_date', { ascending: false })
+  if (typeof limit === 'number') {
+    visitsQuery = visitsQuery.limit(limit)
+  }
+
+  const { data: visits, error: visitsError } = await visitsQuery
 
   if (visitsError || !visits) return { data: null, error: visitsError }
   if (visits.length === 0) return { data: [] as VisitWithRelations[], error: null }

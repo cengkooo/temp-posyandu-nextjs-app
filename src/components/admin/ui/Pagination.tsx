@@ -22,6 +22,13 @@ const Pagination: React.FC<PaginationProps> = ({
 }) => {
   if (totalItems === 0) return null;
 
+  const pagesToShow = Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+    if (totalPages <= 5) return i + 1;
+    if (currentPage <= 3) return i + 1;
+    if (currentPage >= totalPages - 2) return totalPages - 4 + i;
+    return currentPage - 2 + i;
+  });
+
   return (
     <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-200">
       <div className="text-sm text-gray-600">
@@ -36,7 +43,7 @@ const Pagination: React.FC<PaginationProps> = ({
           <ChevronLeft className="w-4 h-4" />
         </button>
         <div className="flex items-center gap-1">
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+          {pagesToShow.map((page) => (
             <button
               key={page}
               onClick={() => onPageChange(page)}

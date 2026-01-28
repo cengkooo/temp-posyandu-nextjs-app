@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Plus, Eye, Pencil, Trash2 } from 'lucide-react';
-import { getPatients, deletePatient, searchPatients, filterPatients } from '@/lib/api';
+import { deletePatient } from '@/lib/api';
 import type { Patient } from '@/types';
 import Card from '@/components/admin/ui/Card';
 import Button from '@/components/admin/forms/Button';
@@ -29,63 +29,111 @@ export default function PasienPage() {
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [genderFilter, setGenderFilter] = useState<string>('all');
   const [currentPage, setCurrentPage] = useState(1);
+  const [total, setTotal] = useState(0);
   const itemsPerPage = 10;
 
   useEffect(() => {
-    loadPatients();
+    loadPatients({ page: 1 });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const loadPatients = async () => {
-    setLoading(true);
-    const { data, error: _error } = await getPatients();
-    if (data) {
-      setPatients(data);
-    }
-    setLoading(false);
-  };
+  const loadPatients = async (opts?: { page?: number; q?: string; type?: string; gender?: string }) => {
+    const page = opts?.page ?? currentPage;
+    const q = (opts?.q ?? searchQuery).trim();
+    const type = (opts?.type ?? typeFilter).trim();
+    const gender = (opts?.gender ?? genderFilter).trim();
 
-  const handleSearch = async (query: string) => {
-    setSearchQuery(query);
-    if (query.trim() === '') {
-      loadPatients();
-      return;
-    }
-    
     setLoading(true);
-    const { data } = await searchPatients(query);
-    if (data) {
-      setPatients(data);
-    }
-    setLoading(false);
-  };
+    try {
+      const params = new URLSearchParams({
+        page: String(page),
+        limit: String(itemsPerPage),
+        sort: 'created_at',
+        dir: 'desc',
+      });
+      if (q) params.set('q', q);
+      if (type && type !== 'all') params.set('type', type);
+      if (gender && gender !== 'all') params.set('gender', gender);
 
-  const handleFilter = async () => {
-    setLoading(true);
-    const filters: Record<string, string> = {};
-    
-    if (typeFilter !== 'all') {
-      filters.type = typeFilter;
-    }
-    
-    if (genderFilter !== 'all') {
-      filters.gender = genderFilter;
-    }
-    
-    if (Object.keys(filters).length === 0) {
-      loadPatients();
-    } else {
-      const { data } = await filterPatients(filters);
-      if (data) {
-        setPatients(data);
+      const res = await fetch(`/api/patients?${params.toString()}`);
+      const json = (await res.json()) as {
+        data: Patient[];
+        page: number;
+        limit: number;
+        total: number;
+        totalPages: number;
+      };
+
+      if (!res.ok) {
+        console.error('Failed to fetch patients:', json);
+        setPatients([]);
+        setTotal(0);
+        return;
       }
+
+      setPatients(json.data ?? []);
+      setTotal(json.total ?? 0);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   useEffect(() => {
-    handleFilter();
+    const handle = setTimeout(() => {
+      setCurrentPage(1);
+      loadPatients({ page: 1 });
+    }, 250);
+    return () => clearTimeout(handle);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [typeFilter, genderFilter]);
+  }, [searchQuery, typeFilter, genderFilter]);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    loadPatients({ page });
+  };
+
+  const fetchAllFilteredPatients = async () => {
+    const q = searchQuery.trim();
+    const type = typeFilter.trim();
+    const gender = genderFilter.trim();
+    const maxRows = 5000;
+
+    let page = 1;
+    const limit = 200;
+    let all: Patient[] = [];
+    let totalItems: number | null = null;
+
+    while (true) {
+      const params = new URLSearchParams({
+        page: String(page),
+        limit: String(limit),
+        sort: 'created_at',
+        dir: 'desc',
+      });
+      if (q) params.set('q', q);
+      if (type && type !== 'all') params.set('type', type);
+      if (gender && gender !== 'all') params.set('gender', gender);
+
+      const res = await fetch(`/api/patients?${params.toString()}`);
+      const json = (await res.json()) as {
+        data: Patient[];
+        total: number;
+      };
+
+      if (!res.ok) throw new Error((json as unknown as { error?: string }).error || 'Gagal memuat data');
+
+      const chunk = json.data ?? [];
+      totalItems = totalItems ?? (json.total ?? 0);
+      all = all.concat(chunk);
+
+      if (all.length >= (totalItems ?? 0)) break;
+      if (chunk.length === 0) break;
+      if (all.length >= maxRows) break;
+      page += 1;
+    }
+
+    return all;
+  };
 
   const handleDelete = async (id: string, name: string) => {
     if (!confirm(`Apakah Anda yakin ingin menghapus data pasien "${name}"?`)) {
@@ -95,29 +143,33 @@ export default function PasienPage() {
     const { error } = await deletePatient(id);
     if (!error) {
       alert('Data pasien berhasil dihapus');
-      loadPatients();
+      loadPatients({ page: 1 });
+      setCurrentPage(1);
     } else {
       alert('Gagal menghapus data pasien');
     }
   };
 
   const handleExport = () => {
-    try {
-      const exportData = patients.map(patient => ({
-        'Nama Lengkap': patient.full_name,
-        'NIK': patient.nik || '-',
-        'Umur': calculateAge(patient.date_of_birth),
-        'J/K': formatGender(patient.gender),
-        'Tipe': getPatientTypeLabel(patient.patient_type),
-        'Orang Tua': patient.parent_name || '-',
-        'Telepon': patient.phone || '-',
-      }));
+    (async () => {
+      try {
+        const allPatients = await fetchAllFilteredPatients();
+        const exportData = allPatients.map((patient) => ({
+          'Nama Lengkap': patient.full_name,
+          'NIK': patient.nik || '-',
+          'Umur': calculateAge(patient.date_of_birth),
+          'J/K': formatGender(patient.gender),
+          'Tipe': getPatientTypeLabel(patient.patient_type),
+          'Orang Tua': patient.parent_name || '-',
+          'Telepon': patient.phone || '-',
+        }));
 
-      exportToExcel(exportData, 'Data_Pasien', 'Data Pasien');
-    } catch (error) {
-      console.error('Error exporting:', error);
-      alert('Gagal mengekspor data');
-    }
+        exportToExcel(exportData, 'Data_Pasien', 'Data Pasien');
+      } catch (error) {
+        console.error('Error exporting:', error);
+        alert(error instanceof Error ? error.message : 'Gagal mengekspor data');
+      }
+    })();
   };
 
   const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -160,7 +212,8 @@ export default function PasienPage() {
 
         if (response.ok) {
           alert(result.message || `Berhasil mengimpor ${validData.length} pasien`);
-          await loadPatients();
+          await loadPatients({ page: 1 });
+          setCurrentPage(1);
         } else {
           throw new Error(result.error || 'Gagal mengimpor data');
         }
@@ -176,36 +229,44 @@ export default function PasienPage() {
   };
 
   const handlePrint = () => {
-    const headers = ['No', 'Nama Lengkap', 'NIK', 'Umur', 'J/K', 'Tipe', 'Orang Tua', 'Telepon'];
-    const rows = patients.map((patient, index) => [
-      String(index + 1),
-      patient.full_name,
-      patient.nik || '-',
-      calculateAge(patient.date_of_birth),
-      formatGender(patient.gender),
-      getPatientTypeLabel(patient.patient_type),
-      patient.parent_name || '-',
-      patient.phone || '-',
-    ]);
+    (async () => {
+      try {
+        const allPatients = await fetchAllFilteredPatients();
+        const headers = ['No', 'Nama Lengkap', 'NIK', 'Umur', 'J/K', 'Tipe', 'Orang Tua', 'Telepon'];
+        const rows = allPatients.map((patient, index) => [
+          String(index + 1),
+          patient.full_name,
+          patient.nik || '-',
+          calculateAge(patient.date_of_birth),
+          formatGender(patient.gender),
+          getPatientTypeLabel(patient.patient_type),
+          patient.parent_name || '-',
+          patient.phone || '-',
+        ]);
 
-    const html = generatePrintHTML(headers, rows, {
-      title: 'Data Pasien Posyandu',
-      subtitle: new Date().toLocaleDateString('id-ID', { 
-        day: 'numeric', 
-        month: 'long', 
-        year: 'numeric' 
-      }),
-      orientation: 'landscape',
-    });
+        const html = generatePrintHTML(headers, rows, {
+          title: 'Data Pasien Posyandu',
+          subtitle: new Date().toLocaleDateString('id-ID', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+          }),
+          orientation: 'landscape',
+        });
 
-    printHTML(html);
+        printHTML(html);
+      } catch (error) {
+        console.error('Error printing:', error);
+        alert(error instanceof Error ? error.message : 'Gagal mencetak data');
+      }
+    })();
   };
 
-  // Pagination
-  const totalPages = Math.ceil(patients.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentPatients = patients.slice(startIndex, endIndex);
+  // Pagination (server-side)
+  const totalPages = Math.ceil(total / itemsPerPage);
+  const startIndex = total === 0 ? 0 : (currentPage - 1) * itemsPerPage;
+  const endIndex = total === 0 ? 0 : startIndex + patients.length;
+  const currentPatients = patients;
 
   return (
     <div className="space-y-6">
@@ -223,7 +284,7 @@ export default function PasienPage() {
       <Card>
         <SearchFilterBar
           searchQuery={searchQuery}
-          onSearchChange={handleSearch}
+          onSearchChange={setSearchQuery}
           typeFilter={typeFilter}
           onTypeFilterChange={setTypeFilter}
           genderFilter={genderFilter}
@@ -318,13 +379,13 @@ export default function PasienPage() {
         </div>
 
         {/* Pagination */}
-        {!loading && patients.length > 0 && (
+        {!loading && total > 0 && (
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
-            totalItems={patients.length}
+            totalItems={total}
             itemsPerPage={itemsPerPage}
-            onPageChange={setCurrentPage}
+            onPageChange={handlePageChange}
             startIndex={startIndex}
             endIndex={endIndex}
           />

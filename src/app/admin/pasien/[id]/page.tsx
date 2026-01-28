@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import {
   ArrowLeft,
@@ -115,8 +115,25 @@ export default function DetailPasienPage() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('kunjungan');
 
+  const loadPatientData = useCallback(async () => {
+    setLoading(true);
+
+    const { data: patientData } = await getPatientById(patientId);
+    if (patientData) {
+      setPatient(patientData);
+    }
+
+    const { data: visitsData } = await getPatientVisits(patientId);
+    if (visitsData) {
+      setVisits(visitsData);
+    }
+
+    setLoading(false);
+  }, [patientId]);
+
   useEffect(() => {
     loadPatientData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [patientId]);
 
   useEffect(() => {
@@ -207,22 +224,6 @@ export default function DetailPasienPage() {
     };
   }, []);
 
-  const loadPatientData = async () => {
-    setLoading(true);
-
-    const { data: patientData } = await getPatientById(patientId);
-    if (patientData) {
-      setPatient(patientData);
-    }
-
-    const { data: visitsData } = await getPatientVisits(patientId);
-    if (visitsData) {
-      setVisits(visitsData);
-    }
-
-    setLoading(false);
-  };
-
   const handleDelete = async () => {
     if (!patient) return;
 
@@ -243,12 +244,12 @@ export default function DetailPasienPage() {
   const tabs = useMemo(() => {
     if (!patient) return [];
     return getTabsForPatientType(patient.patient_type);
-  }, [patient?.patient_type]);
+  }, [patient]);
 
   const typeColors = useMemo(() => {
     if (!patient) return getPatientTypeColor('');
     return getPatientTypeColor(patient.patient_type);
-  }, [patient?.patient_type]);
+  }, [patient]);
 
   // Get latest visit stats
   const latestVisit = useMemo(() => {

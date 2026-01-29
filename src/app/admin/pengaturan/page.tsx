@@ -5,7 +5,6 @@ import {
   User,
   Users,
   Building,
-  Shield,
   Database,
   Save,
   Upload,
@@ -26,7 +25,6 @@ const tabs: Tab[] = [
   { id: 'profil', label: 'Profil Posyandu', icon: <Building className="w-4 h-4" /> },
   { id: 'akun', label: 'Akun Saya', icon: <User className="w-4 h-4" /> },
   { id: 'users', label: 'Management User', icon: <Users className="w-4 h-4" /> },
-  { id: 'keamanan', label: 'Keamanan', icon: <Shield className="w-4 h-4" /> },
   { id: 'data', label: 'Backup Data', icon: <Database className="w-4 h-4" /> },
 ];
 
@@ -265,6 +263,32 @@ export default function PengaturanPage() {
       await loadUsers();
     } catch {
       setUsersError('Gagal membuat user');
+    }
+  };
+
+  const handleDevBootstrapAdmin = async () => {
+    setUsersError(null);
+    try {
+      const res = await fetch('/api/admin/bootstrap', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        credentials: 'include',
+      });
+      const json: unknown = await res.json().catch(() => null);
+      if (!res.ok) {
+        const msg =
+          json && typeof json === 'object'
+            ? (json as Record<string, unknown>).hint ??
+              (json as Record<string, unknown>).message ??
+              (json as Record<string, unknown>).error
+            : null;
+        setUsersError(String(msg ?? 'Gagal bootstrap admin'));
+        return;
+      }
+
+      await loadUsers();
+    } catch {
+      setUsersError('Gagal bootstrap admin');
     }
   };
 
@@ -621,55 +645,6 @@ export default function PengaturanPage() {
     </div>
   );
 
-  const renderKeamananTab = () => (
-    <div className="space-y-6">
-      <Card className="bg-gray-50">
-        <h3 className="font-semibold text-gray-900 mb-4">Ubah Password</h3>
-        <div className="space-y-4 max-w-md">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Password Lama</label>
-            <input
-              type="password"
-              placeholder="••••••••"
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Password Baru</label>
-            <input
-              type="password"
-              placeholder="••••••••"
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Konfirmasi Password Baru</label>
-            <input
-              type="password"
-              placeholder="••••••••"
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-            />
-          </div>
-          <Button variant="primary">Ubah Password</Button>
-        </div>
-      </Card>
-
-      <Card className="bg-gray-50">
-        <h3 className="font-semibold text-gray-900 mb-4">Sesi Aktif</h3>
-        <div className="space-y-3">
-          <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200">
-            <div>
-              <p className="font-medium text-gray-900">Chrome di Windows</p>
-              <p className="text-sm text-gray-500">Jakarta, Indonesia • Saat ini aktif</p>
-            </div>
-            <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs font-medium rounded-full">
-              Sesi ini
-            </span>
-          </div>
-        </div>
-      </Card>
-    </div>
-  );
 
   const renderUserManagementTab = () => (
     <div className="space-y-6">
@@ -679,6 +654,19 @@ export default function PengaturanPage() {
           <h3 className="font-semibold text-gray-900">Daftar Pengguna</h3>
           <p className="text-sm text-gray-500">Kelola akun pengguna yang dapat mengakses sistem</p>
           {usersError && <p className="text-sm text-red-600 mt-2">{usersError}</p>}
+
+          {usersError &&
+            typeof window !== 'undefined' &&
+            window.location.hostname === 'localhost' &&
+            (usersError.toLowerCase().includes('bukan admin') || usersError.toLowerCase().includes('forbidden')) && (
+              <button
+                type="button"
+                onClick={handleDevBootstrapAdmin}
+                className="mt-3 text-xs text-teal-700 hover:text-teal-800 underline"
+              >
+                Jadikan akun saya Admin (dev)
+              </button>
+            )}
         </div>
         <Button
           variant="primary"
@@ -1062,7 +1050,6 @@ export default function PengaturanPage() {
           {activeTab === 'profil' && renderProfilTab()}
           {activeTab === 'akun' && renderAkunTab()}
           {activeTab === 'users' && renderUserManagementTab()}
-          {activeTab === 'keamanan' && renderKeamananTab()}
           {activeTab === 'data' && renderDataTab()}
         </div>
       </Card>

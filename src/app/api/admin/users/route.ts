@@ -64,14 +64,34 @@ async function requireAdmin(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   if (userError) {
+    const msg = userError.message ?? 'Unknown auth error';
     return {
-      response: applyCookies(NextResponse.json({ error: 'Unauthorized' }, { status: 401 })),
+      response: applyCookies(
+        NextResponse.json(
+          {
+            error: 'Unauthorized',
+            message: msg,
+            hint: msg.toLowerCase().includes('fetch failed')
+              ? 'Server gagal konek ke Supabase (fetch failed/timeout). Cek koneksi internet/VPN/firewall ke *.supabase.co.'
+              : 'Silakan login ulang, lalu coba lagi.',
+          },
+          { status: 401 }
+        )
+      ),
     } as const;
   }
 
   if (!user) {
     return {
-      response: applyCookies(NextResponse.json({ error: 'Unauthorized' }, { status: 401 })),
+      response: applyCookies(
+        NextResponse.json(
+          {
+            error: 'Unauthorized',
+            hint: 'Session tidak ditemukan. Silakan login ulang.',
+          },
+          { status: 401 }
+        )
+      ),
     } as const;
   }
 
@@ -91,7 +111,16 @@ async function requireAdmin(request: NextRequest) {
 
   if (!profile || profile.role !== 'admin') {
     return {
-      response: applyCookies(NextResponse.json({ error: 'Forbidden' }, { status: 403 })),
+      response: applyCookies(
+        NextResponse.json(
+          {
+            error: 'Forbidden',
+            hint: 'Akun ini bukan admin. Set profiles.role = "admin" untuk user ini agar bisa kelola pengguna.',
+            role: profile?.role ?? null,
+          },
+          { status: 403 }
+        )
+      ),
     } as const;
   }
 

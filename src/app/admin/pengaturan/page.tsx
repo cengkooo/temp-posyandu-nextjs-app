@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   User,
   Users,
@@ -36,6 +36,15 @@ export default function PengaturanPage() {
   const [showAddUserModal, setShowAddUserModal] = useState(false);
   const [showEditUserModal, setShowEditUserModal] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+  const [backupLoading, setBackupLoading] = useState(false);
+  const [restoreLoading, setRestoreLoading] = useState(false);
+  const [wipeLoading, setWipeLoading] = useState(false);
+  const [dataError, setDataError] = useState<string | null>(null);
+  const [dataMessage, setDataMessage] = useState<string | null>(null);
+  const [restoreMode, setRestoreMode] = useState<'merge' | 'replace'>('merge');
+  const [lastBackupAt, setLastBackupAt] = useState<string | null>(null);
+  const restoreFileInputRef = useRef<HTMLInputElement | null>(null);
 
   type DbRole = 'admin' | 'bidan' | 'kader';
   type UserStatus = 'active' | 'inactive';
@@ -124,6 +133,147 @@ export default function PengaturanPage() {
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    try {
+      const stored = window.localStorage.getItem('posyandu_last_backup_at');
+      if (stored) setLastBackupAt(stored);
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  function formatLastBackup(value: string | null) {
+    if (!value) return null;
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) return null;
+    return d.toLocaleString('id-ID', {
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  }
+
+  function getFilenameFromContentDisposition(header: string | null) {
+    if (!header) return null;
+    const match = header.match(/filename\*=UTF-8''([^;]+)|filename="?([^;\"]+)"?/i);
+    const raw = (match?.[1] ?? match?.[2])?.trim();
+    if (!raw) return null;
+    try {
+      return decodeURIComponent(raw);
+    } catch {
+      return raw;
+    }
+  }
+
+  async function downloadBackup(format: 'excel' | 'json') {
+    setDataError(null);
+    setDataMessage(null);
+    setBackupLoading(true);
+    try {
+      const url = format === 'excel' ? '/api/admin/backup/excel' : '/api/admin/backup/json';
+      const res = await fetch(url, { credentials: 'include' });
+      if (!res.ok) {
+        const msg = await res.json().catch(() => null);
+        throw new Error(String(msg?.message ?? msg?.error ?? 'Gagal download backup'));
+      }
+
+      const blob = await res.blob();
+      const filenameFromHeader = getFilenameFromContentDisposition(res.headers.get('content-disposition'));
+      const fallback =
+        format === 'excel'
+          ? `posyandu_backup_${new Date().toISOString().slice(0, 10)}.xlsx`
+          : `posyandu_backup_${new Date().toISOString().slice(0, 10)}.json`;
+      const filename = filenameFromHeader ?? fallback;
+
+      const objectUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = objectUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(objectUrl);
+
+      const now = new Date().toISOString();
+      setLastBackupAt(now);
+      try {
+        window.localStorage.setItem('posyandu_last_backup_at', now);
+      } catch {
+        // ignore
+      }
+      setDataMessage('Backup berhasil diunduh.');
+    } catch (e) {
+      const message = e instanceof Error ? e.message : 'Gagal download backup';
+      setDataError(message);
+    } finally {
+      setBackupLoading(false);
+    }
+  }
+
+  async function restoreBackupFile(file: File) {
+    setDataError(null);
+    setDataMessage(null);
+    setRestoreLoading(true);
+    try {
+      const form = new FormData();
+      form.set('file', file);
+      form.set('mode', restoreMode);
+
+      const res = await fetch('/api/admin/backup/restore', {
+        method: 'POST',
+        body: form,
+        credentials: 'include',
+      });
+
+      const json = await res.json().catch(() => null);
+      if (!res.ok) {
+        throw new Error(String(json?.message ?? json?.error ?? 'Gagal restore data'));
+      }
+
+      setDataMessage(
+        restoreMode === 'replace'
+          ? 'Restore berhasil (mode replace: data lama dihapus lalu diisi ulang).'
+          : 'Restore berhasil (mode merge: data digabung/upsert).'
+      );
+    } catch (e) {
+      const message = e instanceof Error ? e.message : 'Gagal restore data';
+      setDataError(message);
+    } finally {
+      setRestoreLoading(false);
+    }
+  }
+
+  async function wipeAllData() {
+    setDataError(null);
+    setDataMessage(null);
+    const confirm = window.prompt('Ketik HAPUS untuk konfirmasi hapus semua data posyandu:');
+    if (confirm !== 'HAPUS') return;
+
+    setWipeLoading(true);
+    try {
+      const res = await fetch('/api/admin/backup/wipe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ confirm: 'HAPUS' }),
+        credentials: 'include',
+      });
+
+      const json = await res.json().catch(() => null);
+      if (!res.ok) {
+        throw new Error(String(json?.message ?? json?.error ?? 'Gagal menghapus semua data'));
+      }
+
+      setDataMessage('Semua data posyandu berhasil dihapus.');
+    } catch (e) {
+      const message = e instanceof Error ? e.message : 'Gagal menghapus semua data';
+      setDataError(message);
+    } finally {
+      setWipeLoading(false);
+    }
+  }
 
   // Akun Saya
   const [userData, setUserData] = useState({
@@ -225,7 +375,6 @@ export default function PengaturanPage() {
 
   useEffect(() => {
     if (!canManageUsers) return;
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     void loadUsers();
   }, [canManageUsers, loadUsers]);
 
@@ -971,18 +1120,41 @@ export default function PengaturanPage() {
           Download backup seluruh data posyandu dalam format Excel atau JSON.
         </p>
         <div className="flex items-center gap-3">
-          <Button variant="primary" className="flex items-center gap-2">
+          <Button
+            variant="primary"
+            className="flex items-center gap-2"
+            disabled={backupLoading || restoreLoading || wipeLoading}
+            onClick={() => downloadBackup('excel')}
+          >
             <Database className="w-4 h-4" />
-            Backup ke Excel
+            {backupLoading ? 'Menyiapkan...' : 'Backup ke Excel'}
           </Button>
-          <Button variant="secondary" className="flex items-center gap-2">
+          <Button
+            variant="secondary"
+            className="flex items-center gap-2"
+            disabled={backupLoading || restoreLoading || wipeLoading}
+            onClick={() => downloadBackup('json')}
+          >
             <Database className="w-4 h-4" />
-            Backup ke JSON
+            {backupLoading ? 'Menyiapkan...' : 'Backup ke JSON'}
           </Button>
         </div>
-        <p className="text-xs text-gray-500 mt-3">
-          Backup terakhir: 20 Januari 2025, 14:30 WIB
-        </p>
+
+        {formatLastBackup(lastBackupAt) && (
+          <p className="text-xs text-gray-500 mt-3">Backup terakhir: {formatLastBackup(lastBackupAt)}</p>
+        )}
+
+        {(dataError || dataMessage) && (
+          <div
+            className={`mt-4 rounded-lg border px-4 py-3 text-sm ${
+              dataError
+                ? 'border-red-200 bg-red-50 text-red-700'
+                : 'border-emerald-200 bg-emerald-50 text-emerald-700'
+            }`}
+          >
+            {dataError ?? dataMessage}
+          </div>
+        )}
       </Card>
 
       <Card className="bg-gray-50">
@@ -990,13 +1162,59 @@ export default function PengaturanPage() {
         <p className="text-sm text-gray-600 mb-4">
           Upload file backup untuk memulihkan data.
         </p>
-        <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+        <div className="flex items-center gap-3 mb-4">
+          <label className="text-sm text-gray-700">Mode restore:</label>
+          <select
+            value={restoreMode}
+            onChange={(e) => setRestoreMode(e.target.value === 'replace' ? 'replace' : 'merge')}
+            className="px-3 py-2 border border-gray-200 rounded-lg bg-white text-sm"
+            disabled={backupLoading || restoreLoading || wipeLoading}
+          >
+            <option value="merge">Merge (Upsert)</option>
+            <option value="replace">Replace (Hapus lalu restore)</option>
+          </select>
+        </div>
+
+        <input
+          ref={restoreFileInputRef}
+          type="file"
+          accept=".xlsx,.json,application/json,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (!file) return;
+            void restoreBackupFile(file);
+            e.target.value = '';
+          }}
+          disabled={backupLoading || restoreLoading || wipeLoading}
+        />
+
+        <div
+          className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center"
+          onDragOver={(e) => {
+            e.preventDefault();
+          }}
+          onDrop={(e) => {
+            e.preventDefault();
+            const file = e.dataTransfer.files?.[0];
+            if (!file) return;
+            void restoreBackupFile(file);
+          }}
+        >
           <Upload className="w-10 h-10 text-gray-400 mx-auto mb-3" />
           <p className="text-sm text-gray-600">
             Drag & drop file backup atau{' '}
-            <button className="text-teal-600 hover:underline">browse</button>
+            <button
+              type="button"
+              className="text-teal-600 hover:underline"
+              onClick={() => restoreFileInputRef.current?.click()}
+              disabled={backupLoading || restoreLoading || wipeLoading}
+            >
+              browse
+            </button>
           </p>
           <p className="text-xs text-gray-400 mt-2">Format: .xlsx atau .json</p>
+          {restoreLoading && <p className="text-xs text-gray-500 mt-3">Memulihkan data...</p>}
         </div>
       </Card>
 
@@ -1005,7 +1223,13 @@ export default function PengaturanPage() {
         <p className="text-sm text-red-700 mb-4">
           Hapus semua data posyandu. Tindakan ini tidak dapat dibatalkan.
         </p>
-        <Button variant="danger">Hapus Semua Data</Button>
+        <Button
+          variant="danger"
+          disabled={backupLoading || restoreLoading || wipeLoading}
+          onClick={() => void wipeAllData()}
+        >
+          {wipeLoading ? 'Menghapus...' : 'Hapus Semua Data'}
+        </Button>
       </Card>
     </div>
   );

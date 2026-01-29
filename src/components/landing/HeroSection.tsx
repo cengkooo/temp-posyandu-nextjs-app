@@ -10,7 +10,6 @@ export default function HeroSection() {
         <div className="hero-content">
           {/* Badge */}
           <div className="hero-badge">
-            <span className="badge-icon">💚</span>
             <span>Pelayanan Kesehatan Masyarakat</span>
           </div>
 
@@ -24,8 +23,10 @@ export default function HeroSection() {
 
           {/* Location */}
           <div className="hero-location">
-            <span className="location-icon">📍</span>
-            <span>Desa Sukamaju, Kecamatan Harapan Jaya, Kabupaten Sejahtera</span>
+            <span>Balai Desa Way Kalam, Kec. Penengahan
+            <br>
+            </br>
+            Kabupaten Lampung Selatan, Lampung 35592</span>
           </div>
 
           {/* CTA Buttons */}

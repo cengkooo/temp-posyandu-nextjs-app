@@ -289,7 +289,7 @@ export default function DetailPasienPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <div className="flex items-center justify-center min-h-100">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600"></div>
       </div>
     );
@@ -297,7 +297,7 @@ export default function DetailPasienPage() {
 
   if (!patient) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] text-gray-500">
+      <div className="flex flex-col items-center justify-center min-h-100 text-gray-500">
         <User className="w-12 h-12 mb-3 text-gray-300" />
         <p className="text-lg font-medium">Data pasien tidak ditemukan</p>
         <Button variant="outline" onClick={() => router.back()} className="mt-4">
@@ -610,7 +610,7 @@ export default function DetailPasienPage() {
   return (
     <div className="space-y-6 print-patient-card">
       {/* Header with gradient */}
-      <div className={`bg-gradient-to-r ${typeColors.bg} rounded-xl p-6 text-white`}>
+      <div className={`bg-linear-to-r ${typeColors.bg} rounded-xl p-6 text-white`}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
@@ -643,7 +643,7 @@ export default function DetailPasienPage() {
             <Button
               variant="outline"
               onClick={() => window.print()}
-              className="flex items-center gap-2 !border-white/50 !text-white hover:!bg-white/20"
+              className="flex items-center gap-2 border-white/50! text-white! hover:bg-white/20!"
             >
               <Printer className="w-4 h-4" />
               Cetak
@@ -651,7 +651,7 @@ export default function DetailPasienPage() {
             <Button
               variant="outline"
               onClick={() => router.push(`/admin/pasien/${patientId}/edit`)}
-              className="flex items-center gap-2 !border-white/50 !text-white hover:!bg-white/20"
+              className="flex items-center gap-2 border-white/50! text-white! hover:bg-white/20!"
             >
               <Pencil className="w-4 h-4" />
               Edit
@@ -659,7 +659,7 @@ export default function DetailPasienPage() {
             <Button
               variant="outline"
               onClick={handleDelete}
-              className="flex items-center gap-2 !border-red-300 !text-red-100 hover:!bg-red-500/30"
+              className="flex items-center gap-2 border-red-300! text-red-100! hover:bg-red-500/30!"
             >
               <Trash2 className="w-4 h-4" />
               Hapus

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   ArrowLeft,
@@ -90,6 +90,35 @@ const tabs: Tab[] = [
 export default function KMSDigitalPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('overview');
+  const [posyanduName, setPosyanduName] = useState<string>('Posyandu Melati Sehat');
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadSettings() {
+      try {
+        const res = await fetch('/api/settings/posyandu', { cache: 'no-store' });
+        if (!res.ok) return;
+        const json: unknown = await res.json().catch(() => null);
+        const data =
+          json && typeof json === 'object' && 'data' in json
+            ? (json as Record<string, unknown>).data
+            : null;
+        const name =
+          data && typeof data === 'object' && 'name' in data
+            ? (data as Record<string, unknown>).name
+            : null;
+        if (!cancelled && typeof name === 'string' && name.trim().length > 0) {
+          setPosyanduName(name.trim());
+        }
+      } catch {
+        // ignore
+      }
+    }
+    loadSettings();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const calculateAge = (dob: string) => {
     const birth = new Date(dob);
@@ -152,7 +181,7 @@ export default function KMSDigitalPage() {
       status: imm.status as 'completed' | 'pending' | 'overdue',
     }));
 
-    generateKMSPDF(patientData, growthData, immunizations, []);
+    generateKMSPDF(patientData, growthData, immunizations, [], { posyanduName });
   };
 
   const handlePrint = () => {
@@ -163,7 +192,7 @@ export default function KMSDigitalPage() {
     <div className="space-y-6">
       {/* Status Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="bg-gradient-to-br from-teal-50 to-teal-100" padding="sm">
+        <Card className="bg-linear-to-br from-teal-50 to-teal-100" padding="sm">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-xs text-gray-600 mb-1">Status Gizi</p>
@@ -182,7 +211,7 @@ export default function KMSDigitalPage() {
           </div>
         </Card>
 
-        <Card className="bg-gradient-to-br from-blue-50 to-blue-100" padding="sm">
+        <Card className="bg-linear-to-br from-blue-50 to-blue-100" padding="sm">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-xs text-gray-600 mb-1">Berat Badan Terakhir</p>
@@ -197,7 +226,7 @@ export default function KMSDigitalPage() {
           </div>
         </Card>
 
-        <Card className="bg-gradient-to-br from-purple-50 to-purple-100" padding="sm">
+        <Card className="bg-linear-to-br from-purple-50 to-purple-100" padding="sm">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-xs text-gray-600 mb-1">Tinggi Badan Terakhir</p>
@@ -327,7 +356,7 @@ export default function KMSDigitalPage() {
           <h3 className="font-semibold text-gray-900 mb-4">BB/U (Berat Badan menurut Umur)</h3>
           <div className="relative">
             {/* Chart Area */}
-            <div className="h-64 bg-gradient-to-b from-green-50 via-yellow-50 to-red-50 rounded-lg border border-gray-200 relative overflow-hidden">
+            <div className="h-64 bg-linear-to-b from-green-50 via-yellow-50 to-red-50 rounded-lg border border-gray-200 relative overflow-hidden">
               {/* Zone Labels */}
               <div className="absolute right-2 top-2 text-xs text-green-600 font-medium">+2 SD</div>
               <div className="absolute right-2 top-1/4 text-xs text-green-500">+1 SD</div>
@@ -387,7 +416,7 @@ export default function KMSDigitalPage() {
         <Card>
           <h3 className="font-semibold text-gray-900 mb-4">TB/U (Tinggi Badan menurut Umur)</h3>
           <div className="relative">
-            <div className="h-64 bg-gradient-to-b from-green-50 via-yellow-50 to-red-50 rounded-lg border border-gray-200 relative overflow-hidden">
+            <div className="h-64 bg-linear-to-b from-green-50 via-yellow-50 to-red-50 rounded-lg border border-gray-200 relative overflow-hidden">
               {/* Zone Labels */}
               <div className="absolute right-2 top-2 text-xs text-green-600 font-medium">+2 SD</div>
               <div className="absolute right-2 top-1/2 text-xs text-gray-600 font-medium">Median</div>
@@ -426,7 +455,7 @@ export default function KMSDigitalPage() {
         <Card>
           <h3 className="font-semibold text-gray-900 mb-4">LK/U (Lingkar Kepala menurut Umur)</h3>
           <div className="relative">
-            <div className="h-64 bg-gradient-to-b from-green-50 via-yellow-50 to-red-50 rounded-lg border border-gray-200 relative overflow-hidden">
+            <div className="h-64 bg-linear-to-b from-green-50 via-yellow-50 to-red-50 rounded-lg border border-gray-200 relative overflow-hidden">
               {/* Data Points */}
               {mockVisits.slice(0, 6).reverse().map((visit, _index) => (
                 <div
@@ -459,7 +488,7 @@ export default function KMSDigitalPage() {
         {/* Weight for Height Chart */}
         <Card>
           <h3 className="font-semibold text-gray-900 mb-4">BB/TB (Berat Badan menurut Tinggi Badan)</h3>
-          <div className="h-64 bg-gradient-to-b from-green-50 via-yellow-50 to-red-50 rounded-lg border border-gray-200 flex items-center justify-center">
+          <div className="h-64 bg-linear-to-b from-green-50 via-yellow-50 to-red-50 rounded-lg border border-gray-200 flex items-center justify-center">
             <p className="text-sm text-gray-500">Scatter plot BB/TB</p>
           </div>
           
@@ -625,7 +654,7 @@ export default function KMSDigitalPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-gradient-to-r from-teal-600 to-emerald-600 rounded-xl p-6 text-white">
+      <div className="bg-linear-to-r from-teal-600 to-emerald-600 rounded-xl p-6 text-white">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
@@ -658,14 +687,14 @@ export default function KMSDigitalPage() {
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
-              className="!border-white/50 !text-white hover:!bg-white/20 flex items-center gap-2"
+              className="border-white/50! text-white! hover:bg-white/20! flex items-center gap-2"
             >
               <Share2 className="w-4 h-4" />
               Bagikan
             </Button>
             <Button
               variant="outline"
-              className="!border-white/50 !text-white hover:!bg-white/20 flex items-center gap-2"
+              className="border-white/50! text-white! hover:bg-white/20! flex items-center gap-2"
               onClick={handleDownloadPDF}
             >
               <Download className="w-4 h-4" />
@@ -673,7 +702,7 @@ export default function KMSDigitalPage() {
             </Button>
             <Button
               variant="outline"
-              className="!border-white/50 !text-white hover:!bg-white/20 flex items-center gap-2"
+              className="border-white/50! text-white! hover:bg-white/20! flex items-center gap-2"
               onClick={handlePrint}
             >
               <Printer className="w-4 h-4" />

@@ -22,12 +22,5 @@ export default function AdminLoginLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Completely override parent layout
-  return (
-    <html lang="id" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`} suppressHydrationWarning>
-        {children}
-      </body>
-    </html>
-  );
+  return <div className={`${geistSans.variable} ${geistMono.variable} antialiased`}>{children}</div>;
 }

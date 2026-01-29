@@ -82,6 +82,7 @@ export default function LaporanPage() {
   const [startDate, setStartDate] = useState(format(new Date(new Date().getFullYear(), 0, 1), 'yyyy-MM-dd'));
   const [endDate, setEndDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [loading, setLoading] = useState(false);
+  const [posyanduName, setPosyanduName] = useState<string>('Posyandu Melati Sehat');
 
   const [statistics, setStatistics] = useState<Statistics | null>(null);
   const [visitTrends, setVisitTrends] = useState<VisitTrend[]>([]);
@@ -93,6 +94,34 @@ export default function LaporanPage() {
 
   useEffect(() => {
     loadData();
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadSettings() {
+      try {
+        const res = await fetch('/api/settings/posyandu', { cache: 'no-store' });
+        if (!res.ok) return;
+        const json: unknown = await res.json().catch(() => null);
+        const data =
+          json && typeof json === 'object' && 'data' in json
+            ? (json as Record<string, unknown>).data
+            : null;
+        const name =
+          data && typeof data === 'object' && 'name' in data
+            ? (data as Record<string, unknown>).name
+            : null;
+        if (!cancelled && typeof name === 'string' && name.trim().length > 0) {
+          setPosyanduName(name.trim());
+        }
+      } catch {
+        // ignore
+      }
+    }
+    loadSettings();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const loadData = async () => {
@@ -151,7 +180,8 @@ export default function LaporanPage() {
         dateRange: { start: startDate, end: endDate }
       },
       filename,
-      'posyandu'
+      'posyandu',
+      { posyanduName }
     );
   };
 
@@ -162,7 +192,8 @@ export default function LaporanPage() {
         breakdown: breakdown,
         dateRange: { start: startDate, end: endDate }
       },
-      'posyandu'
+      'posyandu',
+      { posyanduName }
     );
   };
 
@@ -205,7 +236,7 @@ export default function LaporanPage() {
           'Total Kunjungan',
           statistics?.totalVisits || 0,
           statistics?.totalVisitsTrend,
-          'bg-gradient-to-br from-teal-50 to-teal-100',
+          'bg-linear-to-br from-teal-50 to-teal-100',
           'bg-white',
           'text-teal-600'
         )}
@@ -214,7 +245,7 @@ export default function LaporanPage() {
           'Pasien Baru (Periode)',
           statistics?.newPatients || 0,
           statistics?.newPatientsTrend,
-          'bg-gradient-to-br from-blue-50 to-blue-100',
+          'bg-linear-to-br from-blue-50 to-blue-100',
           'bg-white',
           'text-blue-600'
         )}
@@ -223,7 +254,7 @@ export default function LaporanPage() {
           'Balita Dipantau',
           statistics?.totalBalita || 0,
           statistics?.totalBalitaTrend,
-          'bg-gradient-to-br from-cyan-50 to-cyan-100',
+          'bg-linear-to-br from-cyan-50 to-cyan-100',
           'bg-white',
           'text-cyan-600'
         )}
@@ -232,7 +263,7 @@ export default function LaporanPage() {
           'Ibu Hamil Aktif',
           ibuHamilStats?.totalIbuHamil || 0,
           undefined,
-          'bg-gradient-to-br from-pink-50 to-pink-100',
+          'bg-linear-to-br from-pink-50 to-pink-100',
           'bg-white',
           'text-pink-600'
         )}
@@ -241,7 +272,7 @@ export default function LaporanPage() {
           'Cakupan Imunisasi',
           `${statistics?.immunizationCoverage ?? 0}%`,
           statistics?.immunizationCoverageTrend,
-          'bg-gradient-to-br from-orange-50 to-orange-100',
+          'bg-linear-to-br from-orange-50 to-orange-100',
           'bg-white',
           'text-orange-600'
         )}
@@ -481,7 +512,7 @@ export default function LaporanPage() {
   const renderImunisasiTab = () => (
     <div className="space-y-6">
       {/* Overall Coverage */}
-      <Card className="bg-gradient-to-r from-teal-500 to-emerald-500">
+      <Card className="bg-linear-to-r from-teal-500 to-emerald-500">
         <div className="text-white">
           <p className="text-sm opacity-80">Cakupan Imunisasi Dasar Lengkap</p>
           <p className="text-4xl font-bold mt-1">{statistics?.immunizationCoverage ?? 0}%</p>

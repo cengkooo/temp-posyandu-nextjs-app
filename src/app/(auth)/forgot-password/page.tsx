@@ -38,7 +38,7 @@ export default function ForgotPasswordPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-emerald-50 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-linear-to-br from-teal-50 via-white to-emerald-50 flex items-center justify-center p-4">
         {/* Background decoration */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-20 left-10 w-72 h-72 bg-teal-200/20 rounded-full blur-3xl"></div>
@@ -48,7 +48,7 @@ export default function ForgotPasswordPage() {
         <div className="relative w-full max-w-md">
           <div className="bg-white rounded-2xl shadow-xl shadow-teal-100/50 p-8 border border-teal-50 text-center">
             <div className="flex justify-center mb-6">
-              <div className="w-16 h-16 bg-gradient-to-br from-teal-500 to-emerald-500 rounded-full flex items-center justify-center shadow-lg shadow-teal-200/50">
+              <div className="w-16 h-16 bg-linear-to-br from-teal-500 to-emerald-500 rounded-full flex items-center justify-center shadow-lg shadow-teal-200/50">
                 <CheckCircle className="w-8 h-8 text-white" />
               </div>
             </div>
@@ -60,7 +60,7 @@ export default function ForgotPasswordPage() {
 
             <Link
               href="/admin/login"
-              className="inline-flex items-center justify-center gap-2 w-full bg-gradient-to-r from-teal-600 to-emerald-600 text-white font-semibold py-3 px-4 rounded-lg hover:from-teal-700 hover:to-emerald-700 transition-all shadow-lg shadow-teal-200/50"
+              className="inline-flex items-center justify-center gap-2 w-full bg-linear-to-r from-teal-600 to-emerald-600 text-white font-semibold py-3 px-4 rounded-lg hover:from-teal-700 hover:to-emerald-700 transition-all shadow-lg shadow-teal-200/50"
             >
               Kembali ke Login
             </Link>
@@ -71,7 +71,7 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-emerald-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-linear-to-br from-teal-50 via-white to-emerald-50 flex items-center justify-center p-4">
       {/* Background decoration */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-10 w-72 h-72 bg-teal-200/20 rounded-full blur-3xl"></div>
@@ -93,7 +93,7 @@ export default function ForgotPasswordPage() {
         <div className="bg-white rounded-2xl shadow-xl shadow-teal-100/50 p-8 border border-teal-50">
           {/* Icon */}
           <div className="flex justify-center mb-6">
-            <div className="w-16 h-16 bg-gradient-to-br from-teal-500 to-emerald-500 rounded-full flex items-center justify-center shadow-lg shadow-teal-200/50">
+            <div className="w-16 h-16 bg-linear-to-br from-teal-500 to-emerald-500 rounded-full flex items-center justify-center shadow-lg shadow-teal-200/50">
               <Heart className="w-8 h-8 text-white fill-white" />
             </div>
           </div>
@@ -135,7 +135,7 @@ export default function ForgotPasswordPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-gradient-to-r from-teal-600 to-emerald-600 text-white font-semibold py-3 px-4 rounded-lg hover:from-teal-700 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 transition-all shadow-lg shadow-teal-200/50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-linear-to-r from-teal-600 to-emerald-600 text-white font-semibold py-3 px-4 rounded-lg hover:from-teal-700 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 transition-all shadow-lg shadow-teal-200/50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? (
                 <span className="flex items-center justify-center gap-2">

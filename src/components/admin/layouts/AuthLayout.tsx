@@ -21,7 +21,7 @@ export default function AuthLayout({
   backButtonText = 'Kembali ke Beranda',
 }: AuthLayoutProps) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-emerald-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-linear-to-br from-teal-50 via-white to-emerald-50 flex items-center justify-center p-4">
       <BackgroundDecoration />
 
       <div className="relative w-full max-w-md">
@@ -40,7 +40,7 @@ export default function AuthLayout({
         <div className="bg-white rounded-2xl shadow-xl shadow-teal-100/50 p-8 border border-teal-50">
           {/* Icon */}
           <div className="flex justify-center mb-6">
-            <div className="w-16 h-16 bg-gradient-to-br from-teal-500 to-emerald-500 rounded-full flex items-center justify-center shadow-lg shadow-teal-200/50">
+            <div className="w-16 h-16 bg-linear-to-br from-teal-500 to-emerald-500 rounded-full flex items-center justify-center shadow-lg shadow-teal-200/50">
               <Heart className="w-8 h-8 text-white fill-white" />
             </div>
           </div>

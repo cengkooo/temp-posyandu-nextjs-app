@@ -1,6 +1,4 @@
 'use client';
-
-import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { 
@@ -14,8 +12,6 @@ import {
   LogOut,
   ChevronDown,
   Heart,
-  Bell,
-  Search,
   type LucideIcon
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase';
@@ -44,7 +40,6 @@ export default function AdminLayout({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const [searchQuery, setSearchQuery] = useState('');
 
   const handleLogout = async () => {
     const supabase = createClient();
@@ -60,7 +55,7 @@ export default function AdminLayout({
         {/* Logo */}
         <div className="p-6 border-b border-gray-200">
           <Link href="/admin" className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-teal-500 to-emerald-500 rounded-lg flex items-center justify-center">
+            <div className="w-10 h-10 bg-linear-to-br from-teal-500 to-emerald-500 rounded-lg flex items-center justify-center">
               <Heart className="w-6 h-6 text-white fill-white" />
             </div>
             <div>
@@ -131,24 +126,6 @@ export default function AdminLayout({
             </h1>
 
             <div className="flex items-center gap-4">
-              {/* Search Bar */}
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Cari pasien, data..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent w-64"
-                />
-              </div>
-
-              {/* Notifications */}
-              <button className="relative p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
-                <Bell className="w-5 h-5" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-              </button>
-
               {/* User Profile */}
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 bg-teal-100 rounded-full flex items-center justify-center">

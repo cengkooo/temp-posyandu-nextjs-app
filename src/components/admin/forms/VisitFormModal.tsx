@@ -74,8 +74,8 @@ export default function VisitFormModal({
     }
   };
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void loadPatients();
   }, []);
 
@@ -325,7 +325,7 @@ export default function VisitFormModal({
     <div className="fixed inset-0 bg-gray-900/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-xl shadow-xl max-w-4xl w-full max-h-[95vh] overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-teal-600 to-emerald-600">
+        <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-linear-to-r from-teal-600 to-emerald-600">
           <div>
             <h2 className="text-xl font-semibold text-white">
               {visit ? 'Edit Kunjungan' : 'Catat Kunjungan'}

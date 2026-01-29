@@ -42,11 +42,13 @@ export function generateKMSPDF(
   patient: PatientData,
   growthData: GrowthData[],
   immunizations: ImmunizationData[],
-  _visits: VisitData[]
+  _visits: VisitData[],
+  opts?: { posyanduName?: string }
 ): void {
   const doc = new jsPDF('p', 'mm', 'a4');
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
+  const posyanduName = opts?.posyanduName || 'Posyandu Melati Sehat';
   
   // Colors
   const tealColor: [number, number, number] = [20, 184, 166];
@@ -63,7 +65,7 @@ export function generateKMSPDF(
   
   doc.setFontSize(12);
   doc.setFont('helvetica', 'normal');
-  doc.text('Posyandu Melati Sehat', pageWidth / 2, 28, { align: 'center' });
+  doc.text(posyanduName, pageWidth / 2, 28, { align: 'center' });
   doc.text(`Dicetak: ${format(new Date(), 'dd MMMM yyyy', { locale: idLocale })}`, pageWidth / 2, 35, { align: 'center' });
   
   // Patient Info Box
@@ -249,11 +251,13 @@ export function generateBukuKIAPDF(
   patient: PatientData,
   pregnancy: PregnancyData,
   ancVisits: ANCVisit[],
-  ttImmunizations: TTImmunization[]
+  ttImmunizations: TTImmunization[],
+  opts?: { posyanduName?: string }
 ): void {
   const doc = new jsPDF('p', 'mm', 'a4');
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
+  const posyanduName = opts?.posyanduName || 'Posyandu Melati Sehat';
   
   // Colors
   const pinkColor: [number, number, number] = [236, 72, 153];
@@ -271,7 +275,8 @@ export function generateBukuKIAPDF(
   doc.setFontSize(12);
   doc.setFont('helvetica', 'normal');
   doc.text('Kesehatan Ibu dan Anak', pageWidth / 2, 28, { align: 'center' });
-  doc.text(`Dicetak: ${format(new Date(), 'dd MMMM yyyy', { locale: idLocale })}`, pageWidth / 2, 35, { align: 'center' });
+  doc.text(posyanduName, pageWidth / 2, 33, { align: 'center' });
+  doc.text(`Dicetak: ${format(new Date(), 'dd MMMM yyyy', { locale: idLocale })}`, pageWidth / 2, 38, { align: 'center' });
   
   // Patient Info Box
   doc.setFillColor(253, 242, 248);

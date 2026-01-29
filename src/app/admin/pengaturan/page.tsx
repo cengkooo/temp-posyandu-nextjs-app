@@ -1,11 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   User,
   Users,
   Building,
-  Bell,
   Shield,
   Database,
   Save,
@@ -27,7 +26,6 @@ const tabs: Tab[] = [
   { id: 'profil', label: 'Profil Posyandu', icon: <Building className="w-4 h-4" /> },
   { id: 'akun', label: 'Akun Saya', icon: <User className="w-4 h-4" /> },
   { id: 'users', label: 'Management User', icon: <Users className="w-4 h-4" /> },
-  { id: 'notifikasi', label: 'Notifikasi', icon: <Bell className="w-4 h-4" /> },
   { id: 'keamanan', label: 'Keamanan', icon: <Shield className="w-4 h-4" /> },
   { id: 'data', label: 'Backup Data', icon: <Database className="w-4 h-4" /> },
 ];
@@ -36,8 +34,34 @@ export default function PengaturanPage() {
   const [activeTab, setActiveTab] = useState('profil');
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [showAddUserModal, setShowAddUserModal] = useState(false);
-  const [_editingUser, setEditingUser] = useState<Record<string, unknown> | null>(null);
+  const [showEditUserModal, setShowEditUserModal] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+  type DbRole = 'admin' | 'bidan' | 'kader';
+  type UserStatus = 'active' | 'inactive';
+  type ManagedUser = {
+    id: string;
+    name: string;
+    email: string | null;
+    phone: string | null;
+    role: DbRole;
+    status: UserStatus;
+    lastLogin: string | null;
+  };
+
+  type RoleLabel = 'Admin' | 'Bidan' | 'User';
+  function roleToLabel(role: DbRole): RoleLabel {
+    if (role === 'admin') return 'Admin';
+    if (role === 'bidan') return 'Bidan';
+    return 'User';
+  }
+  function labelToRole(label: string): DbRole {
+    if (label === 'Admin') return 'admin';
+    if (label === 'Bidan') return 'bidan';
+    return 'kader';
+  }
 
   // Profil Posyandu
   const [posyanduData, setPosyanduData] = useState({
@@ -55,6 +79,54 @@ export default function PengaturanPage() {
     operationalHours: '08:00 - 12:00',
   });
 
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadSettings() {
+      try {
+        const res = await fetch('/api/settings/posyandu', { cache: 'no-store' });
+        const json: unknown = await res.json().catch(() => null);
+        if (!res.ok) return;
+        const data =
+          json && typeof json === 'object' && 'data' in json
+            ? (json as Record<string, unknown>).data
+            : null;
+        if (!data || cancelled) return;
+
+        const dataRec = typeof data === 'object' && data ? (data as Record<string, unknown>) : null;
+
+        const operationalDaysRaw = dataRec?.operational_days;
+        const operationalDays = Array.isArray(operationalDaysRaw)
+          ? operationalDaysRaw.filter((d): d is string => typeof d === 'string')
+          : null;
+
+        setPosyanduData((prev) => ({
+          ...prev,
+          name: typeof dataRec?.name === 'string' ? dataRec.name : prev.name,
+          code: typeof dataRec?.code === 'string' ? dataRec.code : prev.code,
+          address: typeof dataRec?.address === 'string' ? dataRec.address : '',
+          kelurahan: typeof dataRec?.kelurahan === 'string' ? dataRec.kelurahan : '',
+          kecamatan: typeof dataRec?.kecamatan === 'string' ? dataRec.kecamatan : '',
+          kota: typeof dataRec?.kota === 'string' ? dataRec.kota : '',
+          phone: typeof dataRec?.phone === 'string' ? dataRec.phone : '',
+          email: typeof dataRec?.email === 'string' ? dataRec.email : '',
+          puskesmas: typeof dataRec?.puskesmas === 'string' ? dataRec.puskesmas : '',
+          ketua: typeof dataRec?.ketua === 'string' ? dataRec.ketua : '',
+          operationalDays: operationalDays ?? prev.operationalDays,
+          operationalHours:
+            typeof dataRec?.operational_hours === 'string' ? dataRec.operational_hours : '',
+        }));
+      } catch {
+        // ignore
+      }
+    }
+
+    loadSettings();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   // Akun Saya
   const [userData, setUserData] = useState({
     name: 'Admin Posyandu',
@@ -63,70 +135,291 @@ export default function PengaturanPage() {
     role: 'Admin',
   });
 
-  // Notifikasi
-  const [notifications, setNotifications] = useState({
-    emailReminder: true,
-    smsReminder: false,
-    whatsappReminder: true,
-    reminderDaysBefore: 3,
-    newPatientAlert: true,
-    overdueImmunizationAlert: true,
-    visitSummary: true,
-    summaryFrequency: 'weekly',
-  });
-
   // Users list
-  const [users, setUsers] = useState([
-    {
-      id: '1',
-      name: 'Admin Posyandu',
-      email: 'admin@posyandu-melati.com',
-      phone: '081234567890',
-      role: 'Admin',
-      status: 'active',
-      lastLogin: '2025-01-25 14:30',
-    },
-    {
-      id: '2',
-      name: 'Bidan Sari',
-      email: 'sari@posyandu-melati.com',
-      phone: '081234567891',
-      role: 'Bidan',
-      status: 'active',
-      lastLogin: '2025-01-24 10:15',
-    },
-    {
-      id: '3',
-      name: 'Kader Ani',
-      email: 'ani@posyandu-melati.com',
-      phone: '081234567892',
-      role: 'Kader',
-      status: 'active',
-      lastLogin: '2025-01-23 09:00',
-    },
-    {
-      id: '4',
-      name: 'Kader Budi',
-      email: 'budi@posyandu-melati.com',
-      phone: '081234567893',
-      role: 'Kader',
-      status: 'inactive',
-      lastLogin: '2025-01-10 11:30',
-    },
-  ]);
+  const [users, setUsers] = useState<ManagedUser[]>([]);
+  const [usersLoading, setUsersLoading] = useState(false);
+  const [usersError, setUsersError] = useState<string | null>(null);
 
   const [newUser, setNewUser] = useState({
     name: '',
     email: '',
     phone: '',
-    role: 'Kader',
+    role: 'User',
     password: '',
   });
 
+  const [editingUser, setEditingUser] = useState<{
+    id: string;
+    name: string;
+    email: string;
+    phone: string;
+    role: RoleLabel;
+    password: string;
+  } | null>(null);
+
+  const canManageUsers = useMemo(() => {
+    return activeTab === 'users';
+  }, [activeTab]);
+
+  const loadUsers = useCallback(async () => {
+    setUsersError(null);
+    setUsersLoading(true);
+    try {
+      const res = await fetch('/api/admin/users', { cache: 'no-store', credentials: 'include' });
+      const json: unknown = await res.json().catch(() => null);
+      if (!res.ok) {
+        const msg =
+          json && typeof json === 'object'
+            ? (json as Record<string, unknown>).hint ??
+              (json as Record<string, unknown>).message ??
+              (json as Record<string, unknown>).error
+            : null;
+        setUsersError(String(msg ?? 'Gagal memuat user'));
+        setUsers([]);
+        setUsersLoading(false);
+        return;
+      }
+
+      const dataRaw =
+        json && typeof json === 'object' && 'data' in json
+          ? (json as Record<string, unknown>).data
+          : null;
+      const currentIdRaw =
+        json && typeof json === 'object' && 'currentUserId' in json
+          ? (json as Record<string, unknown>).currentUserId
+          : null;
+
+      setCurrentUserId(typeof currentIdRaw === 'string' ? currentIdRaw : null);
+
+      if (!Array.isArray(dataRaw)) {
+        setUsers([]);
+        setUsersLoading(false);
+        return;
+      }
+
+      const parsedUsers: ManagedUser[] = dataRaw
+        .map((u) => {
+          if (!u || typeof u !== 'object') return null;
+          const rec = u as Record<string, unknown>;
+          const role = rec.role;
+          if (role !== 'admin' && role !== 'bidan' && role !== 'kader') return null;
+          const status = rec.status === 'inactive' ? 'inactive' : 'active';
+          return {
+            id: String(rec.id ?? ''),
+            name: typeof rec.name === 'string' ? rec.name : '-',
+            email: typeof rec.email === 'string' ? rec.email : null,
+            phone: typeof rec.phone === 'string' ? rec.phone : null,
+            role,
+            status,
+            lastLogin: typeof rec.lastLogin === 'string' ? rec.lastLogin : null,
+          };
+        })
+        .filter((x): x is ManagedUser => !!x && x.id.length > 0);
+
+      setUsers(parsedUsers);
+      setUsersLoading(false);
+    } catch {
+      setUsersError('Gagal memuat user');
+      setUsers([]);
+      setUsersLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!canManageUsers) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void loadUsers();
+  }, [canManageUsers, loadUsers]);
+
+  const handleCreateUser = async () => {
+    setUsersError(null);
+    try {
+      const payload = {
+        name: newUser.name,
+        email: newUser.email,
+        phone: newUser.phone,
+        role: labelToRole(newUser.role),
+        password: newUser.password,
+      };
+
+      const res = await fetch('/api/admin/users', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(payload),
+      });
+      const json: unknown = await res.json().catch(() => null);
+      if (!res.ok) {
+        const msg =
+          json && typeof json === 'object'
+            ? (json as Record<string, unknown>).hint ??
+              (json as Record<string, unknown>).message ??
+              (json as Record<string, unknown>).error
+            : null;
+        setUsersError(String(msg ?? 'Gagal membuat user'));
+        return;
+      }
+
+      setNewUser({ name: '', email: '', phone: '', role: 'User', password: '' });
+      setShowAddUserModal(false);
+      await loadUsers();
+    } catch {
+      setUsersError('Gagal membuat user');
+    }
+  };
+
+  const handleOpenEdit = (u: ManagedUser) => {
+    setEditingUser({
+      id: u.id,
+      name: u.name,
+      email: u.email ?? '',
+      phone: u.phone ?? '',
+      role: roleToLabel(u.role),
+      password: '',
+    });
+    setShowEditUserModal(true);
+  };
+
+  const handleUpdateUser = async () => {
+    if (!editingUser) return;
+    setUsersError(null);
+    try {
+      const payload: Record<string, unknown> = {
+        name: editingUser.name,
+        phone: editingUser.phone,
+        role: labelToRole(editingUser.role),
+      };
+      if (editingUser.email.trim().length > 0) payload.email = editingUser.email.trim();
+      if (editingUser.password.trim().length > 0) payload.password = editingUser.password.trim();
+
+      const res = await fetch(`/api/admin/users/${encodeURIComponent(editingUser.id)}`, {
+        method: 'PATCH',
+        headers: { 'content-type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(payload),
+      });
+      const json: unknown = await res.json().catch(() => null);
+      if (!res.ok) {
+        const msg =
+          json && typeof json === 'object'
+            ? (json as Record<string, unknown>).hint ??
+              (json as Record<string, unknown>).message ??
+              (json as Record<string, unknown>).error
+            : null;
+        setUsersError(String(msg ?? 'Gagal update user'));
+        return;
+      }
+
+      setShowEditUserModal(false);
+      setEditingUser(null);
+      await loadUsers();
+    } catch {
+      setUsersError('Gagal update user');
+    }
+  };
+
+  const handleDeleteUser = async (u: ManagedUser) => {
+    setUsersError(null);
+    if (currentUserId && u.id === currentUserId) {
+      setUsersError('Tidak bisa menghapus akun yang sedang dipakai.');
+      return;
+    }
+    const ok = window.confirm(`Hapus user "${u.name}"?`);
+    if (!ok) return;
+
+    try {
+      const res = await fetch(`/api/admin/users/${encodeURIComponent(u.id)}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+      const json: unknown = await res.json().catch(() => null);
+      if (!res.ok) {
+        const msg =
+          json && typeof json === 'object'
+            ? (json as Record<string, unknown>).hint ??
+              (json as Record<string, unknown>).message ??
+              (json as Record<string, unknown>).error
+            : null;
+        setUsersError(String(msg ?? 'Gagal menghapus user'));
+        return;
+      }
+
+      await loadUsers();
+    } catch {
+      setUsersError('Gagal menghapus user');
+    }
+  };
+
   const handleSave = async () => {
     setSaving(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    setSaveError(null);
+
+    // Persist only Profil Posyandu for now.
+    if (activeTab === 'profil') {
+      try {
+        const res = await fetch('/api/settings/posyandu', {
+          method: 'PUT',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(posyanduData),
+        });
+
+        if (!res.ok) {
+          const json: unknown = await res.json().catch(() => null);
+          const msg =
+            json && typeof json === 'object'
+              ? (json as Record<string, unknown>).hint ??
+                (json as Record<string, unknown>).message ??
+                (json as Record<string, unknown>).error
+              : null;
+          setSaveError(String(msg));
+          setSaving(false);
+          return;
+        }
+
+        const json: unknown = await res.json().catch(() => null);
+        const data =
+          json && typeof json === 'object' && 'data' in json
+            ? (json as Record<string, unknown>).data
+            : null;
+
+        const dataRec = typeof data === 'object' && data ? (data as Record<string, unknown>) : null;
+        if (dataRec) {
+          const operationalDaysRaw = dataRec.operational_days;
+          const operationalDays = Array.isArray(operationalDaysRaw)
+            ? operationalDaysRaw.filter((d): d is string => typeof d === 'string')
+            : null;
+
+          setPosyanduData((prev) => ({
+            ...prev,
+            name: typeof dataRec.name === 'string' ? dataRec.name : prev.name,
+            code: typeof dataRec.code === 'string' ? dataRec.code : prev.code,
+            address: typeof dataRec.address === 'string' ? dataRec.address : '',
+            kelurahan: typeof dataRec.kelurahan === 'string' ? dataRec.kelurahan : '',
+            kecamatan: typeof dataRec.kecamatan === 'string' ? dataRec.kecamatan : '',
+            kota: typeof dataRec.kota === 'string' ? dataRec.kota : '',
+            phone: typeof dataRec.phone === 'string' ? dataRec.phone : '',
+            email: typeof dataRec.email === 'string' ? dataRec.email : '',
+            puskesmas: typeof dataRec.puskesmas === 'string' ? dataRec.puskesmas : '',
+            ketua: typeof dataRec.ketua === 'string' ? dataRec.ketua : '',
+            operationalDays: operationalDays ?? prev.operationalDays,
+            operationalHours:
+              typeof dataRec.operational_hours === 'string' ? dataRec.operational_hours : '',
+          }));
+        }
+
+        setSaving(false);
+        setSaved(true);
+        setTimeout(() => setSaved(false), 3000);
+        return;
+      } catch {
+        setSaveError('Gagal menyimpan pengaturan');
+        setSaving(false);
+        return;
+      }
+    }
+
+    // Fallback for other tabs (mock behavior).
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     setSaving(false);
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
@@ -137,7 +430,7 @@ export default function PengaturanPage() {
       {/* Logo & Header */}
       <div className="flex items-start gap-6">
         <div className="relative">
-          <div className="w-24 h-24 rounded-xl bg-gradient-to-br from-teal-100 to-teal-200 flex items-center justify-center">
+          <div className="w-24 h-24 rounded-xl bg-linear-to-br from-teal-100 to-teal-200 flex items-center justify-center">
             <Building className="w-10 h-10 text-teal-600" />
           </div>
           <button className="absolute -bottom-2 -right-2 p-2 bg-white border border-gray-200 rounded-full shadow-sm hover:bg-gray-50">
@@ -280,7 +573,7 @@ export default function PengaturanPage() {
     <div className="space-y-6">
       <div className="flex items-start gap-6">
         <div className="relative">
-          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center text-white text-2xl font-bold">
+          <div className="w-20 h-20 rounded-full bg-linear-to-br from-teal-400 to-teal-600 flex items-center justify-center text-white text-2xl font-bold">
             {userData.name.charAt(0)}
           </div>
           <button className="absolute -bottom-1 -right-1 p-1.5 bg-white border border-gray-200 rounded-full shadow-sm hover:bg-gray-50">
@@ -325,95 +618,6 @@ export default function PengaturanPage() {
           className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 max-w-md"
         />
       </div>
-    </div>
-  );
-
-  const renderNotifikasiTab = () => (
-    <div className="space-y-6">
-      <Card className="bg-gray-50">
-        <h3 className="font-semibold text-gray-900 mb-4">Pengingat Kunjungan</h3>
-        <div className="space-y-4">
-          <label className="flex items-center justify-between">
-            <div>
-              <p className="font-medium text-gray-700">Email Reminder</p>
-              <p className="text-sm text-gray-500">Kirim pengingat via email</p>
-            </div>
-            <input
-              type="checkbox"
-              checked={notifications.emailReminder}
-              onChange={(e) => setNotifications({ ...notifications, emailReminder: e.target.checked })}
-              className="w-5 h-5 text-teal-600 rounded focus:ring-teal-500"
-            />
-          </label>
-          <label className="flex items-center justify-between">
-            <div>
-              <p className="font-medium text-gray-700">SMS Reminder</p>
-              <p className="text-sm text-gray-500">Kirim pengingat via SMS</p>
-            </div>
-            <input
-              type="checkbox"
-              checked={notifications.smsReminder}
-              onChange={(e) => setNotifications({ ...notifications, smsReminder: e.target.checked })}
-              className="w-5 h-5 text-teal-600 rounded focus:ring-teal-500"
-            />
-          </label>
-          <label className="flex items-center justify-between">
-            <div>
-              <p className="font-medium text-gray-700">WhatsApp Reminder</p>
-              <p className="text-sm text-gray-500">Kirim pengingat via WhatsApp</p>
-            </div>
-            <input
-              type="checkbox"
-              checked={notifications.whatsappReminder}
-              onChange={(e) => setNotifications({ ...notifications, whatsappReminder: e.target.checked })}
-              className="w-5 h-5 text-teal-600 rounded focus:ring-teal-500"
-            />
-          </label>
-          <div className="flex items-center justify-between pt-2">
-            <p className="font-medium text-gray-700">Kirim pengingat sebelum</p>
-            <select
-              value={notifications.reminderDaysBefore}
-              onChange={(e) => setNotifications({ ...notifications, reminderDaysBefore: parseInt(e.target.value) })}
-              className="px-3 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-            >
-              <option value="1">1 hari</option>
-              <option value="2">2 hari</option>
-              <option value="3">3 hari</option>
-              <option value="7">7 hari</option>
-            </select>
-          </div>
-        </div>
-      </Card>
-
-      <Card className="bg-gray-50">
-        <h3 className="font-semibold text-gray-900 mb-4">Notifikasi Sistem</h3>
-        <div className="space-y-4">
-          <label className="flex items-center justify-between">
-            <div>
-              <p className="font-medium text-gray-700">Pasien Baru</p>
-              <p className="text-sm text-gray-500">Notifikasi saat ada pasien baru terdaftar</p>
-            </div>
-            <input
-              type="checkbox"
-              checked={notifications.newPatientAlert}
-              onChange={(e) => setNotifications({ ...notifications, newPatientAlert: e.target.checked })}
-              className="w-5 h-5 text-teal-600 rounded focus:ring-teal-500"
-            />
-          </label>
-          <label className="flex items-center justify-between">
-            <div>
-              <p className="font-medium text-gray-700">Imunisasi Terlambat</p>
-              <p className="text-sm text-gray-500">Notifikasi untuk imunisasi yang terlambat</p>
-            </div>
-            <input
-              type="checkbox"
-              checked={notifications.overdueImmunizationAlert}
-              onChange={(e) => setNotifications({ ...notifications, overdueImmunizationAlert: e.target.checked })}
-              className="w-5 h-5 text-teal-600 rounded focus:ring-teal-500"
-            />
-          </label>
-        </div>
-      </Card>
     </div>
   );
 
@@ -474,6 +678,7 @@ export default function PengaturanPage() {
         <div>
           <h3 className="font-semibold text-gray-900">Daftar Pengguna</h3>
           <p className="text-sm text-gray-500">Kelola akun pengguna yang dapat mengakses sistem</p>
+          {usersError && <p className="text-sm text-red-600 mt-2">{usersError}</p>}
         </div>
         <Button
           variant="primary"
@@ -487,6 +692,9 @@ export default function PengaturanPage() {
 
       {/* User List */}
       <Card>
+        {usersLoading ? (
+          <div className="p-6 text-sm text-gray-600">Memuat user...</div>
+        ) : (
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
@@ -505,21 +713,21 @@ export default function PengaturanPage() {
                 <tr key={user.id} className="border-b border-gray-100 hover:bg-gray-50">
                   <td className="py-3 px-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center text-white text-sm font-medium">
+                      <div className="w-8 h-8 rounded-full bg-linear-to-br from-teal-400 to-teal-600 flex items-center justify-center text-white text-sm font-medium">
                         {user.name.charAt(0)}
                       </div>
                       <span className="font-medium text-gray-900">{user.name}</span>
                     </div>
                   </td>
-                  <td className="py-3 px-4 text-sm text-gray-600">{user.email}</td>
-                  <td className="py-3 px-4 text-sm text-gray-600">{user.phone}</td>
+                  <td className="py-3 px-4 text-sm text-gray-600">{user.email ?? '-'}</td>
+                  <td className="py-3 px-4 text-sm text-gray-600">{user.phone ?? '-'}</td>
                   <td className="py-3 px-4">
                     <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                      user.role === 'Admin' ? 'bg-purple-100 text-purple-700' :
-                      user.role === 'Bidan' ? 'bg-pink-100 text-pink-700' :
+                      user.role === 'admin' ? 'bg-purple-100 text-purple-700' :
+                      user.role === 'bidan' ? 'bg-pink-100 text-pink-700' :
                       'bg-teal-100 text-teal-700'
                     }`}>
-                      {user.role}
+                      {roleToLabel(user.role)}
                     </span>
                   </td>
                   <td className="py-3 px-4">
@@ -529,16 +737,20 @@ export default function PengaturanPage() {
                       {user.status === 'active' ? 'Aktif' : 'Nonaktif'}
                     </span>
                   </td>
-                  <td className="py-3 px-4 text-sm text-gray-500">{user.lastLogin}</td>
+                  <td className="py-3 px-4 text-sm text-gray-500">
+                    {user.lastLogin ? new Date(user.lastLogin).toLocaleString('id-ID') : '-'}
+                  </td>
                   <td className="py-3 px-4">
                     <div className="flex items-center gap-2">
                       <button
+                        onClick={() => handleOpenEdit(user)}
                         className="p-1.5 text-gray-500 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition-colors"
                         title="Edit"
                       >
                         <Edit className="w-4 h-4" />
                       </button>
                       <button
+                        onClick={() => handleDeleteUser(user)}
                         className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                         title="Hapus"
                       >
@@ -551,6 +763,7 @@ export default function PengaturanPage() {
             </tbody>
           </table>
         </div>
+        )}
       </Card>
 
       {/* Role Permissions */}
@@ -581,7 +794,7 @@ export default function PengaturanPage() {
           </div>
           <div className="p-4 bg-white rounded-lg border border-gray-200">
             <div className="flex items-center gap-2 mb-3">
-              <span className="px-2 py-1 bg-teal-100 text-teal-700 text-xs font-medium rounded-full">Kader</span>
+              <span className="px-2 py-1 bg-teal-100 text-teal-700 text-xs font-medium rounded-full">User</span>
             </div>
             <ul className="text-sm text-gray-600 space-y-1">
               <li>✓ Lihat data pasien</li>
@@ -640,7 +853,7 @@ export default function PengaturanPage() {
                 >
                   <option value="Admin">Admin</option>
                   <option value="Bidan">Bidan</option>
-                  <option value="Kader">Kader</option>
+                  <option value="User">User</option>
                 </select>
               </div>
               <div>
@@ -653,6 +866,12 @@ export default function PengaturanPage() {
                   placeholder="Minimal 8 karakter"
                 />
               </div>
+
+              {usersError && (
+                <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                  {usersError}
+                </div>
+              )}
             </div>
             <div className="p-6 border-t border-gray-200 flex items-center justify-end gap-3">
               <Button variant="secondary" onClick={() => setShowAddUserModal(false)}>
@@ -660,24 +879,93 @@ export default function PengaturanPage() {
               </Button>
               <Button
                 variant="primary"
+                onClick={handleCreateUser}
+              >
+                Simpan
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit User Modal */}
+      {showEditUserModal && editingUser && (
+        <div className="fixed inset-0 bg-gray-900/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full">
+            <div className="p-6 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-900">Edit User</h3>
+              <p className="text-sm text-gray-500 mt-1">ID: {editingUser.id}</p>
+            </div>
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Nama Lengkap</label>
+                <input
+                  type="text"
+                  value={editingUser.name}
+                  onChange={(e) => setEditingUser({ ...editingUser, name: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                <input
+                  type="email"
+                  value={editingUser.email}
+                  onChange={(e) => setEditingUser({ ...editingUser, email: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">No. Telepon</label>
+                <input
+                  type="tel"
+                  value={editingUser.phone}
+                  onChange={(e) => setEditingUser({ ...editingUser, phone: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Role</label>
+                <select
+                  value={editingUser.role}
+                  onChange={(e) =>
+                    setEditingUser({ ...editingUser, role: e.target.value as RoleLabel })
+                  }
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                >
+                  <option value="Admin">Admin</option>
+                  <option value="Bidan">Bidan</option>
+                  <option value="User">User</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Password Baru (opsional)</label>
+                <input
+                  type="password"
+                  value={editingUser.password}
+                  onChange={(e) => setEditingUser({ ...editingUser, password: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  placeholder="Kosongkan jika tidak diubah"
+                />
+              </div>
+
+              {usersError && (
+                <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                  {usersError}
+                </div>
+              )}
+            </div>
+            <div className="p-6 border-t border-gray-200 flex items-center justify-end gap-3">
+              <Button
+                variant="secondary"
                 onClick={() => {
-                  // Add new user
-                  setUsers([
-                    ...users,
-                    {
-                      id: String(users.length + 1),
-                      name: newUser.name,
-                      email: newUser.email,
-                      phone: newUser.phone,
-                      role: newUser.role,
-                      status: 'active',
-                      lastLogin: '-',
-                    },
-                  ]);
-                  setNewUser({ name: '', email: '', phone: '', role: 'Kader', password: '' });
-                  setShowAddUserModal(false);
+                  setShowEditUserModal(false);
+                  setEditingUser(null);
                 }}
               >
+                Batal
+              </Button>
+              <Button variant="primary" onClick={handleUpdateUser}>
                 Simpan
               </Button>
             </div>
@@ -741,6 +1029,9 @@ export default function PengaturanPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Pengaturan</h1>
           <p className="text-gray-600 mt-1">Kelola pengaturan posyandu dan akun</p>
+          {saveError && (
+            <p className="text-sm text-red-600 mt-2">{saveError}</p>
+          )}
         </div>
         <Button
           variant="primary"
@@ -771,7 +1062,6 @@ export default function PengaturanPage() {
           {activeTab === 'profil' && renderProfilTab()}
           {activeTab === 'akun' && renderAkunTab()}
           {activeTab === 'users' && renderUserManagementTab()}
-          {activeTab === 'notifikasi' && renderNotifikasiTab()}
           {activeTab === 'keamanan' && renderKeamananTab()}
           {activeTab === 'data' && renderDataTab()}
         </div>

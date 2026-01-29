@@ -559,7 +559,7 @@ export default function ImunisasiPage() {
         <>
           {/* Summary Cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Card className="bg-gradient-to-br from-green-50 to-green-100" padding="sm">
+            <Card className="bg-linear-to-br from-green-50 to-green-100" padding="sm">
               <div className="flex items-center gap-3">
                 <CheckCircle className="w-8 h-8 text-green-600" />
                 <div>
@@ -570,7 +570,7 @@ export default function ImunisasiPage() {
                 </div>
               </div>
             </Card>
-            <Card className="bg-gradient-to-br from-blue-50 to-blue-100" padding="sm">
+            <Card className="bg-linear-to-br from-blue-50 to-blue-100" padding="sm">
               <div className="flex items-center gap-3">
                 <Clock className="w-8 h-8 text-blue-600" />
                 <div>
@@ -581,7 +581,7 @@ export default function ImunisasiPage() {
                 </div>
               </div>
             </Card>
-            <Card className="bg-gradient-to-br from-red-50 to-red-100" padding="sm">
+            <Card className="bg-linear-to-br from-red-50 to-red-100" padding="sm">
               <div className="flex items-center gap-3">
                 <AlertTriangle className="w-8 h-8 text-red-600" />
                 <div>
@@ -592,7 +592,7 @@ export default function ImunisasiPage() {
                 </div>
               </div>
             </Card>
-            <Card className="bg-gradient-to-br from-teal-50 to-teal-100" padding="sm">
+            <Card className="bg-linear-to-br from-teal-50 to-teal-100" padding="sm">
               <div className="flex items-center gap-3">
                 <Baby className="w-8 h-8 text-teal-600" />
                 <div>
@@ -605,7 +605,7 @@ export default function ImunisasiPage() {
 
           {/* Search & Filter */}
           <div className="flex flex-wrap items-center gap-4">
-            <div className="relative flex-1 min-w-[200px]">
+            <div className="relative flex-1 min-w-50">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
                 type="text"
@@ -776,7 +776,7 @@ export default function ImunisasiPage() {
       {!isLoading && !error && (
         <>
           {/* Overall Coverage */}
-          <Card className="bg-gradient-to-r from-teal-500 to-emerald-500">
+          <Card className="bg-linear-to-r from-teal-500 to-emerald-500">
             <div className="text-white">
               <p className="text-sm opacity-80">Cakupan Imunisasi Dasar Lengkap (IDL)</p>
               <p className="text-4xl font-bold mt-1">{overallCoverage.percentage}%</p>

@@ -24,7 +24,7 @@ export default function Button({
   const baseStyles = 'font-semibold py-3 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed';
   
   const variantStyles = {
-    primary: 'bg-gradient-to-r from-teal-600 to-emerald-600 text-white hover:from-teal-700 hover:to-emerald-700 focus:ring-teal-500 shadow-lg shadow-teal-200/50',
+    primary: 'bg-linear-to-r from-teal-600 to-emerald-600 text-white hover:from-teal-700 hover:to-emerald-700 focus:ring-teal-500 shadow-lg shadow-teal-200/50',
     secondary: 'bg-white border-2 border-teal-500 text-teal-600 hover:bg-teal-50 focus:ring-teal-500',
     danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 shadow-lg shadow-red-200/50',
     outline: 'bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-50 focus:ring-gray-500',

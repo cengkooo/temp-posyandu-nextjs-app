@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   ArrowLeft,
@@ -141,6 +141,35 @@ const tabs: Tab[] = [
 export default function BukuKIAPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('overview');
+  const [posyanduName, setPosyanduName] = useState<string>('Posyandu Melati Sehat');
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadSettings() {
+      try {
+        const res = await fetch('/api/settings/posyandu', { cache: 'no-store' });
+        if (!res.ok) return;
+        const json: unknown = await res.json().catch(() => null);
+        const data =
+          json && typeof json === 'object' && 'data' in json
+            ? (json as Record<string, unknown>).data
+            : null;
+        const name =
+          data && typeof data === 'object' && 'name' in data
+            ? (data as Record<string, unknown>).name
+            : null;
+        if (!cancelled && typeof name === 'string' && name.trim().length > 0) {
+          setPosyanduName(name.trim());
+        }
+      } catch {
+        // ignore
+      }
+    }
+    loadSettings();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const pregnancyWeeks = useMemo(() => {
     const hpht = new Date(mockPregnancyData.hpht);
@@ -212,7 +241,7 @@ export default function BukuKIAPage() {
       status: imm.status as 'completed' | 'pending',
     }));
 
-    generateBukuKIAPDF(patientData, pregnancyData, ancVisits, ttImmunizations);
+    generateBukuKIAPDF(patientData, pregnancyData, ancVisits, ttImmunizations, { posyanduName });
   };
 
   const handlePrint = () => {
@@ -223,13 +252,13 @@ export default function BukuKIAPage() {
     <div className="space-y-6">
       {/* Pregnancy Info */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="bg-gradient-to-br from-pink-50 to-pink-100" padding="sm">
+        <Card className="bg-linear-to-br from-pink-50 to-pink-100" padding="sm">
           <p className="text-xs text-gray-600 mb-1">Usia Kehamilan</p>
           <p className="text-2xl font-bold text-gray-900">{pregnancyWeeks} minggu</p>
           <p className="text-xs text-pink-600 mt-1">Trimester {trimester}</p>
         </Card>
         
-        <Card className="bg-gradient-to-br from-purple-50 to-purple-100" padding="sm">
+        <Card className="bg-linear-to-br from-purple-50 to-purple-100" padding="sm">
           <p className="text-xs text-gray-600 mb-1">Hari Perkiraan Lahir</p>
           <p className="text-lg font-bold text-gray-900">{formatDate(mockPregnancyData.hpl)}</p>
           <p className="text-xs text-purple-600 mt-1">
@@ -237,7 +266,7 @@ export default function BukuKIAPage() {
           </p>
         </Card>
         
-        <Card className="bg-gradient-to-br from-blue-50 to-blue-100" padding="sm">
+        <Card className="bg-linear-to-br from-blue-50 to-blue-100" padding="sm">
           <p className="text-xs text-gray-600 mb-1">Kenaikan Berat Badan</p>
           <p className="text-2xl font-bold text-gray-900">+{weightGain.toFixed(1)} kg</p>
           <StatusIndicatorBadge 
@@ -247,7 +276,7 @@ export default function BukuKIAPage() {
           />
         </Card>
         
-        <Card className="bg-gradient-to-br from-teal-50 to-teal-100" padding="sm">
+        <Card className="bg-linear-to-br from-teal-50 to-teal-100" padding="sm">
           <p className="text-xs text-gray-600 mb-1">Status LILA</p>
           <p className="text-2xl font-bold text-gray-900">{latestVisit.lila} cm</p>
           <StatusIndicatorBadge status={lilaStatus.type} label={lilaStatus.status} size="sm" />
@@ -551,7 +580,7 @@ export default function BukuKIAPage() {
       </Card>
 
       {/* TTD Summary */}
-      <Card className="bg-gradient-to-br from-red-50 to-red-100">
+      <Card className="bg-linear-to-br from-red-50 to-red-100">
         <div className="flex items-center gap-4">
           <div className="p-3 bg-white rounded-lg">
             <Pill className="w-8 h-8 text-red-600" />
@@ -573,7 +602,7 @@ export default function BukuKIAPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-gradient-to-r from-pink-500 to-rose-500 rounded-xl p-6 text-white">
+      <div className="bg-linear-to-r from-pink-500 to-rose-500 rounded-xl p-6 text-white">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
@@ -606,14 +635,14 @@ export default function BukuKIAPage() {
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
-              className="!border-white/50 !text-white hover:!bg-white/20 flex items-center gap-2"
+              className="border-white/50! text-white! hover:bg-white/20! flex items-center gap-2"
             >
               <Share2 className="w-4 h-4" />
               Bagikan
             </Button>
             <Button
               variant="outline"
-              className="!border-white/50 !text-white hover:!bg-white/20 flex items-center gap-2"
+              className="border-white/50! text-white! hover:bg-white/20! flex items-center gap-2"
               onClick={handleDownloadPDF}
             >
               <Download className="w-4 h-4" />
@@ -621,7 +650,7 @@ export default function BukuKIAPage() {
             </Button>
             <Button
               variant="outline"
-              className="!border-white/50 !text-white hover:!bg-white/20 flex items-center gap-2"
+              className="border-white/50! text-white! hover:bg-white/20! flex items-center gap-2"
               onClick={handlePrint}
             >
               <Printer className="w-4 h-4" />

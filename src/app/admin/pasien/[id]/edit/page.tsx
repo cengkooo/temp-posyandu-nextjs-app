@@ -145,7 +145,7 @@ export default function EditPasienPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <div className="flex items-center justify-center min-h-100">
         <Loader2 className="w-8 h-8 text-teal-600 animate-spin" />
       </div>
     );
@@ -162,7 +162,7 @@ export default function EditPasienPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className={`bg-gradient-to-r ${colors.gradient} rounded-xl p-6 text-white`}>
+      <div className={`bg-linear-to-r ${colors.gradient} rounded-xl p-6 text-white`}>
         <div className="flex items-center gap-4">
           <button
             onClick={() => router.back()}

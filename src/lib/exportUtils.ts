@@ -119,14 +119,16 @@ export function exportToPDF(
     dateRange?: { start: string, end: string }
   },
   filename: string,
-  reportType: string
+  reportType: string,
+  opts?: { posyanduName?: string }
 ) {
   const doc = new jsPDF()
+  const posyanduName = opts?.posyanduName || 'Posyandu Melati Sehat'
 
   // Header
   doc.setFontSize(18)
   doc.setFont('helvetica', 'bold')
-  doc.text('Laporan Posyandu Melati Sehat', 105, 20, { align: 'center' })
+  doc.text(`Laporan ${posyanduName}`, 105, 20, { align: 'center' })
 
   doc.setFontSize(12)
   doc.setFont('helvetica', 'normal')
@@ -227,7 +229,8 @@ export function generatePrintableReport(
     breakdown?: BreakdownRow[]
     dateRange?: { start: string, end: string }
   },
-  reportType: string
+  reportType: string,
+  opts?: { posyanduName?: string }
 ) {
   const printWindow = window.open('', '_blank')
   
@@ -235,6 +238,8 @@ export function generatePrintableReport(
     alert('Please allow popups to print the report')
     return
   }
+
+  const posyanduName = opts?.posyanduName || 'Posyandu Melati Sehat'
 
   const html = `
     <!DOCTYPE html>
@@ -314,7 +319,7 @@ export function generatePrintableReport(
       <button class="print-button no-print" onclick="window.print()">🖨️ Cetak Laporan</button>
       
       <div class="header">
-        <h1>Laporan Posyandu Melati Sehat</h1>
+        <h1>Laporan ${posyanduName}</h1>
         <p><strong>Tipe Laporan:</strong> ${reportType}</p>
         ${data.dateRange ? `<p><strong>Periode:</strong> ${format(new Date(data.dateRange.start), 'dd MMMM yyyy')} - ${format(new Date(data.dateRange.end), 'dd MMMM yyyy')}</p>` : ''}
         <p><strong>Tanggal Generate:</strong> ${format(new Date(), 'dd MMMM yyyy HH:mm')}</p>

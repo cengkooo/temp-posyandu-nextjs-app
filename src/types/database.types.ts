@@ -109,7 +109,7 @@ export interface Database {
         Row: {
           id: string
           full_name: string | null
-          role: 'admin' | 'kader'
+          role: 'admin' | 'bidan' | 'kader'
           phone: string | null
           created_at: string
           updated_at: string
@@ -117,7 +117,7 @@ export interface Database {
         Insert: {
           id: string
           full_name?: string | null
-          role?: 'admin' | 'kader'
+          role?: 'admin' | 'bidan' | 'kader'
           phone?: string | null
           created_at?: string
           updated_at?: string
@@ -125,7 +125,7 @@ export interface Database {
         Update: {
           id?: string
           full_name?: string | null
-          role?: 'admin' | 'kader'
+          role?: 'admin' | 'bidan' | 'kader'
           phone?: string | null
           created_at?: string
           updated_at?: string
@@ -475,6 +475,60 @@ export interface Database {
           special_notes?: string | null
           education_given?: Json | null
           created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+
+      posyandu_settings: {
+        Row: {
+          id: string
+          name: string
+          code: string
+          address: string | null
+          kelurahan: string | null
+          kecamatan: string | null
+          kota: string | null
+          phone: string | null
+          email: string | null
+          puskesmas: string | null
+          ketua: string | null
+          operational_days: string[]
+          operational_hours: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          code: string
+          address?: string | null
+          kelurahan?: string | null
+          kecamatan?: string | null
+          kota?: string | null
+          phone?: string | null
+          email?: string | null
+          puskesmas?: string | null
+          ketua?: string | null
+          operational_days?: string[]
+          operational_hours?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          code?: string
+          address?: string | null
+          kelurahan?: string | null
+          kecamatan?: string | null
+          kota?: string | null
+          phone?: string | null
+          email?: string | null
+          puskesmas?: string | null
+          ketua?: string | null
+          operational_days?: string[]
+          operational_hours?: string | null
           created_at?: string
           updated_at?: string
         }

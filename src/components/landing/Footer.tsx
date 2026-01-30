@@ -117,6 +117,7 @@ export default function Footer() {
           <p>© {new Date().getFullYear()} Tim Kuliah Kerja Nyata Institut Teknologi Sumatera </p>
 
           <div className="flex gap-4">
+            <span>Dikembangkan Oleh :</span>
             <a href="https://www.instagram.com/jefrisembiring5/" className="hover:text-emerald-800 flex items-center gap-1">
               Jefri Wahyu Fernando Sembiring
               <ExternalLink size={12} />

@@ -6,36 +6,138 @@ import { User } from 'lucide-react';
 export default function TeamSection() {
   const teamMembers = [
     {
-      name: 'Ibu Siti Rahayu',
+      name: 'Rosnayah',
       role: 'Ketua Kader',
       photo: null,
     },
     {
-      name: 'Ibu Dewi Lestari',
-      role: 'Bidan Desa',
+      name: 'Siti Kurningsih',
+      role: 'Sekretaris',
       photo: null,
     },
     {
-      name: 'Ibu Ani Wulandari',
-      role: 'Kader Posyandu',
+      name: 'Hudriyah',
+      role: 'Bendahara',
       photo: null,
     },
     {
-      name: 'Ibu Ratna Sari',
-      role: 'Kader Posyandu',
+      name: 'Astriani',
+      role: 'Ketua Bidang Kesehatan',
       photo: null,
     },
     {
-      name: 'Ibu Maya Putri',
-      role: 'Kader Posyandu',
+      name: 'Naenah',
+      role: 'Kader Bidang Kesehatan',
       photo: null,
     },
     {
-      name: 'Ibu Fitri Handayani',
-      role: 'Kader Posyandu',
+      name: 'Suhariyah',
+      role: 'Kader Bidang Kesehatan',
+      photo: null,
+    },
+    {
+      name: 'Masrifah',
+      role: 'Kader Bidang Kesehatan',
+      photo: null,
+    },
+    {
+      name: 'Saminah',
+      role: 'Kader Bidang Kesehatan',
+      photo: null,
+    },
+    {
+      name: 'Asmah',
+      role: 'Kader Bidang Kesehatan',
+      photo: null,
+    },
+    {
+      name: 'Widya Anita',
+      role: 'Kader Bidang Kesehatan',
+      photo: null,
+    },
+    {
+      name: 'Suiyah',
+      role: 'Kader Bidang Kesehatan',
+      photo: null,
+    },
+    {
+      name: 'Nur Afni Sukaesih',
+      role: 'Kader Bidang Kesehatan',
+      photo: null,
+    },
+    {
+      name: 'Nova Wati',
+      role: 'Kader Bidang Kesehatan',
+      photo: null,
+    },
+    {
+      name: 'Betri Yenti',
+      role: 'Kader Bidang Kesehatan',
+      photo: null,
+    },
+    {
+      name: 'Neti Sartika',
+      role: 'Kader Bidang Kesehatan',
+      photo: null,
+    },
+    {
+      name: 'Saiyah Nurfadilah',
+      role: 'Kader Bidang Kesehatan',
+      photo: null,
+    },
+    {
+      name: 'Siti Sa’adiyah',
+      role: 'Kader Bidang Kesehatan',
+      photo: null,
+    },
+    {
+      name: 'Sugi Hariati',
+      role: 'Kader Bidang Kesehatan',
+      photo: null,
+    },
+    {
+      name: 'Sri Astuti',
+      role: 'Kader Bidang Kesehatan',
+      photo: null,
+    },
+    {
+      name: 'Susanti',
+      role: 'Kader Bidang Kesehatan',
+      photo: null,
+    },
+    {
+      name: 'Sunaenah',
+      role: 'Kader Bidang Kesehatan',
+      photo: null,
+    },
+    {
+      name: 'Umi Kulsum',
+      role: 'Ketua Bidang Pendidikan',
+      photo: null,
+    },
+    {
+      name: 'Leli Sodikin',
+      role: 'Ketua Bidang Linmas',
+      photo: null,
+    },
+    {
+      name: 'Zakaria',
+      role: 'Ketua Bidang Pekerjaan Umum',
+      photo: null,
+    },
+    {
+      name: 'Sobri',
+      role: 'Ketua Bidang Perumahan Rakyat',
+      photo: null,
+    },
+    {
+      name: 'Mulyono',
+      role: 'Ketua Bidang Sosial',
       photo: null,
     },
   ];
+
+
 
   return (
     <section id="tim" className="team-section">

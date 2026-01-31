@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
+import AdminSessionHeartbeat from './AdminSessionHeartbeat';
 import { 
   LayoutDashboard, 
   Users, 
@@ -88,14 +89,21 @@ export default function AdminLayout({
   }, []);
 
   const handleLogout = async () => {
+    try {
+      await fetch('/api/admin/logout', { method: 'POST', credentials: 'include' });
+    } catch {
+      // ignore
+    }
+
     const supabase = createClient();
     await supabase.auth.signOut();
-    router.push('/admin/login');
+    router.push('/login');
     router.refresh();
   };
 
   return (
     <div className="flex h-screen bg-gray-50 font-sans">
+      <AdminSessionHeartbeat />
       {/* Sidebar */}
       <aside className="w-64 bg-white border-r border-gray-200 flex flex-col">
         {/* Logo */}

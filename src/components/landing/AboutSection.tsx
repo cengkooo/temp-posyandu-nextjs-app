@@ -5,125 +5,147 @@ import { Eye, Target, MapPin, Phone, Mail, Clock } from 'lucide-react';
 
 export default function AboutSection() {
   return (
-    <section id="tentang" className="about-section">
-      <div className="container">
-        {/* Section Badge */}
-        <div className="section-badge">Tentang Kami</div>
+    <section id="tentang" className="py-20 bg-slate-50">
+      <div className="container mx-auto px-4 md:px-6">
+        {/* Header Section */}
+        <div className="text-center max-w-3xl mx-auto mb-16">
+          <div className="inline-block px-4 py-1.5 rounded-full bg-emerald-100 text-emerald-700 font-semibold text-sm mb-4">
+            Tentang Kami
+          </div>
+          <h2 className="text-3xl md:text-4xl font-bold text-slate-800 mb-4">
+            Mengenal Posyandu Sehat Mandiri
+          </h2>
+          <p className="text-slate-600 text-lg">
+            Berdedikasi melayani kesehatan masyarakat sejak 2010 dengan sepenuh hati.
+          </p>
+        </div>
 
-        {/* Section Title */}
-        <h2 className="section-title">Mengenal Posyandu Sehat Mandiri</h2>
-        <p className="section-subtitle">
-          Berdedikasi melayani kesehatan masyarakat sejak 2010
-        </p>
-
-        <div className="about-grid">
-          {/* Left Column - Visi & Misi */}
-          <div className="about-left">
+        {/* GRID LAYOUT 
+            HAPUS 'items-start' agar grid otomatis stretch (sama tinggi)
+        */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          
+          {/* --- LEFT COLUMN (VISI & MISI) --- */}
+          <div className="lg:col-span-2 flex flex-col gap-8">
+            
             {/* Visi Card */}
-            <div className="info-card">
-              <div className="card-icon visi">
-                <Eye size={28} />
+            <div className="bg-white rounded-2xl p-8 shadow-sm border border-emerald-100 hover:border-emerald-200 transition-all duration-300">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center text-emerald-600">
+                  <Eye size={24} />
+                </div>
+                <h3 className="text-2xl font-bold text-slate-800">Visi Kami</h3>
               </div>
-              <div className="card-content">
-                <h3 className="card-title">Visi</h3>
-                <p className="card-text">
-                  Menjadi pos pelayanan terpadu yang terdepan dalam memberikan
-                  layanan kesehatan berkualitas untuk ibu, anak, dan seluruh masyarakat
-                  desa menuju Indonesia sehat dan sejahtera.
-                </p>
-              </div>
+              <p className="text-slate-600 leading-relaxed text-lg">
+                "Terwujudnya Posyandu Rajabasa Desa Way Kalam yang aktif, mandiri, dan berkelanjutan dalam meningkatkan derajat kesehatan ibu, bayi, balita, dan masyarakat."
+              </p>
             </div>
 
-            {/* Misi Card */}
-            <div className="info-card">
-              <div className="card-icon misi">
-                <Target size={28} />
+            {/* Misi Card - Menggunakan flex-1 agar mengisi sisa ruang jika ada */}
+            <div className="bg-white rounded-2xl p-8 shadow-sm border border-emerald-100 hover:border-emerald-200 transition-all duration-300 flex-1">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center text-emerald-600">
+                  <Target size={24} />
+                </div>
+                <h3 className="text-2xl font-bold text-slate-800">Misi Kami</h3>
               </div>
-              <div className="card-content">
-                <h3 className="card-title">Misi</h3>
-                <ol className="misi-list">
-                  <li>Memberikan pelayanan kesehatan dasar yang terjangkau dan berkualitas</li>
-                  <li>Meningkatkan kesadaran masyarakat tentang pentingnya kesehatan</li>
-                  <li>Melakukan pemantauan tumbuh kembang balita secara berkala</li>
-                  <li>Memberikan edukasi gizi dan pola hidup sehat</li>
-                  <li>Membangun kemitraan dengan berbagai pihak untuk kesehatan masyarakat</li>
-                </ol>
-              </div>
+              <ul className="space-y-4">
+                {[
+                  "Meningkatkan pelayanan kesehatan ibu hamil, ibu menyusui, bayi, dan balita secara rutin dan berkualitas",
+                  "Mendorong peran aktif kader posyandu dalam kegiatan pelayanan dan penyuluhan kesehatan",
+                  "Meningkatkan kesadaran masyarakat akan pentingnya kesehatan dan gizi keluarga",
+                  "Mendukung pencegahan stunting melalui pemantauan tumbuh kembang anak secara berkala",
+                  "Menjalin kerja sama dengan puskesmas, pemerintah desa, dan pihak terkait"
+                ].map((item, index) => (
+                  <li key={index} className="flex items-start gap-4 group">
+                    <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-emerald-50 text-emerald-600 font-bold text-sm border border-emerald-100 group-hover:bg-emerald-600 group-hover:text-white transition-colors duration-300 mt-0.5">
+                      {index + 1}
+                    </span>
+                    <p className="text-slate-600 leading-relaxed group-hover:text-slate-900 transition-colors">
+                      {item}
+                    </p>
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
 
-          {/* Right Column - Contact Info */}
-          <div className="about-right">
-            {/* Location Card */}
-            <div className="contact-card">
-              <div className="contact-icon">
-                <MapPin size={24} />
-              </div>
-              <div className="contact-content">
-                <h4 className="contact-title">Lokasi</h4>
-                <p className="contact-text">
-                  Jl. Kesehatan No. 123, Desa Sukamaju<br />
-                  Kecamatan Harapan Jaya<br />
-                  Kabupaten Sejahtera, Jawa Barat 12345
-                </p>
-              </div>
-            </div>
-
-            {/* Phone Card */}
-            <div className="contact-card">
-              <div className="contact-icon">
-                <Phone size={24} />
-              </div>
-              <div className="contact-content">
-                <h4 className="contact-title">Telepon</h4>
-                <p className="contact-text">
-                  (021) 1234-5678<br />
-                  WhatsApp: 0812-3456-7890
-                </p>
-              </div>
-            </div>
-
-            {/* Email Card */}
-            <div className="contact-card">
-              <div className="contact-icon">
-                <Mail size={24} />
-              </div>
-              <div className="contact-content">
-                <h4 className="contact-title">Email</h4>
-                <p className="contact-text">
-                  posyandu.sehatmandiri@gmail.com
-                </p>
-              </div>
-            </div>
-
-            {/* Schedule Card */}
-            <div className="contact-card">
-              <div className="contact-icon">
-                <Clock size={24} />
-              </div>
-              <div className="contact-content">
-                <h4 className="contact-title">Jadwal Operasional</h4>
-                <div className="schedule-list">
-                  <div className="schedule-item">
-                    <span className="schedule-day">Senin - Rabu</span>
-                    <span className="schedule-time">08:00 - 12:00 WIB</span>
+          {/* --- RIGHT COLUMN (CONTACT INFO) --- */}
+          <div className="lg:col-span-1 h-full">
+            {/* Tambahkan 'h-full' agar tinggi kartu mengikuti kolom sebelah.
+                Tambahkan 'flex flex-col justify-between' agar isinya menyebar rapi.
+            */}
+            <div className="bg-emerald-900 rounded-2xl p-8 text-white shadow-lg h-full flex flex-col justify-between">
+              
+              {/* Bagian Atas: Header & Info Utama */}
+              <div>
+                <h3 className="text-xl font-bold mb-8 border-b border-emerald-700 pb-4">Informasi Kontak</h3>
+                
+                <div className="space-y-8">
+                  {/* Lokasi */}
+                  <div className="flex gap-4">
+                    <MapPin className="text-emerald-400 shrink-0 mt-1" size={24} />
+                    <div>
+                      <h4 className="font-semibold text-emerald-100 mb-2">Lokasi</h4>
+                      <p className="text-emerald-50/80 text-sm leading-relaxed">
+                        Balai Desa Way Kalam, Kec. Penengahan, Kabupaten Lampung Selatan, Lampung 35592
+                      </p>
+                    </div>
                   </div>
-                  <div className="schedule-item">
-                    <span className="schedule-day">Kamis</span>
-                    <span className="schedule-time">08:00 - 14:00 WIB</span>
+
+                  {/* Telepon */}
+                  <div className="flex gap-4">
+                    <Phone className="text-emerald-400 shrink-0 mt-1" size={24} />
+                    <div>
+                      <h4 className="font-semibold text-emerald-100 mb-2">Hubungi Kami</h4>
+                      <p className="text-emerald-50/80 text-sm">
+                        WA: +62 821-8038-5856
+                      </p>
+                    </div>
                   </div>
-                  <div className="schedule-item">
-                    <span className="schedule-day">Jumat</span>
-                    <span className="schedule-time">08:00 - 11:00 WIB</span>
-                  </div>
-                  <div className="schedule-item">
-                    <span className="schedule-day">Sabtu - Minggu</span>
-                    <span className="schedule-time closed">Tutup</span>
+
+                  {/* Email */}
+                  <div className="flex gap-4">
+                    <Mail className="text-emerald-400 shrink-0 mt-1" size={24} />
+                    <div>
+                      <h4 className="font-semibold text-emerald-100 mb-2">Email</h4>
+                      <p className="text-emerald-50/80 text-sm break-all">
+                        Permatasarilinda368@gmail.com
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
+
+              {/* Bagian Bawah: Jadwal (Akan terdorong ke paling bawah) */}
+              <div className="bg-emerald-800/50 rounded-xl p-5 mt-8 border border-emerald-700/50">
+                <div className="flex items-center gap-2 mb-4 text-emerald-300">
+                  <Clock size={20} />
+                  <h4 className="font-semibold">Jam Operasional</h4>
+                </div>
+                <div className="space-y-3 text-sm text-emerald-100/90">
+                  <div className="flex justify-between border-b border-emerald-700/30 pb-2">
+                    <span>Senin - Rabu</span>
+                    <span className="font-mono">08:00 - 12:00</span>
+                  </div>
+                  <div className="flex justify-between border-b border-emerald-700/30 pb-2">
+                    <span>Kamis</span>
+                    <span className="font-mono">08:00 - 14:00</span>
+                  </div>
+                  <div className="flex justify-between border-b border-emerald-700/30 pb-2">
+                    <span>Jumat</span>
+                    <span className="font-mono">08:00 - 11:00</span>
+                  </div>
+                  <div className="flex justify-between pt-1">
+                    <span>Sabtu - Minggu</span>
+                    <span className="text-red-300 font-semibold">Tutup</span>
+                  </div>
+                </div>
+              </div>
+
             </div>
           </div>
+
         </div>
       </div>
     </section>

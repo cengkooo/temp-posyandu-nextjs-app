@@ -26,10 +26,8 @@ export default function AboutSection() {
               </div>
               <div className="card-content">
                 <h3 className="card-title">Visi</h3>
-                <p className="card-text">
-                  Menjadi pos pelayanan terpadu yang terdepan dalam memberikan
-                  layanan kesehatan berkualitas untuk ibu, anak, dan seluruh masyarakat
-                  desa menuju Indonesia sehat dan sejahtera.
+                <p className="card-text">Terwujudnya Posyandu Rajabasa Desa Way Kalam yang aktif, mandiri, 
+                  dan berkelanjutan dalam meningkatkan derajat kesehatan ibu, bayi, balita, dan masyarakat
                 </p>
               </div>
             </div>
@@ -42,11 +40,11 @@ export default function AboutSection() {
               <div className="card-content">
                 <h3 className="card-title">Misi</h3>
                 <ol className="misi-list">
-                  <li>Memberikan pelayanan kesehatan dasar yang terjangkau dan berkualitas</li>
-                  <li>Meningkatkan kesadaran masyarakat tentang pentingnya kesehatan</li>
-                  <li>Melakukan pemantauan tumbuh kembang balita secara berkala</li>
-                  <li>Memberikan edukasi gizi dan pola hidup sehat</li>
-                  <li>Membangun kemitraan dengan berbagai pihak untuk kesehatan masyarakat</li>
+                  <li>Meningkatkan pelayanan kesehatan ibu hamil, ibu menyusui, bayi, dan balita secara rutin dan berkualitas.</li>
+                  <li>Mendorong peran aktif kader posyandu dalam kegiatan pelayanan dan penyuluhan kesehatan.</li>
+                  <li>Meningkatkan kesadaran masyarakat akan pentingnya kesehatan dan gizi keluarga</li>
+                  <li>Mendukung pencegahan stunting melalui pemantauan tumbuh kembang anak secara berkala</li>
+                  <li>Menjalin kerja sama dengan puskesmas, pemerintah desa, dan pihak terkait dalam peningkatan layanan kesehatan masyarakat</li>
                 </ol>
               </div>
             </div>

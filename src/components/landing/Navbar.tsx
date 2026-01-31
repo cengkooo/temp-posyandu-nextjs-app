@@ -33,7 +33,7 @@ export default function Navbar() {
           <div className="logo-icon">
             <Heart size={24} fill="white" />
           </div>
-          <span className="logo-text">Posyandu Sehat</span>
+          <span className="logo-text">Posyandu Way Kalam</span>
         </Link>
 
         {/* Desktop Menu */}

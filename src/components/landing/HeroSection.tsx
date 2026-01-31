@@ -14,7 +14,7 @@ export default function HeroSection() {
           </div>
 
           {/* Main Title */}
-          <h1 className="hero-title">Posyandu Sehat Mandiri</h1>
+          <h1 className="hero-title">Posyandu Way Kalam</h1>
           
           {/* Subtitle */}
           <p className="hero-subtitle">

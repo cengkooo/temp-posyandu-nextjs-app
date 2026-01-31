@@ -13,10 +13,10 @@ export default function AboutSection() {
             Tentang Kami
           </div>
           <h2 className="text-3xl md:text-4xl font-bold text-slate-800 mb-4">
-            Mengenal Posyandu Sehat Mandiri
+            Mengenal Posyandu Rajabasa
           </h2>
           <p className="text-slate-600 text-lg">
-            Berdedikasi melayani kesehatan masyarakat sejak 2010 dengan sepenuh hati.
+            Berdedikasi melayani kesehatan masyarakat dengan sepenuh hati.
           </p>
         </div>
 
@@ -118,30 +118,28 @@ export default function AboutSection() {
               </div>
 
               {/* Bagian Bawah: Jadwal (Akan terdorong ke paling bawah) */}
-              <div className="bg-emerald-800/50 rounded-xl p-5 mt-8 border border-emerald-700/50">
-                <div className="flex items-center gap-2 mb-4 text-emerald-300">
-                  <Clock size={20} />
-                  <h4 className="font-semibold">Jam Operasional</h4>
-                </div>
-                <div className="space-y-3 text-sm text-emerald-100/90">
-                  <div className="flex justify-between border-b border-emerald-700/30 pb-2">
-                    <span>Senin - Rabu</span>
-                    <span className="font-mono">08:00 - 12:00</span>
+                <div className="mt-8 rounded-xl border border-emerald-700/40 bg-gradient-to-br from-emerald-800/60 to-emerald-900/60 p-5 backdrop-blur">
+                  <div className="mb-4 flex items-center gap-2 text-emerald-300">
+                    <Clock size={20} />
+                    <h4 className="font-semibold tracking-wide">Waktu Operasional</h4>
                   </div>
-                  <div className="flex justify-between border-b border-emerald-700/30 pb-2">
-                    <span>Kamis</span>
-                    <span className="font-mono">08:00 - 14:00</span>
-                  </div>
-                  <div className="flex justify-between border-b border-emerald-700/30 pb-2">
-                    <span>Jumat</span>
-                    <span className="font-mono">08:00 - 11:00</span>
-                  </div>
-                  <div className="flex justify-between pt-1">
-                    <span>Sabtu - Minggu</span>
-                    <span className="text-red-300 font-semibold">Tutup</span>
+
+                  <div className="space-y-4 text-sm text-emerald-100/90">
+                    <div className="flex items-center justify-between rounded-lg bg-emerald-700/20 px-3 py-2">
+                      <span className="font-medium">Tanggal 18 setiap bulan</span>
+                      <span className="font-mono text-emerald-300">07:30 – 12:00</span>
+                    </div>
+
+                    <div className="rounded-lg bg-emerald-700/10 px-3 py-2 text-xs leading-relaxed text-emerald-200/80">
+                      <span className="block font-medium text-emerald-300 mb-1">
+                        Catatan:
+                      </span>
+                      Jika tanggal 18 bertepatan dengan hari libur nasional, jadwal
+                      dipindahkan ke hari Senin setelah tanggal 18.
+                    </div>
                   </div>
                 </div>
-              </div>
+
 
             </div>
           </div>

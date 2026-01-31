@@ -28,10 +28,10 @@ function asNullIfEmpty(value: string | null | undefined) {
 function hintFromPostgresCode(code: string | null | undefined) {
   if (!code) return null;
   if (code === 'PGRST205') {
-    return 'Table posyandu_settings belum ada (schema cache). Jalankan migrations/05_posyandu_settings.sql di Supabase, lalu coba lagi.';
+    return 'Table posyandu_settings belum ada (schema cache). Jalankan migrations/00_supabase_schema.sql di Supabase, lalu coba lagi.';
   }
   if (code === '42P01') {
-    return 'Table posyandu_settings belum ada. Jalankan migrations/05_posyandu_settings.sql di Supabase.';
+    return 'Table posyandu_settings belum ada. Jalankan migrations/00_supabase_schema.sql di Supabase.';
   }
   if (code === '42501') {
     return 'Permission denied. Cek RLS/policy posyandu_settings dan role user (profiles.role = admin untuk update).';

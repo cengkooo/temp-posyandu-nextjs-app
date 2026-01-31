@@ -47,7 +47,7 @@ export default function Navbar() {
             <Heart size={20} fill="white" className="text-white" />
           </div>
           <span className={`text-lg font-bold tracking-wide transition-colors duration-300 ${textColorClass}`}>
-            Posyandu Sehat
+            Posyandu Rajabasa
           </span>
         </Link>
 

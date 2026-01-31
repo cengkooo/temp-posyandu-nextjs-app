@@ -2,7 +2,6 @@
 
 import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { createClient } from '@/lib/supabase';
 import AuthLayout from '@/components/admin/layouts/AuthLayout';
 import Input from '@/components/admin/forms/Input';
@@ -76,18 +75,12 @@ export default function AdminLoginPage() {
         />
 
         {/* Remember Me & Forgot Password */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center">
           <Checkbox
             label="Ingat Saya"
             checked={rememberMe}
             onChange={(e) => setRememberMe(e.target.checked)}
           />
-          <Link
-            href="/forgot-password"
-            className="text-sm text-teal-600 hover:text-teal-700 font-medium transition-colors"
-          >
-            Lupa Password?
-          </Link>
         </div>
 
         {/* Submit Button */}

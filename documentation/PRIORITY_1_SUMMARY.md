@@ -5,7 +5,7 @@
 ### Task #1-3: Database Schema & Types ✔️
 
 **File yang dibuat/diubah:**
-- ✅ `migrations/01_update_patient_types_and_extended_data.sql` - Migration SQL lengkap
+- ✅ `migrations/00_supabase_schema.sql` - Single migration (schema lengkap)
 - ✅ `src/types/database.types.ts` - Updated dengan 5 tipe pasien & table baru
 - ✅ `src/types/index.ts` - Tambah type PatientExtendedData dan PatientWithExtendedData
 - ✅ `src/lib/api.ts` - Tambah functions untuk handle extended data
@@ -97,7 +97,7 @@
 ## 📊 STATISTIK PERUBAHAN
 
 - **File Baru**: 3 files
-  - `migrations/01_update_patient_types_and_extended_data.sql`
+  - `migrations/00_supabase_schema.sql`
   - `MIGRATION_GUIDE.md`
   - `PRIORITY_1_SUMMARY.md` (file ini)
 
@@ -126,7 +126,7 @@ Baca file: `MIGRATION_GUIDE.md` untuk instruksi lengkap.
 ```bash
 # 1. Login ke Supabase Dashboard
 # 2. Buka SQL Editor
-# 3. Copy isi file migrations/01_update_patient_types_and_extended_data.sql
+# 3. Copy isi file migrations/00_supabase_schema.sql
 # 4. Paste & RUN
 ```
 

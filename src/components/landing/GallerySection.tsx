@@ -8,28 +8,22 @@ import { ChevronLeft, ChevronRight, Camera } from 'lucide-react';
 const galleryItems = [
   {
     id: 1,
-    src: "/homestayisah.png",
-    title: "Pemeriksaan Balita",
-    desc: "Kegiatan penimbangan dan pengukuran rutin untuk memantau tumbuh kembang anak."
+    src: "/Dokumentasi/Penyuluhan-Bayi.jpeg",
+    title: "Pemberian suntik imunisasi pada bayi",
+    desc: "Memberikan imunisasi pada bayi 9 bulan melalui layanan posyandu."
   },
   {
     id: 2,
-    src: "/uploaded_image_0_1768037972713.png",
-    title: "Penyuluhan Gizi",
-    desc: "Edukasi gizi seimbang bagi ibu hamil untuk mencegah stunting sejak dini."
+    src: "/Dokumentasi/Dokum_2.jpeg",
+    title: "Pengecekan ibu hamil",
+    desc: "Mengecek sudah berapa bulan ibu hamil, dan memberikan vitamin kepada ibu hamil."
   },
   {
     id: 3,
-    src: "/uploaded_image_2_1768037972713.png",
+    src: "/Dokumentasi/Dokum_7.jpeg",
     title: "Imunisasi Rutin",
     desc: "Pemberian vaksin dasar lengkap untuk meningkatkan kekebalan tubuh."
   },
-  {
-    id: 4,
-    src: "/uploaded_image_1_1768037972713.png",
-    title: "Senam Ibu Hamil",
-    desc: "Kegiatan fisik ringan bersama untuk menjaga kesehatan ibu dan janin."
-  }
 ];
 
 export default function GallerySection() {

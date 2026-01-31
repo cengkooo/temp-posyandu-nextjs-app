@@ -16,6 +16,13 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+## Database Setup (Supabase)
+
+Untuk setup database Supabase, pakai single migration schema:
+
+- Panduan: [documentation/MIGRATION_GUIDE.md](documentation/MIGRATION_GUIDE.md)
+- File schema: `migrations/00_supabase_schema.sql`
+
 ## Caching & Rate Limit (Upstash Redis)
 
 Project ini bisa pakai Upstash Redis buat serverless caching + rate limiting (tetap pakai Supabase sebagai database utama).

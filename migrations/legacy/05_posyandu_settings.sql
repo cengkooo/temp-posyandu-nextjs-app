@@ -55,12 +55,12 @@ insert into public.posyandu_settings (
   operational_hours
 )
 select
-  'Posyandu Melati Sehat',
-  'PSY-001',
-  'Jl. Melati No. 10, RT 05/RW 03, Kelurahan Sukamaju',
-  'Sukamaju',
-  'Cilandak',
-  'Jakarta Selatan',
+  'Posyandu Way Kalam',
+  'PSY-WK',
+  'Way Kalam, Kec. Penengahan, Kabupaten Lampung Selatan, Lampung',
+  'Way Kalam',
+  'Penengahan',
+  'Lampung Selatan',
   '021-12345678',
   'posyandu.melati@gmail.com',
   'Puskesmas Cilandak',

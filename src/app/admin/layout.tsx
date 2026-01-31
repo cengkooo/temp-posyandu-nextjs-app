@@ -1,6 +1,8 @@
 'use client';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, useMemo, useState } from 'react';
+import AdminSessionHeartbeat from './AdminSessionHeartbeat';
 import { 
   LayoutDashboard, 
   Users, 
@@ -41,15 +43,67 @@ export default function AdminLayout({
   const pathname = usePathname();
   const router = useRouter();
 
+  const [posyanduName, setPosyanduName] = useState<string | null>(null);
+
+  const posyanduSubtitle = useMemo(() => {
+    const name = posyanduName?.trim();
+    if (!name) return 'Melati Sehat';
+
+    // If name starts with "Posyandu ", show the remainder to match existing UI.
+    const lowered = name.toLowerCase();
+    if (lowered.startsWith('posyandu ')) {
+      const rest = name.slice('posyandu '.length).trim();
+      return rest.length > 0 ? rest : name;
+    }
+    return name;
+  }, [posyanduName]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadPosyanduName() {
+      try {
+        const res = await fetch('/api/settings/posyandu', {
+          cache: 'no-store',
+          credentials: 'include',
+        });
+        const json: unknown = await res.json().catch(() => null);
+        if (!res.ok || cancelled) return;
+
+        const data =
+          json && typeof json === 'object' && 'data' in json
+            ? (json as Record<string, unknown>).data
+            : null;
+        const dataRec = typeof data === 'object' && data ? (data as Record<string, unknown>) : null;
+        const name = typeof dataRec?.name === 'string' ? dataRec.name : null;
+        if (!cancelled) setPosyanduName(name);
+      } catch {
+        // ignore
+      }
+    }
+
+    loadPosyanduName();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const handleLogout = async () => {
+    try {
+      await fetch('/api/admin/logout', { method: 'POST', credentials: 'include' });
+    } catch {
+      // ignore
+    }
+
     const supabase = createClient();
     await supabase.auth.signOut();
-    router.push('/admin/login');
+    router.push('/login');
     router.refresh();
   };
 
   return (
     <div className="flex h-screen bg-gray-50 font-sans">
+      <AdminSessionHeartbeat />
       {/* Sidebar */}
       <aside className="w-64 bg-white border-r border-gray-200 flex flex-col">
         {/* Logo */}
@@ -60,7 +114,7 @@ export default function AdminLayout({
             </div>
             <div>
               <div className="font-bold text-gray-900">Posyandu</div>
-              <div className="text-xs text-gray-500">Melati Sehat</div>
+              <div className="text-xs text-gray-500">{posyanduSubtitle}</div>
             </div>
           </Link>
         </div>

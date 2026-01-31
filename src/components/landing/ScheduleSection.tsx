@@ -72,7 +72,7 @@ export default function ScheduleSection() {
         {/* Section Title */}
         <h2 className="section-title">Jadwal Kegiatan Posyandu</h2>
         <p className="section-subtitle">
-          Informasi jadwal kegiatan dan layanan dari Posyandu Sehat Mandiri
+          Informasi jadwal kegiatan dan layanan dari Posyandu Way Kalam
         </p>
 
         {/* Loading State */}

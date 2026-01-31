@@ -25,7 +25,7 @@ Dibuat API routes untuk mengelola announcements dan schedules:
 - **DELETE /api/schedules/[id]** - Hapus jadwal
 
 ### 2. Database Migration
-**File:** `migrations/02_create_announcements_schedules.sql`
+**File:** `migrations/00_supabase_schema.sql`
 
 Membuat tabel:
 - `announcements` - Menyimpan pengumuman dengan kolom:
@@ -68,7 +68,7 @@ Diubah dari data mock menjadi fetch dari Supabase:
 
 1. Buka Supabase Dashboard
 2. Pergi ke SQL Editor
-3. Jalankan file `migrations/02_create_announcements_schedules.sql`
+3. Jalankan file `migrations/00_supabase_schema.sql`
 4. Verifikasi tabel dan data sample sudah dibuat
 
 ## Testing

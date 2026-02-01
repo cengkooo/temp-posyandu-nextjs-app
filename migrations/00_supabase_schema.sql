@@ -34,7 +34,21 @@ begin
 end;
 $$;
 
--- Role helpers
+-- =============================================================================
+-- Core tables
+-- =============================================================================
+
+-- Profiles (maps to auth.users)
+create table if not exists public.profiles (
+  id uuid primary key references auth.users(id) on delete cascade,
+  full_name text,
+  role text not null default 'kader' check (role in ('admin','bidan','kader')),
+  phone text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+-- Role helpers (defined after profiles table creation)
 create or replace function public.is_admin()
 returns boolean
 language sql
@@ -60,20 +74,6 @@ as $$
       and p.role in ('admin','bidan','kader')
   );
 $$;
-
--- =============================================================================
--- Core tables
--- =============================================================================
-
--- Profiles (maps to auth.users)
-create table if not exists public.profiles (
-  id uuid primary key references auth.users(id) on delete cascade,
-  full_name text,
-  role text not null default 'kader' check (role in ('admin','bidan','kader')),
-  phone text,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
-);
 
 drop trigger if exists trg_profiles_updated_at on public.profiles;
 create trigger trg_profiles_updated_at
@@ -403,15 +403,15 @@ insert into public.posyandu_settings (
   operational_hours
 )
 select
-  'Posyandu Melati Sehat',
-  'PSY-001',
-  'Jl. Melati No. 10, RT 05/RW 03, Kelurahan Sukamaju',
-  'Sukamaju',
-  'Cilandak',
-  'Jakarta Selatan',
+  'Posyandu Way Kalam',
+  'PSY-WK',
+  'Way Kalam, Kec. Penengahan, Kabupaten Lampung Selatan, Lampung',
+  'Way Kalam',
+  'Penengahan',
+  'Lampung Selatan',
   '021-12345678',
   'posyandu.melati@gmail.com',
-  'Puskesmas Cilandak',
+'Puskesmas Penengahan',
   'Ibu Siti Aminah',
   array['Senin','Kamis']::text[],
   '08:00 - 12:00'

@@ -4,38 +4,34 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { ChevronLeft, ChevronRight, Camera } from 'lucide-react';
 
-// Data Dummy (Bisa Anda ganti dengan foto asli kegiatan Posyandu)
 const galleryItems = [
   {
     id: 1,
     src: "/Dokumentasi/Penyuluhan-Bayi.jpeg",
-    title: "Pemberian suntik imunisasi pada bayi",
+    title: "Pemberian suntik imunisasi",
     desc: "Memberikan imunisasi pada bayi 9 bulan melalui layanan posyandu."
   },
   {
     id: 2,
     src: "/Dokumentasi/Dokum_2.jpeg",
     title: "Pengecekan ibu hamil",
-    desc: "Mengecek sudah berapa bulan ibu hamil, dan memberikan vitamin kepada ibu hamil."
+    desc: "Mengecek usia kandungan dan pemberian vitamin."
   },
   {
     id: 3,
     src: "/Dokumentasi/Dokum_7.jpeg",
     title: "Imunisasi Rutin",
-    desc: "Pemberian vaksin dasar lengkap untuk meningkatkan kekebalan tubuh."
+    desc: "Pemberian vaksin dasar lengkap."
   },
 ];
 
 export default function GallerySection() {
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // Efek Auto Slide (Bergeser setiap 5 detik)
   useEffect(() => {
     const slideInterval = setInterval(() => {
       nextSlide();
     }, 5000);
-    
-    // Membersihkan interval saat komponen di-unmount agar tidak memakan memori
     return () => clearInterval(slideInterval);
   }, [currentIndex]);
 
@@ -56,73 +52,68 @@ export default function GallerySection() {
   };
 
   return (
-    <section id="galeri" className="py-16 bg-white border-t border-slate-100">
-      <div className="container mx-auto px-4 md:px-6">
-        {/* Header Section */}
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center p-3 bg-primary/10 rounded-full mb-4">
-            <Camera className="text-primary" size={24} />
+    <section className="py-24 bg-white">
+      <div className="container mx-auto px-6">
+        
+        {/* Styled Header matching the theme */}
+        <div className="flex flex-col md:flex-row items-end justify-between mb-12 gap-6">
+          <div className="max-w-2xl">
+            <div className="inline-flex items-center gap-2 text-teal-600 font-bold text-xs uppercase tracking-widest mb-4">
+              <Camera className="w-4 h-4" /> Dokumentasi Kegiatan
+            </div>
+            <h2 className="text-4xl font-bold text-slate-900">Potret Pelayanan Kami</h2>
+            <p className="text-slate-500 mt-4 font-medium">Melihat lebih dekat interaksi hangat dan profesionalisme kader dalam melayani kesehatan warga desa.</p>
           </div>
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">Galeri Kegiatan</h2>
-          <p className="text-gray-600 max-w-2xl mx-auto">
-            Dokumentasi visual kegiatan pelayanan kesehatan dan pemberdayaan masyarakat yang telah kami laksanakan.
-          </p>
         </div>
 
-        {/* Carousel Container */}
-        <div className="max-w-5xl mx-auto relative group px-2">
-            {/* Main Image Frame */}
-            <div className="relative w-full h-[300px] md:h-[500px] rounded-2xl overflow-hidden shadow-lg bg-gray-200">
+        {/* Carousel Container with new rounded corners and shadow */}
+        <div className="max-w-6xl mx-auto relative group">
+            <div className="relative w-full h-[300px] md:h-[500px] rounded-[2.5rem] overflow-hidden shadow-2xl shadow-slate-200 bg-slate-100">
                <Image
                  src={galleryItems[currentIndex].src}
                  alt={galleryItems[currentIndex].title}
                  fill
-                 className="object-cover transition-transform duration-700 ease-in-out hover:scale-105"
+                 className="object-cover transition-transform duration-1000 ease-in-out hover:scale-105"
                  priority
                  unoptimized
                />
                
-               {/* Overlay Text (Gradient Hitam di Bawah) */}
-               <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-6 md:p-8 text-white">
-                 <h3 className="text-xl md:text-2xl font-bold mb-2 drop-shadow-md">
+               <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-slate-900/90 via-slate-900/50 to-transparent p-10 flex flex-col justify-end h-1/2">
+                 <h3 className="text-2xl md:text-3xl font-bold text-white mb-2 tracking-tight">
                     {galleryItems[currentIndex].title}
                  </h3>
-                 <p className="text-sm md:text-base text-gray-100 max-w-2xl drop-shadow-sm">
+                 <p className="text-slate-200 text-sm md:text-base max-w-2xl font-medium">
                     {galleryItems[currentIndex].desc}
                  </p>
                </div>
             </div>
 
-            {/* Tombol Navigasi Kiri */}
+            {/* Tombol Navigasi dengan style Teal */}
             <button 
                 onClick={prevSlide}
-                className="hidden group-hover:flex absolute top-1/2 -translate-y-1/2 left-4 md:left-6 w-10 h-10 md:w-12 md:h-12 items-center justify-center rounded-full bg-white/20 hover:bg-primary backdrop-blur-sm text-white transition-all duration-300 shadow-md"
-                aria-label="Previous Slide"
+                className="hidden group-hover:flex absolute top-1/2 -translate-y-1/2 left-6 w-12 h-12 items-center justify-center rounded-full bg-white/20 hover:bg-teal-600 backdrop-blur-md text-white transition-all duration-300 shadow-lg border border-white/20"
             >
                 <ChevronLeft size={24} />
             </button>
 
-            {/* Tombol Navigasi Kanan */}
             <button 
                 onClick={nextSlide}
-                className="hidden group-hover:flex absolute top-1/2 -translate-y-1/2 right-4 md:right-6 w-10 h-10 md:w-12 md:h-12 items-center justify-center rounded-full bg-white/20 hover:bg-primary backdrop-blur-sm text-white transition-all duration-300 shadow-md"
-                aria-label="Next Slide"
+                className="hidden group-hover:flex absolute top-1/2 -translate-y-1/2 right-6 w-12 h-12 items-center justify-center rounded-full bg-white/20 hover:bg-teal-600 backdrop-blur-md text-white transition-all duration-300 shadow-lg border border-white/20"
             >
                 <ChevronRight size={24} />
             </button>
 
-            {/* Indikator Titik (Dots) */}
-            <div className="flex justify-center mt-6 gap-2">
+            {/* Indikator */}
+            <div className="flex justify-center mt-8 gap-2">
                 {galleryItems.map((_, slideIndex) => (
                     <button
                       key={slideIndex}
                       onClick={() => goToSlide(slideIndex)}
-                      className={`transition-all duration-300 h-2 rounded-full ${
+                      className={`transition-all duration-300 h-1.5 rounded-full ${
                           currentIndex === slideIndex 
-                          ? 'bg-primary w-8' 
-                          : 'bg-gray-300 w-2 hover:bg-gray-400'
+                          ? 'bg-teal-500 w-8' 
+                          : 'bg-slate-200 w-2 hover:bg-teal-200'
                       }`}
-                      aria-label={`Go to slide ${slideIndex + 1}`}
                     />
                 ))}
             </div>

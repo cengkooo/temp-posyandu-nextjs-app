@@ -8,12 +8,10 @@ export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // Deteksi scroll untuk mengubah style navbar
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
-
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -26,106 +24,80 @@ export default function Navbar() {
     { label: 'Tim', href: '#tim' },
   ];
 
-  // Logic warna teks: Putih saat di atas (transparent), Gelap saat di-scroll (putih)
-  const textColorClass = isScrolled ? "text-slate-800" : "text-white drop-shadow-md";
-  const hoverColorClass = isScrolled ? "hover:text-emerald-600" : "hover:text-emerald-200";
-  const burgerColorClass = isScrolled ? "text-slate-700 hover:bg-emerald-50" : "text-white hover:bg-white/10";
+  const scrollTo = (id: string) => {
+    const element = document.querySelector(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+    setIsMobileMenuOpen(false);
+  };
 
   return (
-    <nav
-      className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-300 border-b ${
-        isScrolled
-          ? 'bg-white/80 backdrop-blur-md border-emerald-100/50 shadow-sm py-2'
-          : 'bg-gradient-to-b from-black/50 to-transparent border-transparent py-4'
-      }`}
-    >
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-6">
+    <nav className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 ${isScrolled ? 'py-3 px-4 md:px-8' : 'py-6 px-6 md:px-12'}`}>
+      <div className={`mx-auto max-w-7xl flex items-center justify-between transition-all duration-500 ${isScrolled ? 'bg-white/80 backdrop-blur-xl border border-white/20 shadow-lg px-6 py-2 rounded-full' : ''}`}>
         
-        {/* Logo Section */}
-        <Link href="/" className="flex items-center gap-2 group">
-          <div className="relative flex h-9 w-9 items-center justify-center rounded-full bg-emerald-500 shadow-lg transition-transform duration-300 group-hover:scale-110">
-            <Heart size={20} fill="white" className="text-white" />
+        {/* Logo */}
+        <div onClick={() => scrollTo('#beranda')} className="flex items-center gap-3 cursor-pointer group">
+          <div className="bg-gradient-to-tr  p-2.5 rounded-xl shadow-lg shadow-teal-200 transition-transform group-hover:rotate-12">
+            <img src="/dinkes.png" alt="Logo" className="w-8 h-8 object-contain" />
           </div>
-          <span className={`text-lg font-bold tracking-wide transition-colors duration-300 ${textColorClass}`}>
-            Posyandu Rajabasa
-          </span>
-        </Link>
+          <div className="flex flex-col">
+          
+            <span className={`font-bold text-lg leading-tight transition-colors ${isScrolled ? 'text-slate-900' : 'text-white'}`}>Way Kalam</span>
+            <span className={`text-[10px] uppercase tracking-[0.2em] font-semibold transition-colors ${isScrolled ? 'text-teal-600' : 'text-teal-200'}`}>Posyandu Terpadu</span>
+          </div>
+        </div>
 
         {/* Desktop Menu */}
-        <ul className="hidden items-center gap-8 md:flex">
+        <div className="hidden lg:flex items-center gap-1">
           {menuItems.map((item) => (
-            <li key={item.href}>
-              <a
-                href={item.href}
-                className={`relative text-sm font-medium transition-all duration-300 group ${textColorClass} ${hoverColorClass}`}
-              >
-                {item.label}
-                {/* Animasi Garis Bawah (Underline) */}
-                <span className={`absolute -bottom-1 left-0 h-0.5 transition-all duration-300 w-0 group-hover:w-full ${
-                    isScrolled ? "bg-emerald-500" : "bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)]"
-                }`} />
-              </a>
-            </li>
-          ))}
-        </ul>
-
-        {/* Actions */}
-        <div className="flex items-center gap-4">
-          
-          {/* Login Button Premium */}
-          <Link
-            href="/login"
-            className={`hidden md:flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-semibold transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg group ${
-                isScrolled
-                ? "bg-gradient-to-r from-emerald-500 to-emerald-400 text-white hover:shadow-emerald-500/30"
-                : "bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20 hover:shadow-white/10"
-            }`}
-          >
-            Masuk
-            <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" />
-          </Link>
-
-          {/* Mobile Toggle */}
-          <button
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className={`rounded-lg p-2 transition-colors md:hidden ${burgerColorClass}`}
-          >
-            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
-        </div>
-      </div>
-
-      {/* Mobile Menu Animated */}
-      <div 
-        className={`md:hidden absolute top-full left-0 right-0 bg-white border-b border-emerald-100 shadow-xl transition-all duration-300 ease-in-out origin-top ${
-          isMobileMenuOpen ? "opacity-100 translate-y-0 visible" : "opacity-0 -translate-y-5 invisible"
-        }`}
-      >
-        <div className="flex flex-col p-4 space-y-2">
-          {menuItems.map((item, idx) => (
-            <a
+            <button
               key={item.href}
-              href={item.href}
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="block rounded-xl px-4 py-3 text-sm font-medium text-slate-600 transition-all hover:bg-emerald-50 hover:text-emerald-600 hover:translate-x-2"
-              style={{ transitionDelay: `${idx * 50}ms` }}
+              onClick={() => scrollTo(item.href)}
+              className={`px-5 py-2 text-sm font-semibold transition-all rounded-full hover:bg-teal-50 ${isScrolled ? 'text-slate-600 hover:text-teal-600' : 'text-white/80 hover:text-white hover:bg-white/10'}`}
             >
               {item.label}
-            </a>
+            </button>
           ))}
-
-          <div className="pt-2 mt-2 border-t border-slate-100">
-            <Link
-              href="/login"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 px-4 py-3 text-center text-sm font-semibold text-white transition-all hover:bg-emerald-600 active:scale-95"
-            >
-              Masuk Akun
-              <ArrowRight size={16} />
-            </Link>
-          </div>
+          <Link 
+            href="/login"
+            className={`ml-4 px-6 py-2.5 rounded-full text-sm font-bold shadow-md transition-all active:scale-95 flex items-center gap-2 ${isScrolled ? 'bg-teal-600 text-white hover:bg-teal-700 hover:shadow-teal-100' : 'bg-white text-teal-700 hover:bg-teal-50'}`}
+          >
+            Masuk <ArrowRight size={16} />
+          </Link>
         </div>
+
+        {/* Mobile Toggle */}
+        <button
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          className={`lg:hidden p-2 rounded-full transition-colors ${isScrolled ? 'text-slate-900 hover:bg-slate-100' : 'text-white hover:bg-white/10'}`}
+        >
+          {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
       </div>
+
+      {/* Mobile Menu */}
+      {isMobileMenuOpen && (
+        <div className="absolute top-full left-4 right-4 mt-2 p-4 bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-slate-100 lg:hidden flex flex-col gap-2">
+          {menuItems.map((item) => (
+            <button
+              key={item.href}
+              onClick={() => scrollTo(item.href)}
+              className="text-left px-4 py-3 rounded-xl font-semibold text-slate-600 hover:bg-teal-50 hover:text-teal-600 transition-colors"
+            >
+              {item.label}
+            </button>
+          ))}
+          <div className="h-px bg-slate-100 my-2"></div>
+          <Link
+            href="/login"
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="text-center px-4 py-3 rounded-xl font-bold text-white bg-teal-600 hover:bg-teal-700 transition-colors"
+          >
+            Masuk Akun
+          </Link>
+        </div>
+      )}
     </nav>
   );
 }

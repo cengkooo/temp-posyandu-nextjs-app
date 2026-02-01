@@ -1,69 +1,69 @@
 'use client';
 
 import React from 'react';
-import { Syringe, Scale, Baby, Users, HeartPulse, Apple } from 'lucide-react';
+import { Syringe, Scale, Baby, Users, HeartPulse, Apple, ChevronRight } from 'lucide-react';
 
 export default function ServicesSection() {
   const services = [
     {
-      icon: <Syringe size={32} />,
+      icon: <Syringe className="w-8 h-8" />,
       title: 'Imunisasi Balita',
-      description: 'Layanan imunisasi lengkap untuk balita sesuai jadwal Kemenkes RI, termasuk vaksin BCG, DPT, Polio, Campak, dan Hepatitis B.',
-      color: 'teal',
+      description: 'Layanan imunisasi lengkap untuk balita sesuai jadwal Kemenkes RI (BCG, DPT, Polio, dll).',
+      gradient: "from-blue-500 to-cyan-400",
     },
     {
-      icon: <Scale size={32} />,
-      title: 'Penimbangan & Pengukuran',
-      description: 'Pemantauan berat badan, tinggi badan, dan lingkar kepala balita untuk memastikan tumbuh kembang yang optimal.',
-      color: 'blue',
+      icon: <Scale className="w-8 h-8" />,
+      title: 'Penimbangan',
+      description: 'Pemantauan berat badan, tinggi badan untuk memastikan tumbuh kembang optimal.',
+      gradient: "from-teal-500 to-emerald-400",
     },
     {
-      icon: <Baby size={32} />,
-      title: 'Pemeriksaan Ibu Hamil',
-      description: 'Pemeriksaan kehamilan rutin meliputi tekanan darah, berat badan, tinggi fundus, dan pemantauan kondisi janin.',
-      color: 'pink',
+      icon: <Baby className="w-8 h-8" />,
+      title: 'Ibu Hamil',
+      description: 'Pemeriksaan kehamilan rutin, cek tensi, dan pemantauan kondisi janin.',
+      gradient: "from-rose-500 to-pink-400",
     },
     {
-      icon: <Users size={32} />,
-      title: 'Keluarga Berencana (KB)',
-      description: 'Konsultasi dan pelayanan KB dengan berbagai pilihan metode kontrasepsi yang aman dan sesuai kebutuhan.',
-      color: 'cyan',
+      icon: <Users className="w-8 h-8" />,
+      title: 'Keluarga Berencana',
+      description: 'Konsultasi dan pelayanan KB dengan berbagai pilihan metode kontrasepsi.',
+      gradient: "from-indigo-500 to-violet-400",
     },
     {
-      icon: <HeartPulse size={32} />,
+      icon: <HeartPulse className="w-8 h-8" />,
       title: 'Pemeriksaan Lansia',
-      description: 'Pemeriksaan kesehatan rutin untuk lansia termasuk cek tekanan darah, gula darah, dan kolesterol.',
-      color: 'green',
+      description: 'Cek kesehatan rutin lansia termasuk tensi, gula darah, dan kolesterol.',
+      gradient: "from-amber-500 to-orange-400",
     },
     {
-      icon: <Apple size={32} />,
+      icon: <Apple className="w-8 h-8" />,
       title: 'Konseling Gizi',
-      description: 'Konsultasi gizi dan edukasi pola makan sehat untuk ibu hamil, menyusui, balita, dan seluruh keluarga.',
-      color: 'orange',
+      description: 'Edukasi pola makan sehat untuk ibu hamil, menyusui, dan balita.',
+      gradient: "from-green-500 to-lime-400",
     },
   ];
 
   return (
-    <section id="layanan" className="services-section">
-      <div className="container">
-        {/* Section Badge */}
-        <div className="section-badge">Layanan Kami</div>
+    <section id="layanan" className="py-32 bg-[#F1F5F9]">
+      <div className="container mx-auto px-6">
+        <div className="text-center mb-20">
+          <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-6">Layanan Kesehatan</h2>
+          <p className="text-slate-500 max-w-xl mx-auto font-medium">
+            Program kesehatan terpadu untuk mendukung setiap fase kehidupan keluarga Anda.
+          </p>
+        </div>
 
-        {/* Section Title */}
-        <h2 className="section-title">Layanan Kesehatan Terpadu</h2>
-        <p className="section-subtitle">
-          Berbagai layanan kesehatan untuk memenuhi kebutuhan Anda dan keluarga
-        </p>
-
-        {/* Services Grid */}
-        <div className="services-grid">
-          {services.map((service, index) => (
-            <div key={index} className={`service-card ${service.color}`}>
-              <div className={`service-icon ${service.color}`}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {services.map((service, i) => (
+            <div key={i} className="group bg-white p-10 rounded-[2.5rem] border border-slate-200 shadow-sm hover:shadow-2xl hover:shadow-teal-100/50 hover:-translate-y-3 transition-all duration-500">
+              <div className={`w-20 h-20 rounded-3xl bg-gradient-to-br ${service.gradient} flex items-center justify-center text-white mb-8 shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-transform duration-500`}>
                 {service.icon}
               </div>
-              <h3 className="service-title">{service.title}</h3>
-              <p className="service-description">{service.description}</p>
+              <h3 className="text-2xl font-bold text-slate-900 mb-4 tracking-tight">{service.title}</h3>
+              <p className="text-slate-500 leading-relaxed font-medium text-sm">
+                {service.description}
+              </p>
+              
             </div>
           ))}
         </div>

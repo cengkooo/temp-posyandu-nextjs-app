@@ -12,8 +12,11 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Posyandu Sehat Mandiri - Melayani dengan Hati",
+  title: "Posyandu  Way Kalam",
   description: "Posyandu Sehat Mandiri melayani kesehatan keluarga Indonesia sejak 2010. Layanan imunisasi, penimbangan balita, pemeriksaan ibu hamil, KB, dan konseling gizi.",
+  icons: {
+    icon: "/dinkes.png",
+  },
 };
 
 export default function RootLayout({

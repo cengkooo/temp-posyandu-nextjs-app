@@ -1,81 +1,59 @@
 'use client';
 
 import React from 'react';
-import { User } from 'lucide-react';
+import { Users, ShieldCheck } from 'lucide-react';
 
 export default function TeamSection() {
   const teamMembers = [
-    { name: 'Rosnayah', role: 'Ketua Kader', photo: null },
-    { name: 'Siti Kurningsih', role: 'Sekretaris', photo: null },
-    { name: 'Hudriyah', role: 'Bendahara', photo: null },
-    { name: 'Astriani', role: 'Ketua Bidang Kesehatan', photo: null },
-    { name: 'Naenah', role: 'Kader Bidang Kesehatan', photo: null },
-    { name: 'Suhariyah', role: 'Kader Bidang Kesehatan', photo: null },
-    { name: 'Masrifah', role: 'Kader Bidang Kesehatan', photo: null },
-    { name: 'Saminah', role: 'Kader Bidang Kesehatan', photo: null },
-    { name: 'Asmah', role: 'Kader Bidang Kesehatan', photo: null },
-    { name: 'Widya Anita', role: 'Kader Bidang Kesehatan', photo: null },
-    { name: 'Suiyah', role: 'Kader Bidang Kesehatan', photo: null },
-    { name: 'Nur Afni Sukaesih', role: 'Kader Bidang Kesehatan', photo: null },
-    { name: 'Nova Wati', role: 'Kader Bidang Kesehatan', photo: null },
-    { name: 'Betri Yenti', role: 'Kader Bidang Kesehatan', photo: null },
-    { name: 'Neti Sartika', role: 'Kader Bidang Kesehatan', photo: null },
-    { name: 'Saiyah Nurfadilah', role: 'Kader Bidang Kesehatan', photo: null },
-    { name: 'Siti Sa’adiyah', role: 'Kader Bidang Kesehatan', photo: null },
-    { name: 'Sugi Hariati', role: 'Kader Bidang Kesehatan', photo: null },
-    { name: 'Sri Astuti', role: 'Kader Bidang Kesehatan', photo: null },
-    { name: 'Susanti', role: 'Kader Bidang Kesehatan', photo: null },
-    { name: 'Sunaenah', role: 'Kader Bidang Kesehatan', photo: null },
-    // Menambahkan personel ke-22 (Contoh, karena di data Anda tadi baru 21)
-    { name: 'Umi Kulsum', role: 'Kader Bidang Kesehatan', photo: null },
+    { name: 'Rosnayah', role: 'Ketua Kader' },
+    { name: 'Siti Kurningsih', role: 'Sekretaris' },
+    { name: 'Hudriyah', role: 'Bendahara' },
+    { name: 'Astriani', role: 'Ketua Bidang Kesehatan' },
+    { name: 'Naenah', role: 'Kader' },
+    { name: 'Suhariyah', role: 'Kader' },
+    { name: 'Masrifah', role: 'Kader' },
+    { name: 'Saminah', role: 'Kader' },
+    { name: 'Asmah', role: 'Kader' },
+    { name: 'Widya Anita', role: 'Kader' },
+    { name: 'Suiyah', role: 'Kader' },
+    { name: 'Nur Afni S.', role: 'Kader' },
+    { name: 'Nova Wati', role: 'Kader' },
+    { name: 'Betri Yenti', role: 'Kader' },
+    { name: 'Neti Sartika', role: 'Kader' },
+    { name: 'Saiyah N.', role: 'Kader' },
+    { name: 'Siti Sa’adiyah', role: 'Kader' },
+    { name: 'Sugi Hariati', role: 'Kader' },
+    { name: 'Sri Astuti', role: 'Kader' },
+    { name: 'Susanti', role: 'Kader' },
+    { name: 'Sunaenah', role: 'Kader' },
+    { name: 'Umi Kulsum', role: 'Kader' },
   ];
 
   return (
-    <section id="tim" className="team-section py-12 bg-slate-50">
-      <div className="container mx-auto px-4">
-        {/* Section Badge */}
-        <div className="flex justify-center mb-4">
-            <span className="section-badge inline-block px-4 py-1.5 rounded-full bg-emerald-100 text-emerald-700 font-semibold text-sm">
-                Tim Kami
-            </span>
+    <section id="tim" className="py-32 bg-slate-950 text-white relative overflow-hidden">
+      <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/pinstriped-suit.png')]"></div>
+      <div className="container mx-auto px-6 relative z-10">
+        <div className="text-center mb-24">
+          <h2 className="text-4xl md:text-5xl font-black mb-6 italic tracking-tighter">Pahlawan Kesehatan Desa</h2>
+          <div className="w-24 h-1.5 bg-gradient-to-r from-teal-500 to-emerald-500 mx-auto rounded-full mb-8"></div>
+          <p className="text-slate-400 max-w-2xl mx-auto font-medium">
+            Inilah para ibu kader yang mendedikasikan waktu dan tenaga untuk menjaga kesehatan warga Desa Way Kalam.
+          </p>
         </div>
 
-        {/* Section Title */}
-        <div className="text-center mb-12">
-            <h2 className="section-title text-3xl font-bold text-slate-800 mb-2">Tim Kader Posyandu</h2>
-            <p className="section-subtitle text-slate-600 max-w-2xl mx-auto">
-            Didukung oleh tim kader yang berdedikasi dan berpengalaman dalam pelayanan kesehatan masyarakat
-            </p>
-        </div>
-
-        {/* PERUBAHAN UTAMA DI SINI:
-            1. Menggunakan 'flex flex-wrap' agar item membungkus ke baris baru.
-            2. Menggunakan 'justify-center' agar item (termasuk baris terakhir) berada di tengah.
-            3. Menggunakan 'gap-6' atau 'gap-8' untuk jarak.
-        */}
-        <div className="flex flex-wrap justify-center gap-8">
-          {teamMembers.map((member, index) => (
-            /* Set lebar kartu (w-64 atau w-72) agar ukurannya seragam 
-               karena kita tidak menggunakan Grid column lagi.
-            */
-            <div key={index} className="team-card w-64 flex flex-col items-center text-center bg-white p-6 rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition-all">
-              <div className="team-photo mb-4 relative">
-                {member.photo ? (
-                  <img 
-                    src={member.photo} 
-                    alt={member.name} 
-                    className="w-32 h-32 rounded-full object-cover border-4 border-emerald-50"
-                  />
-                ) : (
-                  <div className="photo-placeholder w-32 h-32 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mx-auto">
-                    <User size={48} />
-                  </div>
-                )}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-x-8 gap-y-16">
+          {teamMembers.map((member, i) => (
+            <div key={i} className="flex flex-col items-center group">
+              <div className="relative mb-6">
+                <div className="w-24 h-24 sm:w-28 sm:h-28 bg-slate-800 rounded-[2rem] flex items-center justify-center border border-slate-700 shadow-2xl transition-all duration-500 group-hover:bg-teal-600 group-hover:rotate-6 group-hover:scale-110">
+                  <Users className="w-10 h-10 text-slate-500 group-hover:text-white opacity-40 group-hover:opacity-100 transition-opacity" />
+                </div>
+                <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-emerald-500 rounded-xl flex items-center justify-center shadow-lg transform scale-0 group-hover:scale-100 transition-transform delay-100">
+                  <ShieldCheck className="w-4 h-4 text-white" />
+                </div>
               </div>
-              <div className="team-info">
-                <h3 className="team-name font-bold text-slate-800 text-lg">{member.name}</h3>
-                <p className="team-role text-emerald-600 text-sm font-medium">{member.role}</p>
-              </div>
+              <h4 className="font-bold text-sm sm:text-base text-center mb-1 text-slate-200 group-hover:text-teal-400 transition-colors">{member.name}</h4>
+              <p className="text-slate-500 text-[10px] font-bold uppercase tracking-[0.2em] text-center">{member.role}</p>
             </div>
           ))}
         </div>

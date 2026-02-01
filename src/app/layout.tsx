@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   title: "Posyandu  Way Kalam",
   description: "Posyandu Sehat Mandiri melayani kesehatan keluarga Indonesia sejak 2010. Layanan imunisasi, penimbangan balita, pemeriksaan ibu hamil, KB, dan konseling gizi.",
   icons: {
-    icon: "/Dinkes.png",
+    icon: "/Logo_Lampung_Selatan.ico",
   },
 };
 

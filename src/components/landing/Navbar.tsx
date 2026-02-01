@@ -39,7 +39,7 @@ export default function Navbar() {
         {/* Logo */}
         <div onClick={() => scrollTo('#beranda')} className="flex items-center gap-3 cursor-pointer group">
           <div className="bg-gradient-to-tr  p-2.5 rounded-xl shadow-lg shadow-teal-200 transition-transform group-hover:rotate-12">
-            <img src="/dinkes.png" alt="Logo" className="w-8 h-8 object-contain" />
+            <img src="/Dinkes.png" alt="Logo" className="w-8 h-8 object-contain" />
           </div>
           <div className="flex flex-col">
           

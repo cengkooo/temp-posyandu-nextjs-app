@@ -19,7 +19,7 @@ export default function Footer() {
           <div className="col-span-1 lg:col-span-1">
             <div className="flex items-center gap-3 mb-8">
               <div className="bg-transparent p-2 rounded-xl">
-                <img src="/dinkes.png" alt="Logo Posyandu Way Kalam" className="w-6 h-6 object-contain" />
+                <img src="/Dinkes.png" alt="Logo Posyandu Way Kalam" className="w-6 h-6 object-contain" />
               </div>
               <span className="font-bold text-2xl tracking-tighter">Way <span className="text-teal-500">Kalam</span></span>
             </div>

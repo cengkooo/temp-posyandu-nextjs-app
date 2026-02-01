@@ -58,7 +58,7 @@ export default function HeroSection() {
                 <Users size={20} />
               </div>
               <div className="text-left">
-                <p className="text-white text-lg font-bold leading-tight">500+</p>
+                <p className="text-white text-lg font-bold leading-tight">3.500+</p>
                 <p className="text-slate-400 text-[10px] uppercase font-bold tracking-wider">Pasien Terlayani</p>
               </div>
             </div>
@@ -68,7 +68,7 @@ export default function HeroSection() {
                 <Clock size={20} />
               </div>
               <div className="text-left">
-                <p className="text-white text-lg font-bold leading-tight">5+</p>
+                <p className="text-white text-lg font-bold leading-tight">15+</p>
                 <p className="text-slate-400 text-[10px] uppercase font-bold tracking-wider">Tahun Melayani</p>
               </div>
             </div>
